@@ -15,7 +15,7 @@ function zip_dir {
     fi
 }
 
-function clear_dir_and_zip {
+function clear_dumped_yamls {
     if [ -n "${1}" ] && [ -d "${output_dir}/${1}" ]
     then
         rm -rf "${output_dir}/${1}/"*
@@ -34,7 +34,7 @@ output_dir="${this_dir}/out"
 
 for object_name in "${objects[@]}"
 do
-    clear_data "${object_name}"
+    clear_dumped_yamls "${object_name}"
 done
 
 ${this_dir}/venv/bin/python3 dump.py -o "${objects[*]}"
@@ -43,6 +43,6 @@ if $make_zip_archive
 then
     for object_name in "${objects[@]}"
     do
-        clear_dir_and_zip "${object_name}"
+        zip_dir "${object_name}"
     done
 fi
