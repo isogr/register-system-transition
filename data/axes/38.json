@@ -1,0 +1,17 @@
+{
+   "uuid":"fe748cfb-d67a-4ca9-98dd-59148cf7dcc3",
+   "identifier":38,
+   "status":"valid",
+   "name":"Geodetic latitude",
+   "remarks":"Used in geographic 2D and geographic 3D coordinate reference systems.",
+   "axis_abbreviation":"Lat",
+   "axis_direction":"north",
+   "axis_unit":{
+      "uuid":"6a54d914-a8a0-4df8-969e-57bcdb182e3c",
+      "name":"degree (supplier to define representation)"
+   },
+   "minimum_value":"",
+   "maximum_value":"",
+   "range_meaning":"",
+   "information_source":[]
+}

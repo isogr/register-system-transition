@@ -1,0 +1,17 @@
+{
+   "uuid":"f8339102-4078-4da1-a310-d544ae581cea",
+   "identifier":35,
+   "status":"valid",
+   "name":"Gravity-related height",
+   "remarks":"Used in a 1D vertical coordinate system.",
+   "axis_abbreviation":"H",
+   "axis_direction":"up",
+   "axis_unit":{
+      "uuid":"932dce03-daeb-4762-ac71-81c69c41746b",
+      "name":"metre"
+   },
+   "minimum_value":"",
+   "maximum_value":"",
+   "range_meaning":"",
+   "information_source":[]
+}

@@ -1,0 +1,34 @@
+{
+   "uuid":"93163b34-3c15-4623-9771-cf03adae7c2c",
+   "identifier":40,
+   "status":"valid",
+   "name":"Ellipsoidal 2D CS. Axes: longitude, latitude. Orientations: east, north. UoM: degree",
+   "remarks":"Coordinates referenced to this CS are in degrees. Any degree representation (e.g. DMSH, decimal, etc.) may be used but that used must be declared for the user by the supplier of data. Used in geographic 2D coordinate reference systems.",
+   "coordinate_system_axes":[
+      {
+         "identifier":34,
+         "uuid":"addb3701-9efd-487d-93ef-9540beb175f5",
+         "name":"Geodetic longitude",
+         "axis_abbreviation":"Lon",
+         "axis_direction":"east",
+         "unit":{
+            "uuid":"6a54d914-a8a0-4df8-969e-57bcdb182e3c",
+            "name":"degree (supplier to define representation)"
+         }
+      },
+      {
+         "identifier":38,
+         "uuid":"fe748cfb-d67a-4ca9-98dd-59148cf7dcc3",
+         "name":"Geodetic latitude",
+         "axis_abbreviation":"Lat",
+         "axis_direction":"north",
+         "unit":{
+            "uuid":"6a54d914-a8a0-4df8-969e-57bcdb182e3c",
+            "name":"degree (supplier to define representation)"
+         }
+      }
+   ],
+   "information_source":[
+      
+   ]
+}

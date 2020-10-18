@@ -1,0 +1,18 @@
+# Uncomment line(s) to dump objects:
+
+objects+=('coordinate-ops--transformation')
+objects+=('crs--geodetic')
+objects+=('coordinate-sys--сartesian')
+objects+=('coordinate-sys--ellipsoidal')
+objects+=('coordinate-sys--vertical')
+objects+=('coordinate-sys-axis')
+objects+=('unit-of-measurement')
+objects+=('datums--geodetic')
+objects+=('datums--vertical')
+objects+=('ellipsoid')
+objects+=('prime-meridian')
+
+
+# Set true or false if you need to zip results :
+
+make_zip_archive=false

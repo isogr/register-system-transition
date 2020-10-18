@@ -1,0 +1,17 @@
+{
+   "uuid":"ab143abe-d350-4401-bd42-55e96a479423",
+   "identifier":37,
+   "status":"valid",
+   "name":"Geocentric Y",
+   "remarks":"",
+   "axis_abbreviation":"Y",
+   "axis_direction":"Geocentre > equator/90°E",
+   "axis_unit":{
+      "uuid":"932dce03-daeb-4762-ac71-81c69c41746b",
+      "name":"metre"
+   },
+   "minimum_value":"",
+   "maximum_value":"",
+   "range_meaning":"",
+   "information_source":[]
+}

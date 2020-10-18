@@ -1,0 +1,23 @@
+{
+   "uuid":"bccbe20a-3852-4a31-8533-ac6e043b52d9",
+   "identifier":42,
+   "status":"valid",
+   "name":"Vertical CS. Axis: height (H). Orientation: up. UoM: m.",
+   "remarks":"Used in vertical coordinate reference systems.",
+   "coordinate_system_axes":[
+      {
+         "identifier":35,
+         "uuid":"f8339102-4078-4da1-a310-d544ae581cea",
+         "name":"Gravity-related height",
+         "axis_abbreviation":"H",
+         "axis_direction":"up",
+         "unit":{
+            "uuid":"932dce03-daeb-4762-ac71-81c69c41746b",
+            "name":"metre"
+         }
+      }
+   ],
+   "information_source":[
+      
+   ]
+}

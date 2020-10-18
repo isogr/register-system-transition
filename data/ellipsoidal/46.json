@@ -1,0 +1,45 @@
+{
+   "uuid":"c3c232d6-8e8b-4574-b6a8-85915d532cd5",
+   "identifier":46,
+   "status":"valid",
+   "name":"Ellipsoidal 3D CS. Axes: latitude, longitude, ellipsoidal height. Orientations: north, east, up. UoM: degree, degree, metre.",
+   "remarks":"Used in geographic 3D coordinate reference systems. Horizontal coordinates referenced to this CS are in degrees. Any degree representation (e.g. DMSH, decimal, etc.) may be used but that used must be declared for the user.",
+   "coordinate_system_axes":[
+      {
+         "identifier":38,
+         "uuid":"fe748cfb-d67a-4ca9-98dd-59148cf7dcc3",
+         "name":"Geodetic latitude",
+         "unit":{
+            "uuid":"6a54d914-a8a0-4df8-969e-57bcdb182e3c",
+            "name":"degree (supplier to define representation)",
+            "axis_abbreviation":"Lat",
+            "axis_direction":"north"
+         }
+      },
+      {
+         "identifier":34,
+         "uuid":"addb3701-9efd-487d-93ef-9540beb175f5",
+         "name":"Geodetic longitude",
+         "unit":{
+            "uuid":"6a54d914-a8a0-4df8-969e-57bcdb182e3c",
+            "name":"degree (supplier to define representation)",
+            "axis_abbreviation":"Lon",
+            "axis_direction":"east"
+         }
+      },
+      {
+         "identifier":36,
+         "uuid":"7578267e-1a3f-4bb8-97f6-07b9664f866d",
+         "name":"Ellipsoidal height",
+         "unit":{
+            "uuid":"932dce03-daeb-4762-ac71-81c69c41746b",
+            "name":"metre",
+            "axis_abbreviation":"h",
+            "axis_direction":"up"
+         }
+      }
+   ],
+   "information_source":[
+      
+   ]
+}

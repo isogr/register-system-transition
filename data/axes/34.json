@@ -1,0 +1,17 @@
+{
+   "uuid":"addb3701-9efd-487d-93ef-9540beb175f5",
+   "identifier":34,
+   "status":"valid",
+   "name":"Geodetic longitude",
+   "remarks":"Used in geographic 2D and geographic 3D coordinate reference systems.",
+   "axis_abbreviation":"Lon",
+   "axis_direction":"east",
+   "axis_unit":{
+      "uuid":"6a54d914-a8a0-4df8-969e-57bcdb182e3c",
+      "name":"degree (supplier to define representation)"
+   },
+   "minimum_value":"",
+   "maximum_value":"",
+   "range_meaning":"",
+   "information_source":[]
+}

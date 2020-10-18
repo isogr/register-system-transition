@@ -1,0 +1,16 @@
+{
+   "uuid":"cbc22008-33fd-4e8e-9663-a36306adf105",
+   "identifier":25,
+   "status":"valid",
+   "name":"Greenwich",
+   "remarks":"",
+   "aliases":[
+      
+   ],
+   "unit":{
+      "uuid":"1d86d720-ff1a-47ef-819e-2fb3524c9ce9",
+      "name":"degree"
+   },
+   "longitude_from_greenwich":0.0,
+   "information_source": []
+}

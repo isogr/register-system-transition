@@ -1,0 +1,8 @@
+output_dir = './out'
+data_dir = './data'
+
+db_name='isoreg'
+db_user='isoreg'
+db_password='isoreg'
+db_host='127.0.0.1'
+db_port='5432'
