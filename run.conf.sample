@@ -13,6 +13,6 @@ objects+=('ellipsoid')
 objects+=('prime-meridian')
 
 
-# Set true or false if you need to zip results :
+# Set false or true if you need to zip results:
 
 make_zip_archive=false
