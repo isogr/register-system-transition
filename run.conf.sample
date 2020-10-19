@@ -2,6 +2,7 @@
 
 objects+=('coordinate-ops--transformation')
 objects+=('crs--geodetic')
+objects+=('crs--vertical')
 objects+=('coordinate-sys--cartesian')
 objects+=('coordinate-sys--ellipsoidal')
 objects+=('coordinate-sys--vertical')

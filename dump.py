@@ -476,8 +476,8 @@ def datums_geodetic_dump():
                 "definition": row[cols.index("definition")],
                 "originDescription": row[cols.index("origin_description")],
                 "scope": row[cols.index("datum_scope")],
-                "ellipsoid": {"itemID": row[cols.index("ellipsoid_uuid")]},
-                "primeMeridian": {"itemID": row[cols.index("primemeridian_uuid")]},
+                "ellipsoid": row[cols.index("ellipsoid_uuid")],
+                "primeMeridian": row[cols.index("primemeridian_uuid")],
                 "coordinateReferenceEpoch": row[cols.index("coordinatereferenceepoch")],
                 "informationSources": get_citations_by_uuid(row[cols.index("uuid")])
             }
@@ -614,17 +614,12 @@ def ellipsoid_dump():
                 "remarks": row[cols.index("remarks")],
                 "isSphere": row[cols.index("issphere")],
                 "semiMajorAxis": row[cols.index("semimajoraxis")],
-                "semiMajorAxisUoM": {
-                    "itemID": row[cols.index("semimajoraxisuom_uuid")]
-                },
+                "semiMajorAxisUoM": row[cols.index("semimajoraxisuom_uuid")],
                 "semiMinorAxis": row[cols.index("semiminoraxis")],
-                "semiMinorAxisUoM": {
-                    "itemID": row[cols.index("semiminoraxisuom_uuid")]
-                },
+                "semiMinorAxisUoM": row[cols.index("semiminoraxisuom_uuid")],
                 "inverseFlattening": row[cols.index("inverseflattening")],
-                "inverseFlatteningUoM": {
-                    "itemID": row[cols.index("inverseflatteninguom_uuid")]
-                },
+                "inverseFlatteningUoM": row[cols.index("inverseflatteninguom_uuid")],
+                
                 "informationSources": get_citations_by_uuid(row[cols.index("uuid")])
             }
         )
@@ -788,13 +783,21 @@ def cs_cartesian_dump():
 
         for elm in coordinate_system_axes:
             _coordinate_system_axes.append(
-                {"itemID": elm["uuid"], "classID": "coordinate-sys-axis"}
+                {
+                    "itemID": elm["uuid"],
+                    "classID": "coordinate-sys-axis"
+                }
             )
 
         item["coordinateSystemAxes"] = _coordinate_system_axes
         item["informationSources"] = get_citations_by_uuid(uuid)
 
-        data = {"id": uuid, "dateAccepted": "", "status": item["status"], "data": item}
+        data = {
+            "id": uuid,
+            "dateAccepted": "",
+            "status": item["status"],
+            "data": item
+        }
 
         del data["data"]["status"]
 
@@ -818,13 +821,21 @@ def cs_ellipsoidal_dump():
 
         for elm in coordinate_system_axes:
             _coordinate_system_axes.append(
-                {"itemID": elm["uuid"], "classID": "coordinate-sys-axis"}
+                {
+                    "itemID": elm["uuid"],
+                    "classID": "coordinate-sys-axis"
+                }
             )
 
         item["coordinateSystemAxes"] = _coordinate_system_axes
         item["informationSources"] = get_citations_by_uuid(uuid)
 
-        data = {"id": uuid, "dateAccepted": "", "status": item["status"], "data": item}
+        data = {
+            "id": uuid,
+            "dateAccepted": "",
+            "status": item["status"],
+            "data": item
+        }
 
         del data["data"]["status"]
 
@@ -848,7 +859,10 @@ def cs_vertical_dump():
 
         for elm in coordinate_system_axes:
             _coordinate_system_axes.append(
-                {"itemID": elm["uuid"], "classID": "coordinate-sys-axis"}
+                {
+                    "itemID": elm["uuid"],
+                    "classID": "coordinate-sys-axis"
+                }
             )
 
         item["coordinateSystemAxes"] = _coordinate_system_axes
