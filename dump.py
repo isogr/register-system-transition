@@ -53,7 +53,7 @@ def get_crs_by_uuid(uuid):
     if _row:
         return {
             "itemID": _row[1],
-            "classID": crs_uuid_classes[_row[1]]
+            "classID": item_classes[_row[1]]
         }
 
     else:
@@ -141,7 +141,8 @@ def get_geo_datum_by_uuid(uuid):
     cur.execute(
         """
         SELECT
-            name
+            name,
+            itemclass_uuid
         FROM
             geodeticdatum
         WHERE
@@ -153,8 +154,13 @@ def get_geo_datum_by_uuid(uuid):
     _row = cur.fetchone()
 
     if _row:
-        return _row[0]
+        return {
+            "uuid": uuid,
+            "name": _row[0], 
+            "class_uuid": _row[1]
+        }
     else:
+        print("not found")
         return None
 
 
@@ -197,10 +203,10 @@ def get_coord_sys_by_uuid(uuid):
 
     if _row:
         return {
-            "name": _row[0],
-            "uuid": uuid,
-            "class": get_items_class_by_uuid(_row[1]),
+            "itemID": uuid,
+            "classID": name_classes.get(get_items_class_by_uuid(_row[1]))
         }
+
 
     else:
         cur.execute(
@@ -220,9 +226,8 @@ def get_coord_sys_by_uuid(uuid):
 
         if _row:
             return {
-                "name": _row[0],
-                "uuid": uuid,
-                "class": get_items_class_by_uuid(_row[1]),
+                "itemID": uuid,
+                "classID": name_classes.get(get_items_class_by_uuid(_row[1]))
             }
 
         else:
@@ -244,9 +249,8 @@ def get_coord_sys_by_uuid(uuid):
 
             if _row:
                 return {
-                    "name": _row[0],
-                    "uuid": uuid,
-                    "class": get_items_class_by_uuid(_row[1]),
+                    "itemID": uuid,
+                    "classID": name_classes.get(get_items_class_by_uuid(_row[1]))
                 }
 
             else:
@@ -268,9 +272,8 @@ def get_coord_sys_by_uuid(uuid):
 
                 if _row:
                     return {
-                        "name": _row[0],
-                        "uuid": uuid,
-                        "class": get_items_class_by_uuid(_row[1]),
+                        "itemID": uuid,
+                        "classID": name_classes.get(get_items_class_by_uuid(_row[1]))
                     }
                 else:
                     return None
@@ -619,7 +622,6 @@ def ellipsoid_dump():
                 "semiMinorAxisUoM": row[cols.index("semiminoraxisuom_uuid")],
                 "inverseFlattening": row[cols.index("inverseflattening")],
                 "inverseFlatteningUoM": row[cols.index("inverseflatteninguom_uuid")],
-                
                 "informationSources": get_citations_by_uuid(row[cols.index("uuid")])
             }
         )
@@ -949,7 +951,7 @@ def units_dump():
                 "numerator": row[cols.index("scaletostandardunitnumerator")],
                 "denominator": row[cols.index("scaletostandardunitdenominator")],
                 "standardUnit": row[cols.index("standardunit_uuid")],
-                "informationSources": [],
+                "informationSources": get_citations_by_uuid(row[cols.index("uuid")])
             }
         )
 
@@ -1022,7 +1024,7 @@ def transformations_dump():
                 "coordOperationMethod": row[cols.index("method_uuid")],
                 "sourceCRS": get_crs_by_uuid(row[cols.index("sourcecrs_uuid")]),
                 "targetCRS": get_crs_by_uuid(row[cols.index("targetcrs_uuid")]),
-                "informationSources": get_citations_by_uuid(row[cols.index("uuid")])                
+                "informationSources": get_citations_by_uuid(row[cols.index("uuid")])
             }
         )
 
@@ -1080,6 +1082,8 @@ def crs_geodetic_dump():
     items = []
 
     for row in rows:
+        geo_datum = get_geo_datum_by_uuid(row[cols.index("datum_uuid")])
+
         items.append(
             {
                 "uuid": row[cols.index("uuid")],
@@ -1092,8 +1096,8 @@ def crs_geodetic_dump():
                 "extent": get_extent_by_uuid(row[cols.index("domainofvalidity_uuid")]),
                 "operation": row[cols.index("operation_uuid")],
                 "datum": {
-                    "uuid": row[cols.index("datum_uuid")],
-                    "name": get_geo_datum_by_uuid(row[cols.index("datum_uuid")]),
+                    'itemID': row[cols.index("datum_uuid")],
+                    'classID': item_classes.get(geo_datum['class_uuid'])
                 },
                 "coordinateSystem": get_coord_sys_by_uuid(
                     row[cols.index("coordinatesystem_uuid")]
@@ -1203,20 +1207,52 @@ if __name__ == "__main__":
     )
     cur = con.cursor()
 
-    crs_name_classes = {
-        "Compound CRS": "crs--compound",
-        "Engineering CRS": "crs--engineering",
-        "Geodetic CRS": "crs--geodetic",
-        "Projected CRS": "crs--projected",
-        "Vertical CRS": "crs--vertical",
+    name_classes = {
+        "GeodeticCRS": "crs--geodetic",
+        "EngineeringCRS": "crs--engineering",
+        "CompoundCRS": "crs--compound",
+        "ProjectedCRS": "crs--projected",
+        "VerticalCRS": "crs--vertical",
+        "Transformation": "coordinate-ops--transformation",
+        "Conversion": "coordinate-ops--conversion",
+        "ConcatenatedOperation": "coordinate-ops--concatenated-operation",
+        "EngineeringDatum": "datums--engineering",
+        "GeodeticDatum": "datums--geodetic",
+        "VerticalDatum": "datums--vertical",
+        "CartesianCS": "coordinate-sys--cartesian",
+        "EllipsoidalCS": "coordinate-sys--ellipsoidal",
+        "VerticalCS": "coordinate-sys--vertical",
+        "SphericalCS": "coordinate-sys--spherical",
+        "Ellipsoid": "ellipsoid",
+        "CoordinateSystemAxis": "coordinate-sys-axis",
+        "OperationMethod": "coordinate-op-method",
+        "OperationParameter": "coordinate-op-parameter",
+        "PrimeMeridian": "prime-meridian",
+        "UnitOfMeasure": "unit-of-measurement"
     }
 
-    crs_uuid_classes = {
+    item_classes = {
         "69c0beba-4120-4e58-ae36-d294cb2e8623": "crs--geodetic",
         "7be258b1-ffcd-4493-aad4-58f913d08825": "crs--engineering",
         "9aabc0d2-039f-4202-aac0-3188ff71fce5": "crs--compound",
         "b8a1d920-61bb-4a2e-a111-b49df172719c": "crs--projected",
         "fb381dcb-f58e-41ec-994d-168734d6e029": "crs--vertical",
+        "546b4647-1d3a-4b9b-9640-862ab3fd9867": "coordinate-ops--transformation",
+        "a0b5683b-7cc7-4551-8bbb-f3b9870cb5d4": "coordinate-ops--conversion",
+        "7b6cfab6-07d0-4f28-b425-29a9176597a7": "coordinate-ops--concatenated-operation",
+        "bc0c8369-34c2-44e7-9498-b35c9d8438f4": "datums--engineering",
+        "4d6353fc-ecd5-4024-bd76-fff10d0ac970": "datums--geodetic",
+        "307dd049-e74b-4856-96e1-8108d69bf68d": "datums--vertical",
+        "3582ebd6-57bb-4673-b32b-a5a555111013": "coordinate-sys--cartesian",
+        "4299ce1c-9bd4-4b14-a168-0f9bcdcdb20b": "coordinate-sys--ellipsoidal",
+        "9bccbe77-35b0-4078-813d-0e7d332990f7": "coordinate-sys--vertical",
+        "c7eaf787-578d-4fb3-80bd-dbeb14ddc1ca": "coordinate-sys--spherical",
+        "aada3089-bca3-4bc2-8ccb-23570def7d23": "ellipsoid",
+        "6eb0564e-a4f7-4764-8e19-f62422bb562e": "coordinate-sys-axis",
+        "4149b8f8-7cae-4f26-8396-6d7a9cc203eb": "coordinate-op-method",
+        "d27ca5ec-65f7-4e72-be5a-9e1cac4afc63": "coordinate-op-parameter",
+        "c176f626-dad9-4821-893b-ded32f175675": "prime-meridian",
+        "c40172d7-9615-4d62-b512-a0b8d54a8fd0": "unit-of-measurement"
     }
 
     objects_dumpers = {
