@@ -798,7 +798,7 @@ def cs_cartesian_dump():
 
         del data["data"]["status"]
 
-        save_yaml(uuid, "coordinate-sys--сartesian", data)
+        save_yaml(uuid, "coordinate-sys--cartesian", data)
 
 
 def cs_ellipsoidal_dump():
@@ -1217,7 +1217,7 @@ if __name__ == "__main__":
         "datums--engineering": datums_engineering_dump,
         "datums--geodetic": datums_geodetic_dump,
         "datums--vertical": datums_vertical_dump,
-        "coordinate-sys--сartesian": cs_cartesian_dump,
+        "coordinate-sys--cartesian": cs_cartesian_dump,
         "coordinate-sys--ellipsoidal": cs_ellipsoidal_dump,
         "coordinate-sys--vertical": cs_vertical_dump,
         "coordinate-sys--spherical": cs_spherical_dump,
