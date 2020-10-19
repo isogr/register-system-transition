@@ -52,8 +52,8 @@ def get_crs_by_uuid(uuid):
 
     if _row:
         return {
-            "itemID": _row[1],
-            "classID": item_classes[_row[1]]
+            "itemID": uuid,
+            "classID": item_classes.get(_row[1])
         }
 
     else:
@@ -108,6 +108,8 @@ def get_citation(uuid):
             series_page
         FROM
             ci_citation
+        WHERE
+            uuid = %(uuid)s
     """,
         {"uuid": uuid},
     )
@@ -118,17 +120,28 @@ def get_citation(uuid):
     items = []
 
     if row:
+        other_details = row[cols.index("othercitationdetails")]
+        if other_details and not other_details.strip():
+            other_details = None
+
+        edition_date = row[cols.index("editiondate")]
+
+        # some fields has a garbage:
+        if edition_date and edition_date.replace('-', '').isnumeric():
+            edition_date_dt = datetime.datetime.strptime(edition_date, '%Y-%m-%d')
+        else:
+            edition_date_dt = None
+
         return {
                 "uuid": row[cols.index("uuid")],
                 "title": row[cols.index("title")],
-                "collectiveTitle": row[cols.index("collectivetitle")],
                 "edition": row[cols.index("edition")],
-                "editionDate": row[cols.index("editiondate")],
+                "editionDate": edition_date_dt,
                 "isbn": row[cols.index("isbn")],
                 "issn": row[cols.index("issn")],
-                "otherDetails": row[cols.index("othercitationdetails")],
+                "otherDetails": other_details,
                 "seriesName": row[cols.index("series_name")],
-                "seriesIssueId": row[cols.index("series_issueidentification")],
+                "seriesIssueID": row[cols.index("series_issueidentification")],
                 "seriesPage": row[cols.index("series_page")],
         }
 
@@ -1095,10 +1108,11 @@ def crs_geodetic_dump():
                 "description": row[cols.index("description")],
                 "extent": get_extent_by_uuid(row[cols.index("domainofvalidity_uuid")]),
                 "operation": row[cols.index("operation_uuid")],
-                "datum": {
-                    'itemID': row[cols.index("datum_uuid")],
-                    'classID': item_classes.get(geo_datum['class_uuid'])
-                },
+                "datum": row[cols.index("datum_uuid")],
+                #"datum": {
+                #    'itemID': row[cols.index("datum_uuid")],
+                #    'classID': item_classes.get(geo_datum['class_uuid'])
+                #},
                 "coordinateSystem": get_coord_sys_by_uuid(
                     row[cols.index("coordinatesystem_uuid")]
                 ),
@@ -1169,10 +1183,11 @@ def crs_vertical_dump():
                 "description": row[cols.index("description")],
                 "extent": get_extent_by_uuid(row[cols.index("domainofvalidity_uuid")]),
                 "operation": row[cols.index("operation_uuid")],
-                "datum": {
-                    "uuid": row[cols.index("datum_uuid")],
-                    "name": get_vert_datum_by_uuid(row[cols.index("datum_uuid")]),
-                },
+                "datum": row[cols.index("datum_uuid")],
+                #"datum": {
+                #    "uuid": row[cols.index("datum_uuid")],
+                #    "name": get_vert_datum_by_uuid(row[cols.index("datum_uuid")]),
+                #},
                 "coordinateSystem": get_coord_sys_by_uuid(
                     row[cols.index("coordinatesystem_uuid")]
                 ),
