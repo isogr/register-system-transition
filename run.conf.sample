@@ -1,17 +1,26 @@
-# Uncomment line(s) to dump objects:
+# Uncomment line(s) to dump objects or comment to skip:
 
-objects+=('coordinate-ops--transformation')
 objects+=('crs--geodetic')
 objects+=('crs--vertical')
+objects+=('crs--compound')
+objects+=('crs--projected')
+objects+=('crs--engineering')
+objects+=('coordinate-ops--transformation')
+objects+=('coordinate-ops--conversion')
+objects+=('coordinate-ops--concatenated-operation')
+objects+=('datums--engineering')
+objects+=('datums--geodetic')
+objects+=('datums--vertical')
 objects+=('coordinate-sys--cartesian')
 objects+=('coordinate-sys--ellipsoidal')
 objects+=('coordinate-sys--vertical')
-objects+=('coordinate-sys-axis')
-objects+=('unit-of-measurement')
-objects+=('datums--geodetic')
-objects+=('datums--vertical')
+objects+=('coordinate-sys--spherical')
 objects+=('ellipsoid')
+objects+=('coordinate-sys-axis')
+objects+=('coordinate-op-method')
+objects+=('coordinate-op-parameter')
 objects+=('prime-meridian')
+objects+=('unit-of-measurement')
 
 
 # Set false or true if you need to zip results:

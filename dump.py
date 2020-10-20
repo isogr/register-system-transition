@@ -763,10 +763,8 @@ def cs_axis_dump():
 
         del item["information_source"]
 
-        item["unit"] = {
-            "itemID": item["axis_unit"]["uuid"],
-            "classID": "unit-of-measurement",
-        }
+        item["unit"] = item["axis_unit"]["uuid"]
+
         del item["axis_unit"]
 
         item["abbreviation"] = item["axis_abbreviation"]
@@ -775,18 +773,23 @@ def cs_axis_dump():
         item["direction"] = item["axis_direction"]
         del item["axis_direction"]
 
-        item["minValue"] = item["minimum_value"]
+        #item["minValue"] = item["minimum_value"]
         del item["minimum_value"]
 
-        item["maxValue"] = item["maximum_value"]
+        #item["maxValue"] = item["maximum_value"]
         del item["maximum_value"]
 
-        item["rangeMeaning"] = item["range_meaning"]
+        #item["rangeMeaning"] = item["range_meaning"]
         del item["range_meaning"]
 
         item["informationSources"] = get_citations_by_uuid(uuid)
 
-        data = {"id": uuid, "status": item["status"], "data": item}
+        data = {
+            "id": uuid,
+            "dateAccepted": "",
+            "status": item["status"],
+            "data": item
+        }
         del data["data"]["status"]
 
         save_yaml(uuid, "coordinate-sys-axis", data)
@@ -808,12 +811,7 @@ def cs_cartesian_dump():
         _coordinate_system_axes = []
 
         for elm in coordinate_system_axes:
-            _coordinate_system_axes.append(
-                {
-                    "itemID": elm["uuid"],
-                    "classID": "coordinate-sys-axis"
-                }
-            )
+            _coordinate_system_axes.append(elm["uuid"])
 
         item["coordinateSystemAxes"] = _coordinate_system_axes
         item["informationSources"] = get_citations_by_uuid(uuid)
@@ -846,12 +844,7 @@ def cs_ellipsoidal_dump():
         _coordinate_system_axes = []
 
         for elm in coordinate_system_axes:
-            _coordinate_system_axes.append(
-                {
-                    "itemID": elm["uuid"],
-                    "classID": "coordinate-sys-axis"
-                }
-            )
+            _coordinate_system_axes.append(elm["uuid"])
 
         item["coordinateSystemAxes"] = _coordinate_system_axes
         item["informationSources"] = get_citations_by_uuid(uuid)
@@ -884,17 +877,17 @@ def cs_vertical_dump():
         _coordinate_system_axes = []
 
         for elm in coordinate_system_axes:
-            _coordinate_system_axes.append(
-                {
-                    "itemID": elm["uuid"],
-                    "classID": "coordinate-sys-axis"
-                }
-            )
+            _coordinate_system_axes.append(elm["uuid"])
 
         item["coordinateSystemAxes"] = _coordinate_system_axes
         item["informationSources"] = get_citations_by_uuid(uuid)
 
-        data = {"id": uuid, "dateAccepted": "", "status": item["status"], "data": item}
+        data = {
+            "id": uuid, 
+            "dateAccepted": "", 
+            "status": item["status"], 
+            "data": item
+        }
 
         del data["data"]["status"]
 
@@ -1034,13 +1027,11 @@ def transformations_dump():
                 "identifier": int(row[cols.index("identifier")]),
                 "name": row[cols.index("name")],
                 "description": row[cols.index("description")],
-                # 'accepted': row[cols.index('dateaccepted')],
                 "remarks": row[cols.index("remarks")],
                 "operationVersion": row[cols.index("operationversion")],
                 "extent": get_extent_by_uuid(row[cols.index("domainofvalidity_uuid")]),
                 "scope": [],
                 "parameters": [],
-                "informationSources": [],
                 # 'coordOperationMethod': {
                 #   'uuid': row[cols.index('method_uuid')],
                 #   'name': get_op_method_by_uuid(row[cols.index('method_uuid')])
@@ -1058,9 +1049,7 @@ def transformations_dump():
 
         data = {
             "id": uuid,
-            # 'timestamp': datetime.datetime.now(),
             "dateAccepted": row[cols.index("dateaccepted")],
-            # 'parents': [],
             "status": row[cols.index("status")].lower(),
             "data": item,
         }
