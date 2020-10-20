@@ -731,7 +731,7 @@ def prime_meridian_dump():
 
         del item["information_source"]
 
-        item["longitudeFromFreenwich"] = item["longitude_from_greenwich"]
+        item["longitudeFromGreenwich"] = item["longitude_from_greenwich"]
         del item["longitude_from_greenwich"]
 
         item["informationSources"] = get_citations_by_uuid(uuid)
