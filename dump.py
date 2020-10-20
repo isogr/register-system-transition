@@ -729,14 +729,25 @@ def prime_meridian_dump():
         uuid = item["uuid"]
         del item["uuid"]
 
+        date_accepted = datetime.datetime.strptime(item["date_accepted"], '%Y-%m-%d')
+        del item["date_accepted"]
+
         del item["information_source"]
 
         item["longitudeFromGreenwich"] = item["longitude_from_greenwich"]
         del item["longitude_from_greenwich"]
 
+        item["longitudeFromGreenwichUoM"] = item["longitude_from_greenwich_uom"]
+        del item["longitude_from_greenwich_uom"]
+
         item["informationSources"] = get_citations_by_uuid(uuid)
 
-        data = {"id": uuid, "dateAccepted": "", "status": item["status"], "data": item}
+        data = {
+            "id": uuid,
+            "dateAccepted": date_accepted,
+            "status": item["status"],
+            "data": item
+        }
 
         del data["data"]["status"]
 

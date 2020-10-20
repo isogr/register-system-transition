@@ -1,16 +1,18 @@
 {
    "uuid":"cbc22008-33fd-4e8e-9663-a36306adf105",
    "identifier":25,
+   "date_accepted": "2018-11-17",
    "status":"valid",
    "name":"Greenwich",
    "remarks":"",
    "aliases":[
-      
+      "Zero meridian"
    ],
    "unit":{
       "uuid":"1d86d720-ff1a-47ef-819e-2fb3524c9ce9",
       "name":"degree"
    },
    "longitude_from_greenwich":0.0,
+   "longitude_from_greenwich_uom": "1d86d720-ff1a-47ef-819e-2fb3524c9ce9",
    "information_source": []
 }
