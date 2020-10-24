@@ -7,13 +7,13 @@ import argparse
 import json
 import glob
 
-import psycopg2
 from yaml import load, dump
+import psycopg2
 
 import config
 
 
-def get_items_class_by_uuid(uuid):
+def get_class_by_uuid(uuid):
     cur.execute(
         """
         SELECT
@@ -30,8 +30,6 @@ def get_items_class_by_uuid(uuid):
 
     if _row:
         return _row[0]
-    else:
-        return None
 
 
 def get_crs_by_uuid(uuid):
@@ -56,9 +54,6 @@ def get_crs_by_uuid(uuid):
             "classID": item_classes.get(_row[1])
         }
 
-    else:
-        return None
-
 
 def get_citations_by_uuid(uuid):
     cur.execute(
@@ -76,17 +71,14 @@ def get_citations_by_uuid(uuid):
     rows = cur.fetchall()
 
     result = []
-    
+
     if rows:
         for row in rows:
             citation = get_citation(row[0])
             if citation:
                 result.append(citation)
 
-        return result
-
-    else:
-        return None
+    return result
 
 
 def get_citation(uuid):
@@ -117,7 +109,7 @@ def get_citation(uuid):
     row = cur.fetchone()
     cols = [desc[0] for desc in cur.description]
 
-    items = []
+    # items = []
 
     if row:
         other_details = row[cols.index("othercitationdetails")]
@@ -128,26 +120,22 @@ def get_citation(uuid):
 
         # some fields has a garbage:
         if edition_date and edition_date.replace('-', '').isnumeric():
-            edition_date_dt = datetime.datetime.strptime(edition_date, '%Y-%m-%d')
+            edition_date_dt = str_to_dt(edition_date)
         else:
             edition_date_dt = None
 
         return {
-                "uuid": row[cols.index("uuid")],
-                "title": row[cols.index("title")],
-                "edition": row[cols.index("edition")],
-                "editionDate": edition_date_dt,
-                "isbn": row[cols.index("isbn")],
-                "issn": row[cols.index("issn")],
-                "otherDetails": other_details,
-                "seriesName": row[cols.index("series_name")],
-                "seriesIssueID": row[cols.index("series_issueidentification")],
-                "seriesPage": row[cols.index("series_page")],
+            "uuid": row[cols.index("uuid")],
+            "title": row[cols.index("title")],
+            "edition": row[cols.index("edition")],
+            "editionDate": edition_date_dt,
+            "isbn": row[cols.index("isbn")],
+            "issn": row[cols.index("issn")],
+            "otherDetails": other_details,
+            "seriesName": row[cols.index("series_name")],
+            "seriesIssueID": row[cols.index("series_issueidentification")],
+            "seriesPage": row[cols.index("series_page")],
         }
-
-    else:
-        return None
-
 
 
 def get_geo_datum_by_uuid(uuid):
@@ -169,12 +157,9 @@ def get_geo_datum_by_uuid(uuid):
     if _row:
         return {
             "uuid": uuid,
-            "name": _row[0], 
+            "name": _row[0],
             "class_uuid": _row[1]
         }
-    else:
-        print("not found")
-        return None
 
 
 def get_vert_datum_by_uuid(uuid):
@@ -194,8 +179,6 @@ def get_vert_datum_by_uuid(uuid):
 
     if _row:
         return _row[0]
-    else:
-        return None
 
 
 def get_coord_sys_by_uuid(uuid):
@@ -217,9 +200,8 @@ def get_coord_sys_by_uuid(uuid):
     if _row:
         return {
             "itemID": uuid,
-            "classID": name_classes.get(get_items_class_by_uuid(_row[1]))
+            "classID": name_classes[get_class_by_uuid(_row[1])]
         }
-
 
     else:
         cur.execute(
@@ -240,11 +222,10 @@ def get_coord_sys_by_uuid(uuid):
         if _row:
             return {
                 "itemID": uuid,
-                "classID": name_classes.get(get_items_class_by_uuid(_row[1]))
+                "classID": name_classes[get_class_by_uuid(_row[1])]
             }
 
         else:
-
             cur.execute(
                 """
                 SELECT
@@ -263,11 +244,10 @@ def get_coord_sys_by_uuid(uuid):
             if _row:
                 return {
                     "itemID": uuid,
-                    "classID": name_classes.get(get_items_class_by_uuid(_row[1]))
+                    "classID": name_classes[get_class_by_uuid(_row[1])]
                 }
 
             else:
-
                 cur.execute(
                     """
                     SELECT
@@ -286,10 +266,8 @@ def get_coord_sys_by_uuid(uuid):
                 if _row:
                     return {
                         "itemID": uuid,
-                        "classID": name_classes.get(get_items_class_by_uuid(_row[1]))
+                        "classID": name_classes[get_class_by_uuid(_row[1])]
                     }
-                else:
-                    return None
 
 
 def get_op_method_by_uuid(uuid):
@@ -309,8 +287,209 @@ def get_op_method_by_uuid(uuid):
 
     if _row:
         return _row[0]
-    else:
-        return None
+
+
+def get_op_params_by_method_uuid(uuid):
+    cur.execute(
+        """
+        SELECT
+            parameter_uuid,
+            parameter_index
+        FROM
+            operationmethoditem_generaloperationparameteritem
+        WHERE
+            operationmethoditem_uuid = %(uuid)s
+        ORDER BY
+            parameter_index
+    """,
+        {"uuid": uuid},
+    )
+
+    items = []
+
+    for row in cur.fetchall():
+        items.append(row[0])
+
+    return items
+
+
+def get_tf_params_by_tf_uuid(uuid):
+    cur.execute(
+        """
+        SELECT
+            parametervalue_uuid
+        FROM
+            singleoperationitem_generalparametervalue
+        WHERE
+            singleoperationitem_uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    items = []
+    _d = []
+
+    for row in cur.fetchall():
+        item = {}
+
+        param_val_uuid = row[0]
+        op_param_val = get_op_simple_param_val(param_val_uuid)
+        _param_val = get_op_param_val(param_val_uuid)
+        param_uuid = _param_val["uuid"]
+
+        if op_param_val:
+            # item["parameter"] = {
+                # "classID": "coordinate-op-parameter",
+                # "parameter": _param_val["uuid"],
+                # "type": "measure (w/ UoM)",
+                # "name": None,
+                # "id": None
+            # }
+
+            param = get_op_parameter_by_uuid(_param_val["uuid"])
+            if param:
+                # item["parameter"]["name"] = param["name"]
+                # item["parameter"]["id"] = param["id"]
+                item["name"] = param["name"]
+            else:
+                item["name"] = None
+
+            item["parameter"] = _param_val["uuid"]
+            item["type"] = "measure (w/ UoM)"
+            item["value"] = op_param_val.pop("value")
+            item["unitOfMeasurement"] = op_param_val["uuid"]
+            item["fileCitation"] = None  # get_citations_by_uuid(_param_val["uuid"])
+
+            items.append(item)
+
+        else:
+            cur.execute(
+                """
+                SELECT
+                    parametervaluesimple
+                FROM
+                    operationparametervalue_parametervaluesimple
+                WHERE
+                    operationparametervalue_uuid = %(uuid)s
+            """,
+                {"uuid": param_val_uuid},
+            )
+            _val = cur.fetchone()
+
+            if _val and _param_val:
+                param_aliases = get_aliases(_param_val["uuid"])
+
+                if len(param_aliases) == 1:
+                    param_name = param_aliases[0]
+                else:
+                    param_name = None
+
+                param = get_op_parameter_by_uuid(param_uuid)
+
+                if param:
+                    # item["parameter"] = {
+                        # "classID": "coordinate-op-parameter",
+                        # "parameter": param_uuid,
+                        # "type": paramType.get(_param_val["type"]),
+                        # "name": param["name"],
+                        # "id": param["id"]
+                    # }
+
+                    item["name"] = param["name"]
+                    item["parameter"] = param_uuid
+                    item["type"] = paramType.get(_param_val["type"])
+                    item["value"] = _val[0]
+                    item["unitOfMeasurement"] = None
+                    item["fileCitation"] = None  # get_citations_by_uuid(_param_val["citation_uuid"])
+
+            items.append(item)
+
+    return items
+
+
+def get_op_param_val(uuid):
+    cur.execute(
+        """
+        SELECT
+            dtype,
+            parametertype,
+            parameter_uuid,
+            referencefilecitation_uuid
+        FROM
+            generalparametervalue
+        WHERE
+            uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    param = cur.fetchone()
+    if param:
+        return {
+            "dtype": param[0],
+            "type": param[1],
+            "uuid": param[2],
+            "citation_uuid": param[3]
+        }
+
+
+def get_op_simple_param_val(uuid):
+    cur.execute(
+        """
+        SELECT
+            value,
+            uom_uuid
+        FROM
+            operationparametervalue_parametervalue
+        WHERE
+            operationparametervalue_uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    op_param_val = cur.fetchone()
+
+    if op_param_val:
+        val_str = str(psycopg2.Binary(op_param_val[0]))
+        val_str = val_str.replace("::bytea", "").strip("'")
+
+        val_str = val_str.replace('\\254\\355\\000\\005sr\\000\\020java.lang.Double\\200\\263\\302J)k\\373\\004\\002\\000\\001D\\000\\005valuexr\\000\\020java.lang.Number\\206\\254\\225\\035\\013\\224\\340\\213\\002\\000\\000xp', '')
+
+        if not val_str.replace('\\000', ''):
+            value = float(0.0)
+        else:
+            value = None
+
+        return {
+            "value": value,
+            "classID": "unit-of-measurement",
+            "uuid": op_param_val[1]
+        }
+
+
+def get_op_parameter_by_uuid(uuid):
+    cur.execute(
+        """
+        SELECT
+            name,
+            identifier,
+            itemclass_uuid
+        FROM
+            operationparameteritem
+        WHERE
+            uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    _row = cur.fetchone()
+
+    if _row:
+        return {
+            "id": _row[1],
+            "name": _row[0],
+            "classID": name_classes.get(get_class_by_uuid(_row[2]))
+        }
 
 
 def get_extent_by_uuid(uuid):
@@ -331,8 +510,6 @@ def get_extent_by_uuid(uuid):
 
     if _row:
         name = _row[0]
-    else:
-        return None
 
     cur.execute(
         """
@@ -352,8 +529,6 @@ def get_extent_by_uuid(uuid):
 
     if _row:
         geo_uuid = _row[0]
-    else:
-        return None
 
     cur.execute(
         """
@@ -380,12 +555,156 @@ def get_extent_by_uuid(uuid):
             "s": _row[2],
             "w": _row[3],
         }
-    else:
-        return None
 
 
-def get_accuracy_by_uuid(uuid):
-    pass
+def get_aliases(uuid):
+    cur.execute(
+        """
+        SELECT
+            aliases
+        FROM
+            identifieditem_aliases
+        WHERE
+            identifieditem_uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    items = []
+
+    for row in cur.fetchall():
+        items.append(row[0])
+
+    return items
+
+
+def get_coord_op_scope(uuid):
+    cur.execute(
+        """
+        SELECT
+            scope
+        FROM
+            coordinateoperationitem_scope
+        WHERE
+            coordinateoperationitem_uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    items = []
+
+    for row in cur.fetchall():
+        items.append(row[0])
+
+    return items
+
+
+def get_coord_op_accuracy(uuid):
+    cur.execute(
+        """
+        SELECT
+            coordinateoperationaccuracy_uuid
+        FROM
+            coordinateoperationitem_dq_positionalaccuracy
+        WHERE
+            coordinateoperationitem_uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    items = []
+
+    for row in cur.fetchall():
+        accuracy_uuid = row[0]
+
+        cur.execute(
+            """
+            SELECT
+                result_uuid
+            FROM
+                dq_absoluteexternalpositionalaccuracy
+            WHERE
+                uuid = %(uuid)s
+        """,
+            {"uuid": accuracy_uuid},
+        )
+
+        for row2 in cur.fetchall():
+            result_uuid = row2[0]
+
+            cur.execute(
+                """
+                SELECT
+                    dtype,
+                    accuracy,
+                    accuracyunit_uuid
+                FROM
+                    result
+                WHERE
+                    uuid = %(uuid)s
+            """,
+                {"uuid": result_uuid},
+            )
+
+            result = cur.fetchone()
+
+            items.append(
+                {
+                    "dtype": result[0],
+                    "value": result[1],
+                    "unitOfMeasurement": result[2],
+                }
+            )
+
+    if items:
+        return items[0]
+
+
+def str_to_dt(date_str):
+    return datetime.datetime.strptime(
+        date_str, '%Y-%m-%d'
+    ).date()
+
+
+def read_json(fname):
+    with open(fname, "r") as _f:
+        result = json.load(_f)
+        return result
+
+
+def read_json_dir(alias):
+    result = []
+    json_dir = "%s/%s" % (config.data_dir, alias)
+    files = glob.glob("%s/*.json" % json_dir)
+    for fname in files:
+        data = read_json(fname)
+        result.append(data)
+
+    return result
+
+
+def save_yaml(uuid, dname, data):
+    file_path = "%s/%s" % (config.output_dir, dname)
+    pathlib.Path(file_path).mkdir(parents=True, exist_ok=True)
+    file = open("%s/%s.yaml" % (file_path, uuid), "w")
+    file.write(dump(data))
+    file.close()
+
+
+def save_items(items, class_id):
+    for item in items:
+        uuid = item.pop("uuid")
+        date_accepted = item.pop("dateAccepted")
+        status = item.pop("status")
+
+        data = {
+            "id": uuid,
+            "dateAccepted": date_accepted,
+            "status": status,
+            "data": item,
+        }
+
+        save_yaml(uuid, class_id, data)
 
 
 def crs_compound_dump():
@@ -414,31 +733,6 @@ def concat_conversion_dump():
 
 def cs_spherical_dump():
     print("Not Implemented")
-
-
-def read_json(fname):
-    with open(fname, "r") as _f:
-        result = json.load(_f)
-        return result
-
-
-def read_json_dir(alias):
-    result = []
-    json_dir = "%s/%s" % (config.data_dir, alias)
-    files = glob.glob("%s/*.json" % json_dir)
-    for fname in files:
-        data = read_json(fname)
-        result.append(data)
-
-    return result
-
-
-def save_yaml(uuid, dname, data):
-    file_path = "%s/%s" % (config.output_dir, dname)
-    pathlib.Path(file_path).mkdir(parents=True, exist_ok=True)
-    f = open("%s/%s.yaml" % (file_path, uuid), "w")
-    f.write(dump(data))
-    f.close()
 
 
 def datums_geodetic_dump():
@@ -483,6 +777,8 @@ def datums_geodetic_dump():
         items.append(
             {
                 "uuid": row[cols.index("uuid")],
+                "dateAccepted": row[cols.index("dateaccepted")],
+                "status": row[cols.index("status")].lower(),
                 "name": row[cols.index("name")],
                 "identifier": int(row[cols.index("identifier")]),
                 "aliases": get_aliases(row[cols.index("uuid")]),
@@ -499,18 +795,7 @@ def datums_geodetic_dump():
             }
         )
 
-    for item in items:
-        uuid = item["uuid"]
-        del item["uuid"]
-
-        data = {
-            "id": uuid,
-            "dateAccepted": row[cols.index("dateaccepted")],
-            "status": row[cols.index("status")].lower(),
-            "data": item,
-        }
-
-        save_yaml(uuid, "datums--geodetic", data)
+    save_items(items, "datums--geodetic")
 
 
 def datums_vertical_dump():
@@ -552,6 +837,8 @@ def datums_vertical_dump():
         items.append(
             {
                 "uuid": row[cols.index("uuid")],
+                "dateAccepted": row[cols.index("dateaccepted")],
+                "status": row[cols.index("status")].lower(),
                 "name": row[cols.index("name")],
                 "identifier": int(row[cols.index("identifier")]),
                 "aliases": get_aliases(row[cols.index("uuid")]),
@@ -566,23 +853,10 @@ def datums_vertical_dump():
             }
         )
 
-    for item in items:
-
-        uuid = item["uuid"]
-        del item["uuid"]
-
-        data = {
-            "id": uuid,
-            "dateAccepted": row[cols.index("dateaccepted")],
-            "status": row[cols.index("status")].lower(),
-            "data": item,
-        }
-
-        save_yaml(uuid, "datums--vertical", data)
+    save_items(items, "datums--vertical")
 
 
 def ellipsoid_dump():
-
     cur.execute(
         """
         SELECT
@@ -623,6 +897,8 @@ def ellipsoid_dump():
         items.append(
             {
                 "uuid": row[cols.index("uuid")],
+                "dateAccepted": row[cols.index("dateaccepted")],
+                "status": row[cols.index("status")].lower(),
                 "name": row[cols.index("name")],
                 "identifier": int(row[cols.index("identifier")]),
                 "aliases": get_aliases(row[cols.index("uuid")]),
@@ -639,23 +915,10 @@ def ellipsoid_dump():
             }
         )
 
-    for item in items:
-
-        uuid = item["uuid"]
-        del item["uuid"]
-
-        data = {
-            "id": uuid,
-            "dateAccepted": row[cols.index("dateaccepted")],
-            "status": row[cols.index("status")].lower(),
-            "data": item,
-        }
-
-        save_yaml(uuid, "ellipsoid", data)
+    save_items(items, "ellipsoid")
 
 
 def co_method_dump():
-
     cur.execute(
         """
         SELECT
@@ -694,217 +957,48 @@ def co_method_dump():
         items.append(
             {
                 "uuid": row[cols.index("uuid")],
+                "dateAccepted": row[cols.index("dateaccepted")],
+                "status": row[cols.index("status")].lower(),
                 "name": row[cols.index("name")],
                 "identifier": int(row[cols.index("identifier")]),
-                "parameters": get_parameters(row[cols.index("uuid")]),
-                "remarks": row[cols.index("remarks")],
-                "formula": row[cols.index("formula")],
-                "specification": {},
-                "reversible": row[cols.index("reversible")],
+                "aliases": get_aliases(row[cols.index("uuid")]),
                 "definition": row[cols.index("definition")],
                 "description": row[cols.index("description")],
+                "parameters": get_op_params_by_method_uuid(row[cols.index("uuid")]),
+                "remarks": row[cols.index("remarks")],
+                "formula": row[cols.index("formula")],
+                "formulaCitation": get_citations_by_uuid(row[cols.index("formulacitation_uuid")]),
                 "informationSources": get_citations_by_uuid(row[cols.index("uuid")])
             }
         )
 
-    for item in items:
-
-        uuid = item["uuid"]
-        del item["uuid"]
-
-        data = {
-            "id": uuid,
-            "dateAccepted": row[cols.index("dateaccepted")],
-            "status": row[cols.index("status")].lower(),
-            "data": item,
-        }
-
-        save_yaml(uuid, "coordinate-op-method", data)
+    save_items(items, "coordinate-op-method")
 
 
-def prime_meridian_dump():
-    data = read_json_dir("prime-meridian")
-
-    for item in data:
-        uuid = item["uuid"]
-        del item["uuid"]
-
-        date_accepted = datetime.datetime.strptime(item["date_accepted"], '%Y-%m-%d')
-        del item["date_accepted"]
-
-        del item["information_source"]
-
-        item["longitudeFromGreenwich"] = item["longitude_from_greenwich"]
-        del item["longitude_from_greenwich"]
-
-        item["longitudeFromGreenwichUoM"] = item["longitude_from_greenwich_uom"]
-        del item["longitude_from_greenwich_uom"]
-
-        item["informationSources"] = get_citations_by_uuid(uuid)
-
-        data = {
-            "id": uuid,
-            "dateAccepted": date_accepted,
-            "status": item["status"],
-            "data": item
-        }
-
-        del data["data"]["status"]
-
-        save_yaml(uuid, "prime-meridian", data)
-
-
-def cs_axis_dump():
-    data = read_json_dir("axes")
-
-    for item in data:
-        uuid = item["uuid"]
-        del item["uuid"]
-
-        del item["information_source"]
-
-        item["unit"] = item["axis_unit"]["uuid"]
-
-        del item["axis_unit"]
-
-        item["abbreviation"] = item["axis_abbreviation"]
-        del item["axis_abbreviation"]
-
-        item["direction"] = item["axis_direction"]
-        del item["axis_direction"]
-
-        #item["minValue"] = item["minimum_value"]
-        del item["minimum_value"]
-
-        #item["maxValue"] = item["maximum_value"]
-        del item["maximum_value"]
-
-        #item["rangeMeaning"] = item["range_meaning"]
-        del item["range_meaning"]
-
-        item["informationSources"] = get_citations_by_uuid(uuid)
-
-        data = {
-            "id": uuid,
-            "dateAccepted": "",
-            "status": item["status"],
-            "data": item
-        }
-        del data["data"]["status"]
-
-        save_yaml(uuid, "coordinate-sys-axis", data)
-
-
-def cs_cartesian_dump():
-    data = read_json_dir("cartesian")
-
-    for item in data:
-        uuid = item["uuid"]
-        del item["uuid"]
-
-        coordinate_system_axes = item["coordinate_system_axes"]
-        del item["coordinate_system_axes"]
-
-        information_source = item["information_source"]
-        del item["information_source"]
-
-        _coordinate_system_axes = []
-
-        for elm in coordinate_system_axes:
-            _coordinate_system_axes.append(elm["uuid"])
-
-        item["coordinateSystemAxes"] = _coordinate_system_axes
-        item["informationSources"] = get_citations_by_uuid(uuid)
-
-        data = {
-            "id": uuid,
-            "dateAccepted": "",
-            "status": item["status"],
-            "data": item
-        }
-
-        del data["data"]["status"]
-
-        save_yaml(uuid, "coordinate-sys--cartesian", data)
-
-
-def cs_ellipsoidal_dump():
-    data = read_json_dir("ellipsoidal")
-
-    for item in data:
-        uuid = item["uuid"]
-        del item["uuid"]
-
-        coordinate_system_axes = item["coordinate_system_axes"]
-        del item["coordinate_system_axes"]
-
-        information_source = item["information_source"]
-        del item["information_source"]
-
-        _coordinate_system_axes = []
-
-        for elm in coordinate_system_axes:
-            _coordinate_system_axes.append(elm["uuid"])
-
-        item["coordinateSystemAxes"] = _coordinate_system_axes
-        item["informationSources"] = get_citations_by_uuid(uuid)
-
-        data = {
-            "id": uuid,
-            "dateAccepted": "",
-            "status": item["status"],
-            "data": item
-        }
-
-        del data["data"]["status"]
-
-        save_yaml(uuid, "coordinate-sys--ellipsoidal", data)
-
-
-def cs_vertical_dump():
-    data = read_json_dir("vertical")
-
-    for item in data:
-        uuid = item["uuid"]
-        del item["uuid"]
-
-        coordinate_system_axes = item["coordinate_system_axes"]
-        del item["coordinate_system_axes"]
-
-        information_source = item["information_source"]
-        del item["information_source"]
-
-        _coordinate_system_axes = []
-
-        for elm in coordinate_system_axes:
-            _coordinate_system_axes.append(elm["uuid"])
-
-        item["coordinateSystemAxes"] = _coordinate_system_axes
-        item["informationSources"] = get_citations_by_uuid(uuid)
-
-        data = {
-            "id": uuid, 
-            "dateAccepted": "", 
-            "status": item["status"], 
-            "data": item
-        }
-
-        del data["data"]["status"]
-
-        save_yaml(uuid, "coordinate-sys--vertical", data)
-
-
-def get_aliases(uuid):
+def co_parameter_dump():
     cur.execute(
         """
         SELECT
-            aliases
+            uuid,
+            dateaccepted,
+            dateamended,
+            definition,
+            description,
+            itemidentifier,
+            name,
+            status,
+            itemclass_uuid,
+            register_uuid,
+            specificationlineage_uuid,
+            specificationsource_uuid,
+            data_source,
+            identifier,
+            information_source,
+            remarks,
+            minimumoccurs
         FROM
-            identifieditem_aliases
-        WHERE
-            identifieditem_uuid = %(uuid)s
-    """,
-        {"uuid": uuid},
+            operationparameteritem
+    """
     )
 
     rows = cur.fetchall()
@@ -913,13 +1007,175 @@ def get_aliases(uuid):
     items = []
 
     for row in rows:
-        items.append(row[0])
+        if row[cols.index("minimumoccurs")]:
+            minimum_occurs = int(row[cols.index("minimumoccurs")])
+        else:
+            minimum_occurs = None
 
-    return items
+        items.append(
+            {
+                "uuid": row[cols.index("uuid")],
+                "dateAccepted": row[cols.index("dateaccepted")],
+                "status": row[cols.index("status")].lower(),
+                "name": row[cols.index("name")],
+                "identifier": int(row[cols.index("identifier")]),
+                "aliases": get_aliases(row[cols.index("uuid")]),
+                "definition": row[cols.index("definition")],
+                "remarks": row[cols.index("remarks")],
+                "minimumOccurs": minimum_occurs,
+                "informationSources": get_citations_by_uuid(row[cols.index("uuid")])
+            }
+        )
+
+    save_items(items, "coordinate-op-parameter")
+
+
+def prime_meridian_dump():
+    data = read_json_dir("prime-meridian")
+
+    for item in data:
+        uuid = item.pop("uuid")
+        status = item.pop("status")
+        date_accepted = str_to_dt(item.pop("date_accepted"))
+        item["longitudeFromGreenwich"] = item.pop("longitude_from_greenwich")
+        item["longitudeFromGreenwichUoM"] = item.pop("longitude_from_greenwich_uom")
+        item["informationSources"] = get_citations_by_uuid(uuid)
+
+        del item["information_source"]
+
+        data = {
+            "id": uuid,
+            "dateAccepted": date_accepted,
+            "status": status,
+            "data": item
+        }
+
+        save_yaml(uuid, "prime-meridian", data)
+
+
+def cs_axis_dump():
+    data = read_json_dir("axes")
+
+    for item in data:
+        uuid = item.pop("uuid")
+        status = item.pop("status")
+        date_accepted = str_to_dt(item.pop("date_accepted"))
+
+        item["abbreviation"] = item.pop("axis_abbreviation")
+
+        item["direction"] = item.pop("axis_direction")
+
+        item["unit"] = item["axis_unit"]["uuid"]
+        del item["axis_unit"]
+
+        del item["minimum_value"]
+        del item["maximum_value"]
+        del item["range_meaning"]
+        del item["information_source"]
+
+        item["informationSources"] = get_citations_by_uuid(uuid)
+
+        data = {
+            "id": uuid,
+            "dateAccepted": date_accepted,
+            "status": status,
+            "data": item
+        }
+
+        save_yaml(uuid, "coordinate-sys-axis", data)
+
+
+def cs_cartesian_dump():
+    data = read_json_dir("cartesian")
+
+    for item in data:
+        uuid = item.pop("uuid")
+        status = item.pop("status")
+        date_accepted = str_to_dt(item.pop("date_accepted"))
+
+        coordinate_system_axes = item.pop("coordinate_system_axes")
+
+        _coordinate_system_axes = []
+
+        for elm in coordinate_system_axes:
+            _coordinate_system_axes.append(elm["uuid"])
+
+        item["coordinateSystemAxes"] = _coordinate_system_axes
+        item["informationSources"] = get_citations_by_uuid(uuid)
+
+        del item["information_source"]
+
+        data = {
+            "id": uuid,
+            "dateAccepted": date_accepted,
+            "status": status,
+            "data": item
+        }
+
+        save_yaml(uuid, "coordinate-sys--cartesian", data)
+
+
+def cs_ellipsoidal_dump():
+    data = read_json_dir("ellipsoidal")
+
+    for item in data:
+        uuid = item.pop("uuid")
+        status = item.pop("status")
+        date_accepted = str_to_dt(item.pop("date_accepted"))
+
+        coordinate_system_axes = item.pop("coordinate_system_axes")
+
+        _coordinate_system_axes = []
+
+        for elm in coordinate_system_axes:
+            _coordinate_system_axes.append(elm["uuid"])
+
+        item["coordinateSystemAxes"] = _coordinate_system_axes
+        item["informationSources"] = get_citations_by_uuid(uuid)
+
+        del item["information_source"]
+
+        data = {
+            "id": uuid,
+            "dateAccepted": date_accepted,
+            "status": status,
+            "data": item
+        }
+
+        save_yaml(uuid, "coordinate-sys--ellipsoidal", data)
+
+
+def cs_vertical_dump():
+    data = read_json_dir("vertical")
+
+    for item in data:
+        uuid = item.pop("uuid")
+        status = item.pop("status")
+        date_accepted = str_to_dt(item.pop("date_accepted"))
+
+        coordinate_system_axes = item.pop("coordinate_system_axes")
+
+        # information_source = item.pop("information_source")
+
+        _coordinate_system_axes = []
+
+        for elm in coordinate_system_axes:
+            _coordinate_system_axes.append(elm["uuid"])
+
+        item["coordinateSystemAxes"] = _coordinate_system_axes
+        item["informationSources"] = get_citations_by_uuid(uuid)
+
+        data = {
+            "id": uuid,
+            "dateAccepted": date_accepted,
+            "status": status,
+            "data": item
+        }
+
+        save_yaml(uuid, "coordinate-sys--vertical", data)
 
 
 def units_dump():
-
     cur.execute(
         """
         SELECT
@@ -959,6 +1215,8 @@ def units_dump():
         items.append(
             {
                 "uuid": row[cols.index("uuid")],
+                "dateAccepted": row[cols.index("dateaccepted")],
+                "status": row[cols.index("status")].lower(),
                 "name": row[cols.index("name")],
                 "identifier": int(row[cols.index("identifier")]),
                 "aliases": get_aliases(row[cols.index("uuid")]),
@@ -971,24 +1229,10 @@ def units_dump():
                 "informationSources": get_citations_by_uuid(row[cols.index("uuid")])
             }
         )
-
-    for item in items:
-
-        uuid = item["uuid"]
-        del item["uuid"]
-
-        data = {
-            "id": uuid,
-            "dateAccepted": row[cols.index("dateaccepted")],
-            "status": row[cols.index("status")].lower(),
-            "data": item,
-        }
-
-        save_yaml(uuid, "unit-of-measurement", data)
+    save_items(items, "unit-of-measurement")
 
 
 def transformations_dump():
-
     cur.execute(
         """
         SELECT
@@ -1009,7 +1253,6 @@ def transformations_dump():
             sourcecrs_uuid,
             targetcrs_uuid,
             method_uuid
-
         FROM
             transformationitem
     """
@@ -1024,18 +1267,17 @@ def transformations_dump():
         items.append(
             {
                 "uuid": row[cols.index("uuid")],
-                "identifier": int(row[cols.index("identifier")]),
+                "dateAccepted": row[cols.index("dateaccepted")],
+                "status": row[cols.index("status")].lower(),
                 "name": row[cols.index("name")],
+                "identifier": int(row[cols.index("identifier")]),
                 "description": row[cols.index("description")],
                 "remarks": row[cols.index("remarks")],
                 "operationVersion": row[cols.index("operationversion")],
                 "extent": get_extent_by_uuid(row[cols.index("domainofvalidity_uuid")]),
-                "scope": [],
-                "parameters": [],
-                # 'coordOperationMethod': {
-                #   'uuid': row[cols.index('method_uuid')],
-                #   'name': get_op_method_by_uuid(row[cols.index('method_uuid')])
-                # },
+                "scope": get_coord_op_scope(row[cols.index("uuid")]),
+                "accuracy": get_coord_op_accuracy(row[cols.index("uuid")]),
+                "parameters": get_tf_params_by_tf_uuid(row[cols.index("uuid")]),
                 "coordOperationMethod": row[cols.index("method_uuid")],
                 "sourceCRS": get_crs_by_uuid(row[cols.index("sourcecrs_uuid")]),
                 "targetCRS": get_crs_by_uuid(row[cols.index("targetcrs_uuid")]),
@@ -1043,18 +1285,7 @@ def transformations_dump():
             }
         )
 
-    for item in items:
-        uuid = item["uuid"]
-        del item["uuid"]
-
-        data = {
-            "id": uuid,
-            "dateAccepted": row[cols.index("dateaccepted")],
-            "status": row[cols.index("status")].lower(),
-            "data": item,
-        }
-
-        save_yaml(uuid, "coordinate-ops--transformation", data)
+    save_items(items, "coordinate-ops--transformation")
 
 
 def crs_geodetic_dump():
@@ -1095,11 +1326,13 @@ def crs_geodetic_dump():
     items = []
 
     for row in rows:
-        geo_datum = get_geo_datum_by_uuid(row[cols.index("datum_uuid")])
+        # geo_datum = get_geo_datum_by_uuid(row[cols.index("datum_uuid")])
 
         items.append(
             {
                 "uuid": row[cols.index("uuid")],
+                "dateAccepted": row[cols.index("dateaccepted")],
+                "status": row[cols.index("status")].lower(),
                 "name": row[cols.index("name")],
                 "identifier": int(row[cols.index("identifier")]),
                 "scope": row[cols.index("crs_scope")],
@@ -1109,10 +1342,6 @@ def crs_geodetic_dump():
                 "extent": get_extent_by_uuid(row[cols.index("domainofvalidity_uuid")]),
                 "operation": row[cols.index("operation_uuid")],
                 "datum": row[cols.index("datum_uuid")],
-                #"datum": {
-                #    'itemID': row[cols.index("datum_uuid")],
-                #    'classID': item_classes.get(geo_datum['class_uuid'])
-                #},
                 "coordinateSystem": get_coord_sys_by_uuid(
                     row[cols.index("coordinatesystem_uuid")]
                 ),
@@ -1121,18 +1350,7 @@ def crs_geodetic_dump():
             }
         )
 
-    for item in items:
-        uuid = item["uuid"]
-        del item["uuid"]
-
-        data = {
-            "id": uuid,
-            "dateAccepted": row[cols.index("dateaccepted")],
-            "status": row[cols.index("status")].lower(),
-            "data": item,
-        }
-
-        save_yaml(uuid, "crs--geodetic", data)
+    save_items(items, "crs--geodetic")
 
 
 def crs_vertical_dump():
@@ -1175,6 +1393,8 @@ def crs_vertical_dump():
         items.append(
             {
                 "uuid": row[cols.index("uuid")],
+                "dateAccepted": row[cols.index("dateaccepted")],
+                "status": row[cols.index("status")].lower(),
                 "name": row[cols.index("name")],
                 "identifier": int(row[cols.index("identifier")]),
                 "scope": row[cols.index("crs_scope")],
@@ -1184,10 +1404,6 @@ def crs_vertical_dump():
                 "extent": get_extent_by_uuid(row[cols.index("domainofvalidity_uuid")]),
                 "operation": row[cols.index("operation_uuid")],
                 "datum": row[cols.index("datum_uuid")],
-                #"datum": {
-                #    "uuid": row[cols.index("datum_uuid")],
-                #    "name": get_vert_datum_by_uuid(row[cols.index("datum_uuid")]),
-                #},
                 "coordinateSystem": get_coord_sys_by_uuid(
                     row[cols.index("coordinatesystem_uuid")]
                 ),
@@ -1196,19 +1412,7 @@ def crs_vertical_dump():
             }
         )
 
-    for item in items:
-
-        uuid = item["uuid"]
-        del item["uuid"]
-
-        data = {
-            "id": uuid,
-            "dateAccepted": row[cols.index("dateaccepted")],
-            "status": row[cols.index("status")].lower(),
-            "data": item,
-        }
-
-        save_yaml(uuid, "crs--vertical", data)
+    save_items(items, "crs--vertical")
 
 
 if __name__ == "__main__":
@@ -1221,6 +1425,10 @@ if __name__ == "__main__":
         port=config.db_port,
     )
     cur = con.cursor()
+
+    paramType = {
+        6: "parameter file name"
+    }
 
     name_classes = {
         "GeodeticCRS": "crs--geodetic",
@@ -1288,10 +1496,10 @@ if __name__ == "__main__":
         "coordinate-sys--spherical": cs_spherical_dump,
         "ellipsoid": ellipsoid_dump,
         "coordinate-sys-axis": cs_axis_dump,
-        # "coordinate-op-method": co_method_dump, # not ready
-        # "coordinate-op-parameter": co_parameter_dump, #23 objects id db
+        "coordinate-op-method": co_method_dump,
+        "coordinate-op-parameter": co_parameter_dump,
         "prime-meridian": prime_meridian_dump,
-        "unit-of-measurement": units_dump,
+        "unit-of-measurement": units_dump
     }
 
     parser = argparse.ArgumentParser(
