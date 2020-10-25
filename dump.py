@@ -346,14 +346,22 @@ def get_tf_params_by_tf_uuid(uuid):
                 # "id": None
             # }
 
-            param = get_op_parameter_by_uuid(_param_val["uuid"])
-            if param:
+            # param = get_op_parameter_by_uuid(_param_val["uuid"])
+            # if param:
                 # item["parameter"]["name"] = param["name"]
                 # item["parameter"]["id"] = param["id"]
-                item["name"] = param["name"]
-            else:
-                item["name"] = None
+                # item["name"] = param["name"]
+            # else:
+                # item["name"] = None
 
+            param_aliases = get_aliases(_param_val["uuid"])
+
+            if len(param_aliases) == 1:
+                alias_name = param_aliases[0]
+            else:
+                alias_name = None
+
+            item["alias"] = alias_name
             item["parameter"] = _param_val["uuid"]
             item["type"] = "measure (w/ UoM)"
             item["value"] = op_param_val.pop("value")
@@ -380,9 +388,9 @@ def get_tf_params_by_tf_uuid(uuid):
                 param_aliases = get_aliases(_param_val["uuid"])
 
                 if len(param_aliases) == 1:
-                    param_name = param_aliases[0]
+                    alias_name = param_aliases[0]
                 else:
-                    param_name = None
+                    alias_name = None
 
                 param = get_op_parameter_by_uuid(param_uuid)
 
@@ -395,7 +403,7 @@ def get_tf_params_by_tf_uuid(uuid):
                         # "id": param["id"]
                     # }
 
-                    item["name"] = param["name"]
+                    item["alias"] = alias_name
                     item["parameter"] = param_uuid
                     item["type"] = paramType.get(_param_val["type"])
                     item["value"] = _val[0]
