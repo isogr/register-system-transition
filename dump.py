@@ -55,7 +55,7 @@ def get_crs_by_uuid(uuid):
         }
 
 
-def get_citations_by_uuid(uuid):
+def get_citations_by_item(uuid):
     cur.execute(
         """
         SELECT
@@ -358,7 +358,7 @@ def get_tf_params_by_tf_uuid(uuid):
             item["type"] = "measure (w/ UoM)"
             item["value"] = op_param_val.pop("value")
             item["unitOfMeasurement"] = op_param_val["uuid"]
-            item["fileCitation"] = None  # get_citations_by_uuid(_param_val["uuid"])
+            item["fileCitation"] = get_citation(_param_val["citation_uuid"])
 
             items.append(item)
 
@@ -400,7 +400,7 @@ def get_tf_params_by_tf_uuid(uuid):
                     item["type"] = paramType.get(_param_val["type"])
                     item["value"] = _val[0]
                     item["unitOfMeasurement"] = None
-                    item["fileCitation"] = None  # get_citations_by_uuid(_param_val["citation_uuid"])
+                    item["fileCitation"] = get_citation(_param_val["citation_uuid"])
 
             items.append(item)
 
@@ -736,7 +736,6 @@ def cs_spherical_dump():
 
 
 def datums_geodetic_dump():
-
     cur.execute(
         """
         SELECT
@@ -791,7 +790,7 @@ def datums_geodetic_dump():
                 "ellipsoid": row[cols.index("ellipsoid_uuid")],
                 "primeMeridian": row[cols.index("primemeridian_uuid")],
                 "coordinateReferenceEpoch": row[cols.index("coordinatereferenceepoch")],
-                "informationSources": get_citations_by_uuid(row[cols.index("uuid")])
+                "informationSources": get_citations_by_item(row[cols.index("uuid")])
             }
         )
 
@@ -849,7 +848,7 @@ def datums_vertical_dump():
                 "originDescription": row[cols.index("origin_description")],
                 "scope": row[cols.index("datum_scope")],
                 "coordinateReferenceEpoch": row[cols.index("coordinatereferenceepoch")],
-                "informationSources": get_citations_by_uuid(row[cols.index("uuid")])
+                "informationSources": get_citations_by_item(row[cols.index("uuid")])
             }
         )
 
@@ -911,7 +910,7 @@ def ellipsoid_dump():
                 "semiMinorAxisUoM": row[cols.index("semiminoraxisuom_uuid")],
                 "inverseFlattening": row[cols.index("inverseflattening")],
                 "inverseFlatteningUoM": row[cols.index("inverseflatteninguom_uuid")],
-                "informationSources": get_citations_by_uuid(row[cols.index("uuid")])
+                "informationSources": get_citations_by_item(row[cols.index("uuid")])
             }
         )
 
@@ -967,8 +966,8 @@ def co_method_dump():
                 "parameters": get_op_params_by_method_uuid(row[cols.index("uuid")]),
                 "remarks": row[cols.index("remarks")],
                 "formula": row[cols.index("formula")],
-                "formulaCitation": get_citations_by_uuid(row[cols.index("formulacitation_uuid")]),
-                "informationSources": get_citations_by_uuid(row[cols.index("uuid")])
+                "formulaCitation": get_citation((row[cols.index("formulacitation_uuid")])),
+                "informationSources": get_citations_by_item(row[cols.index("uuid")])
             }
         )
 
@@ -1023,7 +1022,7 @@ def co_parameter_dump():
                 "definition": row[cols.index("definition")],
                 "remarks": row[cols.index("remarks")],
                 "minimumOccurs": minimum_occurs,
-                "informationSources": get_citations_by_uuid(row[cols.index("uuid")])
+                "informationSources": get_citations_by_item(row[cols.index("uuid")])
             }
         )
 
@@ -1039,7 +1038,7 @@ def prime_meridian_dump():
         date_accepted = str_to_dt(item.pop("date_accepted"))
         item["longitudeFromGreenwich"] = item.pop("longitude_from_greenwich")
         item["longitudeFromGreenwichUoM"] = item.pop("longitude_from_greenwich_uom")
-        item["informationSources"] = get_citations_by_uuid(uuid)
+        item["informationSources"] = get_citations_by_item(uuid)
 
         del item["information_source"]
 
@@ -1073,7 +1072,7 @@ def cs_axis_dump():
         del item["range_meaning"]
         del item["information_source"]
 
-        item["informationSources"] = get_citations_by_uuid(uuid)
+        item["informationSources"] = get_citations_by_item(uuid)
 
         data = {
             "id": uuid,
@@ -1101,7 +1100,7 @@ def cs_cartesian_dump():
             _coordinate_system_axes.append(elm["uuid"])
 
         item["coordinateSystemAxes"] = _coordinate_system_axes
-        item["informationSources"] = get_citations_by_uuid(uuid)
+        item["informationSources"] = get_citations_by_item(uuid)
 
         del item["information_source"]
 
@@ -1131,7 +1130,7 @@ def cs_ellipsoidal_dump():
             _coordinate_system_axes.append(elm["uuid"])
 
         item["coordinateSystemAxes"] = _coordinate_system_axes
-        item["informationSources"] = get_citations_by_uuid(uuid)
+        item["informationSources"] = get_citations_by_item(uuid)
 
         del item["information_source"]
 
@@ -1163,7 +1162,7 @@ def cs_vertical_dump():
             _coordinate_system_axes.append(elm["uuid"])
 
         item["coordinateSystemAxes"] = _coordinate_system_axes
-        item["informationSources"] = get_citations_by_uuid(uuid)
+        item["informationSources"] = get_citations_by_item(uuid)
 
         data = {
             "id": uuid,
@@ -1226,7 +1225,7 @@ def units_dump():
                 "numerator": row[cols.index("scaletostandardunitnumerator")],
                 "denominator": row[cols.index("scaletostandardunitdenominator")],
                 "standardUnit": row[cols.index("standardunit_uuid")],
-                "informationSources": get_citations_by_uuid(row[cols.index("uuid")])
+                "informationSources": get_citations_by_item(row[cols.index("uuid")])
             }
         )
     save_items(items, "unit-of-measurement")
@@ -1281,7 +1280,7 @@ def transformations_dump():
                 "coordOperationMethod": row[cols.index("method_uuid")],
                 "sourceCRS": get_crs_by_uuid(row[cols.index("sourcecrs_uuid")]),
                 "targetCRS": get_crs_by_uuid(row[cols.index("targetcrs_uuid")]),
-                "informationSources": get_citations_by_uuid(row[cols.index("uuid")])
+                "informationSources": get_citations_by_item(row[cols.index("uuid")])
             }
         )
 
@@ -1289,7 +1288,6 @@ def transformations_dump():
 
 
 def crs_geodetic_dump():
-
     cur.execute(
         """
         SELECT
@@ -1346,7 +1344,7 @@ def crs_geodetic_dump():
                     row[cols.index("coordinatesystem_uuid")]
                 ),
                 "baseCRS": row[cols.index("basecrs_uuid")],
-                "informationSources": get_citations_by_uuid(row[cols.index("uuid")])
+                "informationSources": get_citations_by_item(row[cols.index("uuid")])
             }
         )
 
@@ -1408,7 +1406,7 @@ def crs_vertical_dump():
                     row[cols.index("coordinatesystem_uuid")]
                 ),
                 "baseCRS": row[cols.index("basecrs_uuid")],
-                "informationSources": get_citations_by_uuid(row[cols.index("uuid")])
+                "informationSources": get_citations_by_item(row[cols.index("uuid")])
             }
         )
 
