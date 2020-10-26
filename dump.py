@@ -7,10 +7,20 @@ import argparse
 import json
 import glob
 
-from yaml import load, dump
+from yaml import dump
 import psycopg2
 
 import config
+
+
+def get_cols_dict():
+    i = 0
+    result = {}
+    for name in [desc[0] for desc in cur.description]:
+        result[name] = i
+        i += 1
+
+    return result
 
 
 def get_class_by_uuid(uuid):
@@ -107,16 +117,14 @@ def get_citation(uuid):
     )
 
     row = cur.fetchone()
-    cols = [desc[0] for desc in cur.description]
-
-    # items = []
+    _ = get_cols_dict()
 
     if row:
-        other_details = row[cols.index("othercitationdetails")]
+        other_details = row[_["othercitationdetails"]]
         if other_details and not other_details.strip():
             other_details = None
 
-        edition_date = row[cols.index("editiondate")]
+        edition_date = row[_["editiondate"]]
 
         # some fields has a garbage:
         if edition_date and edition_date.replace('-', '').isnumeric():
@@ -125,16 +133,16 @@ def get_citation(uuid):
             edition_date_dt = None
 
         return {
-            "uuid": row[cols.index("uuid")],
-            "title": row[cols.index("title")],
-            "edition": row[cols.index("edition")],
+            "uuid": row[_["uuid"]],
+            "title": row[_["title"]],
+            "edition": row[_["edition"]],
             "editionDate": edition_date_dt,
-            "isbn": row[cols.index("isbn")],
-            "issn": row[cols.index("issn")],
+            "isbn": row[_["isbn"]],
+            "issn": row[_["issn"]],
             "otherDetails": other_details,
-            "seriesName": row[cols.index("series_name")],
-            "seriesIssueID": row[cols.index("series_issueidentification")],
-            "seriesPage": row[cols.index("series_page")],
+            "seriesName": row[_["series_name"]],
+            "seriesIssueID": row[_["series_issueidentification"]],
+            "seriesPage": row[_["series_page"]],
         }
 
 
@@ -354,14 +362,6 @@ def get_tf_params_by_tf_uuid(uuid):
             # else:
                 # item["name"] = None
 
-            param_aliases = get_aliases(_param_val["uuid"])
-
-            if len(param_aliases) == 1:
-                alias_name = param_aliases[0]
-            else:
-                alias_name = None
-
-            item["alias"] = alias_name
             item["parameter"] = _param_val["uuid"]
             item["type"] = "measure (w/ UoM)"
             item["value"] = op_param_val.pop("value")
@@ -385,16 +385,9 @@ def get_tf_params_by_tf_uuid(uuid):
             _val = cur.fetchone()
 
             if _val and _param_val:
-                param_aliases = get_aliases(_param_val["uuid"])
 
-                if len(param_aliases) == 1:
-                    alias_name = param_aliases[0]
-                else:
-                    alias_name = None
-
-                param = get_op_parameter_by_uuid(param_uuid)
-
-                if param:
+                # param = get_op_parameter_by_uuid(param_uuid)
+                # if param:
                     # item["parameter"] = {
                         # "classID": "coordinate-op-parameter",
                         # "parameter": param_uuid,
@@ -403,12 +396,11 @@ def get_tf_params_by_tf_uuid(uuid):
                         # "id": param["id"]
                     # }
 
-                    item["alias"] = alias_name
-                    item["parameter"] = param_uuid
-                    item["type"] = paramType.get(_param_val["type"])
-                    item["value"] = _val[0]
-                    item["unitOfMeasurement"] = None
-                    item["fileCitation"] = get_citation(_param_val["citation_uuid"])
+                item["parameter"] = param_uuid
+                item["type"] = paramType.get(_param_val["type"])
+                item["value"] = _val[0]
+                item["unitOfMeasurement"] = None
+                item["fileCitation"] = get_citation(_param_val["citation_uuid"])
 
             items.append(item)
 
@@ -670,7 +662,7 @@ def get_coord_op_accuracy(uuid):
 
 def str_to_dt(date_str):
     return datetime.datetime.strptime(
-        date_str, '%Y-%m-%d'
+        date_str, "%Y-%m-%d"
     ).date()
 
 
@@ -775,30 +767,28 @@ def datums_geodetic_dump():
     """
     )
 
-    rows = cur.fetchall()
-    cols = [desc[0] for desc in cur.description]
-
     items = []
+    _ = get_cols_dict()
 
-    for row in rows:
+    for row in cur.fetchall():
         items.append(
             {
-                "uuid": row[cols.index("uuid")],
-                "dateAccepted": row[cols.index("dateaccepted")],
-                "status": row[cols.index("status")].lower(),
-                "name": row[cols.index("name")],
-                "identifier": int(row[cols.index("identifier")]),
-                "aliases": get_aliases(row[cols.index("uuid")]),
-                "extent": get_extent_by_uuid(row[cols.index("domainofvalidity_uuid")]),
-                "remarks": row[cols.index("remarks")],
-                "releaseDate": row[cols.index("realization_epoch")],
-                "definition": row[cols.index("definition")],
-                "originDescription": row[cols.index("origin_description")],
-                "scope": row[cols.index("datum_scope")],
-                "ellipsoid": row[cols.index("ellipsoid_uuid")],
-                "primeMeridian": row[cols.index("primemeridian_uuid")],
-                "coordinateReferenceEpoch": row[cols.index("coordinatereferenceepoch")],
-                "informationSources": get_citations_by_item(row[cols.index("uuid")])
+                "uuid": row[_["uuid"]],
+                "dateAccepted": row[_["dateaccepted"]],
+                "status": row[_["status"]].lower(),
+                "name": row[_["name"]],
+                "identifier": int(row[_["identifier"]]),
+                "aliases": get_aliases(row[_["uuid"]]),
+                "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
+                "remarks": row[_["remarks"]],
+                "releaseDate": row[_["realization_epoch"]],
+                "definition": row[_["definition"]],
+                "originDescription": row[_["origin_description"]],
+                "scope": row[_["datum_scope"]],
+                "ellipsoid": row[_["ellipsoid_uuid"]],
+                "primeMeridian": row[_["primemeridian_uuid"]],
+                "coordinateReferenceEpoch": row[_["coordinatereferenceepoch"]],
+                "informationSources": get_citations_by_item(row[_["uuid"]])
             }
         )
 
@@ -835,28 +825,26 @@ def datums_vertical_dump():
     """
     )
 
-    rows = cur.fetchall()
-    cols = [desc[0] for desc in cur.description]
-
     items = []
+    _ = get_cols_dict()
 
-    for row in rows:
+    for row in cur.fetchall():
         items.append(
             {
-                "uuid": row[cols.index("uuid")],
-                "dateAccepted": row[cols.index("dateaccepted")],
-                "status": row[cols.index("status")].lower(),
-                "name": row[cols.index("name")],
-                "identifier": int(row[cols.index("identifier")]),
-                "aliases": get_aliases(row[cols.index("uuid")]),
-                "extent": get_extent_by_uuid(row[cols.index("domainofvalidity_uuid")]),
-                "remarks": row[cols.index("remarks")],
-                "releaseDate": row[cols.index("realization_epoch")],
-                "definition": row[cols.index("definition")],
-                "originDescription": row[cols.index("origin_description")],
-                "scope": row[cols.index("datum_scope")],
-                "coordinateReferenceEpoch": row[cols.index("coordinatereferenceepoch")],
-                "informationSources": get_citations_by_item(row[cols.index("uuid")])
+                "uuid": row[_["uuid"]],
+                "dateAccepted": row[_["dateaccepted"]],
+                "status": row[_["status"]].lower(),
+                "name": row[_["name"]],
+                "identifier": int(row[_["identifier"]]),
+                "aliases": get_aliases(row[_["uuid"]]),
+                "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
+                "remarks": row[_["remarks"]],
+                "releaseDate": row[_["realization_epoch"]],
+                "definition": row[_["definition"]],
+                "originDescription": row[_["origin_description"]],
+                "scope": row[_["datum_scope"]],
+                "coordinateReferenceEpoch": row[_["coordinatereferenceepoch"]],
+                "informationSources": get_citations_by_item(row[_["uuid"]])
             }
         )
 
@@ -895,30 +883,28 @@ def ellipsoid_dump():
     """
     )
 
-    rows = cur.fetchall()
-    cols = [desc[0] for desc in cur.description]
-
     items = []
+    _ = get_cols_dict()
 
-    for row in rows:
+    for row in cur.fetchall():
         items.append(
             {
-                "uuid": row[cols.index("uuid")],
-                "dateAccepted": row[cols.index("dateaccepted")],
-                "status": row[cols.index("status")].lower(),
-                "name": row[cols.index("name")],
-                "identifier": int(row[cols.index("identifier")]),
-                "aliases": get_aliases(row[cols.index("uuid")]),
-                "description": row[cols.index("description")],
-                "remarks": row[cols.index("remarks")],
-                "isSphere": row[cols.index("issphere")],
-                "semiMajorAxis": row[cols.index("semimajoraxis")],
-                "semiMajorAxisUoM": row[cols.index("semimajoraxisuom_uuid")],
-                "semiMinorAxis": row[cols.index("semiminoraxis")],
-                "semiMinorAxisUoM": row[cols.index("semiminoraxisuom_uuid")],
-                "inverseFlattening": row[cols.index("inverseflattening")],
-                "inverseFlatteningUoM": row[cols.index("inverseflatteninguom_uuid")],
-                "informationSources": get_citations_by_item(row[cols.index("uuid")])
+                "uuid": row[_["uuid"]],
+                "dateAccepted": row[_["dateaccepted"]],
+                "status": row[_["status"]].lower(),
+                "name": row[_["name"]],
+                "identifier": int(row[_["identifier"]]),
+                "aliases": get_aliases(row[_["uuid"]]),
+                "description": row[_["description"]],
+                "remarks": row[_["remarks"]],
+                "isSphere": row[_["issphere"]],
+                "semiMajorAxis": row[_["semimajoraxis"]],
+                "semiMajorAxisUoM": row[_["semimajoraxisuom_uuid"]],
+                "semiMinorAxis": row[_["semiminoraxis"]],
+                "semiMinorAxisUoM": row[_["semiminoraxisuom_uuid"]],
+                "inverseFlattening": row[_["inverseflattening"]],
+                "inverseFlatteningUoM": row[_["inverseflatteninguom_uuid"]],
+                "informationSources": get_citations_by_item(row[_["uuid"]])
             }
         )
 
@@ -955,27 +941,25 @@ def co_method_dump():
     """
     )
 
-    rows = cur.fetchall()
-    cols = [desc[0] for desc in cur.description]
-
     items = []
+    _ = get_cols_dict()
 
-    for row in rows:
+    for row in cur.fetchall():
         items.append(
             {
-                "uuid": row[cols.index("uuid")],
-                "dateAccepted": row[cols.index("dateaccepted")],
-                "status": row[cols.index("status")].lower(),
-                "name": row[cols.index("name")],
-                "identifier": int(row[cols.index("identifier")]),
-                "aliases": get_aliases(row[cols.index("uuid")]),
-                "definition": row[cols.index("definition")],
-                "description": row[cols.index("description")],
-                "parameters": get_op_params_by_method_uuid(row[cols.index("uuid")]),
-                "remarks": row[cols.index("remarks")],
-                "formula": row[cols.index("formula")],
-                "formulaCitation": get_citation((row[cols.index("formulacitation_uuid")])),
-                "informationSources": get_citations_by_item(row[cols.index("uuid")])
+                "uuid": row[_["uuid"]],
+                "dateAccepted": row[_["dateaccepted"]],
+                "status": row[_["status"]].lower(),
+                "name": row[_["name"]],
+                "identifier": int(row[_["identifier"]]),
+                "aliases": get_aliases(row[_["uuid"]]),
+                "definition": row[_["definition"]],
+                "description": row[_["description"]],
+                "parameters": get_op_params_by_method_uuid(row[_["uuid"]]),
+                "remarks": row[_["remarks"]],
+                "formula": row[_["formula"]],
+                "formulaCitation": get_citation((row[_["formulacitation_uuid"]])),
+                "informationSources": get_citations_by_item(row[_["uuid"]])
             }
         )
 
@@ -1008,29 +992,27 @@ def co_parameter_dump():
     """
     )
 
-    rows = cur.fetchall()
-    cols = [desc[0] for desc in cur.description]
-
     items = []
+    _ = get_cols_dict()
 
-    for row in rows:
-        if row[cols.index("minimumoccurs")]:
-            minimum_occurs = int(row[cols.index("minimumoccurs")])
+    for row in cur.fetchall():
+        if row[_["minimumoccurs"]]:
+            minimum_occurs = int(row[_["minimumoccurs"]])
         else:
             minimum_occurs = None
 
         items.append(
             {
-                "uuid": row[cols.index("uuid")],
-                "dateAccepted": row[cols.index("dateaccepted")],
-                "status": row[cols.index("status")].lower(),
-                "name": row[cols.index("name")],
-                "identifier": int(row[cols.index("identifier")]),
-                "aliases": get_aliases(row[cols.index("uuid")]),
-                "definition": row[cols.index("definition")],
-                "remarks": row[cols.index("remarks")],
+                "uuid": row[_["uuid"]],
+                "dateAccepted": row[_["dateaccepted"]],
+                "status": row[_["status"]].lower(),
+                "name": row[_["name"]],
+                "identifier": int(row[_["identifier"]]),
+                "aliases": get_aliases(row[_["uuid"]]),
+                "definition": row[_["definition"]],
+                "remarks": row[_["remarks"]],
                 "minimumOccurs": minimum_occurs,
-                "informationSources": get_citations_by_item(row[cols.index("uuid")])
+                "informationSources": get_citations_by_item(row[_["uuid"]])
             }
         )
 
@@ -1058,38 +1040,6 @@ def prime_meridian_dump():
         }
 
         save_yaml(uuid, "prime-meridian", data)
-
-
-def cs_axis_dump():
-    data = read_json_dir("axes")
-
-    for item in data:
-        uuid = item.pop("uuid")
-        status = item.pop("status")
-        date_accepted = str_to_dt(item.pop("date_accepted"))
-
-        item["abbreviation"] = item.pop("axis_abbreviation")
-
-        item["direction"] = item.pop("axis_direction")
-
-        item["unit"] = item["axis_unit"]["uuid"]
-        del item["axis_unit"]
-
-        del item["minimum_value"]
-        del item["maximum_value"]
-        del item["range_meaning"]
-        del item["information_source"]
-
-        item["informationSources"] = get_citations_by_item(uuid)
-
-        data = {
-            "id": uuid,
-            "dateAccepted": date_accepted,
-            "status": status,
-            "data": item
-        }
-
-        save_yaml(uuid, "coordinate-sys-axis", data)
 
 
 def cs_cartesian_dump():
@@ -1182,6 +1132,66 @@ def cs_vertical_dump():
         save_yaml(uuid, "coordinate-sys--vertical", data)
 
 
+def cs_axis_dump():
+    cur.execute(
+        """
+        SELECT
+            uuid,
+            dateaccepted,
+            dateamended,
+            definition,
+            description,
+            itemidentifier,
+            name,
+            status,
+            itemclass_uuid,
+            register_uuid,
+            specificationlineage_uuid,
+            specificationsource_uuid,
+            data_source,
+            identifier,
+            information_source,
+            remarks,
+            coord_axis_abbreviation,
+            coord_axis_orientation,
+            coord_axis_orientation_codespace,
+            maximumvalue,
+            minimumvalue,
+            rangemeaning,
+            axisunit_uuid
+        FROM
+            axis
+    """
+    )
+
+    items = []
+    _ = get_cols_dict()
+
+    for row in cur.fetchall():
+        # min_value = str(psycopg2.Binary(row[_["minimumvalue"]]))
+        # max_value = str(psycopg2.Binary(row[_["maximumvalue"]]))
+        max_value = None
+        min_value = None
+
+        items.append(
+            {
+                "uuid": row[_["uuid"]],
+                "dateAccepted": row[_["dateaccepted"]],
+                "status": row[_["status"]].lower(),
+                "name": row[_["name"]],
+                "identifier": int(row[_["identifier"]]),
+                "abbreviation": row[_["coord_axis_abbreviation"]],
+                "orientation": row[_["coord_axis_orientation"]],
+                "unitOfMeasurement": row[_["axisunit_uuid"]],
+                "minValue": min_value,
+                "maxValue": max_value,
+                "informationSources": get_citations_by_item(row[_["uuid"]])
+            }
+        )
+
+    save_items(items, "coordinate-sys-axis")
+
+
 def units_dump():
     cur.execute(
         """
@@ -1213,27 +1223,25 @@ def units_dump():
     """
     )
 
-    rows = cur.fetchall()
-    cols = [desc[0] for desc in cur.description]
-
     items = []
+    _ = get_cols_dict()
 
-    for row in rows:
+    for row in cur.fetchall():
         items.append(
             {
-                "uuid": row[cols.index("uuid")],
-                "dateAccepted": row[cols.index("dateaccepted")],
-                "status": row[cols.index("status")].lower(),
-                "name": row[cols.index("name")],
-                "identifier": int(row[cols.index("identifier")]),
-                "aliases": get_aliases(row[cols.index("uuid")]),
-                "remarks": row[cols.index("remarks")],
-                "measureType": row[cols.index("measuretype")],
-                "symbol": row[cols.index("symbol")],
-                "numerator": row[cols.index("scaletostandardunitnumerator")],
-                "denominator": row[cols.index("scaletostandardunitdenominator")],
-                "standardUnit": row[cols.index("standardunit_uuid")],
-                "informationSources": get_citations_by_item(row[cols.index("uuid")])
+                "uuid": row[_["uuid"]],
+                "dateAccepted": row[_["dateaccepted"]],
+                "status": row[_["status"]].lower(),
+                "name": row[_["name"]],
+                "identifier": int(row[_["identifier"]]),
+                "aliases": get_aliases(row[_["uuid"]]),
+                "remarks": row[_["remarks"]],
+                "measureType": row[_["measuretype"]],
+                "symbol": row[_["symbol"]],
+                "numerator": row[_["scaletostandardunitnumerator"]],
+                "denominator": row[_["scaletostandardunitdenominator"]],
+                "standardUnit": row[_["standardunit_uuid"]],
+                "informationSources": get_citations_by_item(row[_["uuid"]])
             }
         )
     save_items(items, "unit-of-measurement")
@@ -1265,30 +1273,28 @@ def transformations_dump():
     """
     )
 
-    rows = cur.fetchall()
-    cols = [desc[0] for desc in cur.description]
-
     items = []
+    _ = get_cols_dict()
 
-    for row in rows:
+    for row in cur.fetchall():
         items.append(
             {
-                "uuid": row[cols.index("uuid")],
-                "dateAccepted": row[cols.index("dateaccepted")],
-                "status": row[cols.index("status")].lower(),
-                "name": row[cols.index("name")],
-                "identifier": int(row[cols.index("identifier")]),
-                "description": row[cols.index("description")],
-                "remarks": row[cols.index("remarks")],
-                "operationVersion": row[cols.index("operationversion")],
-                "extent": get_extent_by_uuid(row[cols.index("domainofvalidity_uuid")]),
-                "scope": get_coord_op_scope(row[cols.index("uuid")]),
-                "accuracy": get_coord_op_accuracy(row[cols.index("uuid")]),
-                "parameters": get_tf_params_by_tf_uuid(row[cols.index("uuid")]),
-                "coordOperationMethod": row[cols.index("method_uuid")],
-                "sourceCRS": get_crs_by_uuid(row[cols.index("sourcecrs_uuid")]),
-                "targetCRS": get_crs_by_uuid(row[cols.index("targetcrs_uuid")]),
-                "informationSources": get_citations_by_item(row[cols.index("uuid")])
+                "uuid": row[_["uuid"]],
+                "dateAccepted": row[_["dateaccepted"]],
+                "status": row[_["status"]].lower(),
+                "name": row[_["name"]],
+                "identifier": int(row[_["identifier"]]),
+                "description": row[_["description"]],
+                "remarks": row[_["remarks"]],
+                "operationVersion": row[_["operationversion"]],
+                "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
+                "scope": get_coord_op_scope(row[_["uuid"]]),
+                "accuracy": get_coord_op_accuracy(row[_["uuid"]]),
+                "parameters": get_tf_params_by_tf_uuid(row[_["uuid"]]),
+                "coordOperationMethod": row[_["method_uuid"]],
+                "sourceCRS": get_crs_by_uuid(row[_["sourcecrs_uuid"]]),
+                "targetCRS": get_crs_by_uuid(row[_["targetcrs_uuid"]]),
+                "informationSources": get_citations_by_item(row[_["uuid"]])
             }
         )
 
@@ -1326,33 +1332,29 @@ def crs_geodetic_dump():
     """
     )
 
-    rows = cur.fetchall()
-    cols = [desc[0] for desc in cur.description]
-
     items = []
+    _ = get_cols_dict()
 
-    for row in rows:
-        # geo_datum = get_geo_datum_by_uuid(row[cols.index("datum_uuid")])
-
+    for row in cur.fetchall():
         items.append(
             {
-                "uuid": row[cols.index("uuid")],
-                "dateAccepted": row[cols.index("dateaccepted")],
-                "status": row[cols.index("status")].lower(),
-                "name": row[cols.index("name")],
-                "identifier": int(row[cols.index("identifier")]),
-                "scope": row[cols.index("crs_scope")],
-                "aliases": get_aliases(row[cols.index("uuid")]),
-                "remarks": row[cols.index("remarks")],
-                "description": row[cols.index("description")],
-                "extent": get_extent_by_uuid(row[cols.index("domainofvalidity_uuid")]),
-                "operation": row[cols.index("operation_uuid")],
-                "datum": row[cols.index("datum_uuid")],
+                "uuid": row[_["uuid"]],
+                "dateAccepted": row[_["dateaccepted"]],
+                "status": row[_["status"]].lower(),
+                "name": row[_["name"]],
+                "identifier": int(row[_["identifier"]]),
+                "scope": row[_["crs_scope"]],
+                "aliases": get_aliases(row[_["uuid"]]),
+                "remarks": row[_["remarks"]],
+                "description": row[_["description"]],
+                "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
+                "operation": row[_["operation_uuid"]],
+                "datum": row[_["datum_uuid"]],
                 "coordinateSystem": get_coord_sys_by_uuid(
-                    row[cols.index("coordinatesystem_uuid")]
+                    row[_["coordinatesystem_uuid"]]
                 ),
-                "baseCRS": row[cols.index("basecrs_uuid")],
-                "informationSources": get_citations_by_item(row[cols.index("uuid")])
+                "baseCRS": row[_["basecrs_uuid"]],
+                "informationSources": get_citations_by_item(row[_["uuid"]])
             }
         )
 
@@ -1390,31 +1392,29 @@ def crs_vertical_dump():
     """
     )
 
-    rows = cur.fetchall()
-    cols = [desc[0] for desc in cur.description]
-
     items = []
+    _ = get_cols_dict()
 
-    for row in rows:
+    for row in cur.fetchall():
         items.append(
             {
-                "uuid": row[cols.index("uuid")],
-                "dateAccepted": row[cols.index("dateaccepted")],
-                "status": row[cols.index("status")].lower(),
-                "name": row[cols.index("name")],
-                "identifier": int(row[cols.index("identifier")]),
-                "scope": row[cols.index("crs_scope")],
-                "aliases": get_aliases(row[cols.index("uuid")]),
-                "remarks": row[cols.index("remarks")],
-                "description": row[cols.index("description")],
-                "extent": get_extent_by_uuid(row[cols.index("domainofvalidity_uuid")]),
-                "operation": row[cols.index("operation_uuid")],
-                "datum": row[cols.index("datum_uuid")],
+                "uuid": row[_["uuid"]],
+                "dateAccepted": row[_["dateaccepted"]],
+                "status": row[_["status"]].lower(),
+                "name": row[_["name"]],
+                "identifier": int(row[_["identifier"]]),
+                "scope": row[_["crs_scope"]],
+                "aliases": get_aliases(row[_["uuid"]]),
+                "remarks": row[_["remarks"]],
+                "description": row[_["description"]],
+                "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
+                "operation": row[_["operation_uuid"]],
+                "datum": row[_["datum_uuid"]],
                 "coordinateSystem": get_coord_sys_by_uuid(
-                    row[cols.index("coordinatesystem_uuid")]
+                    row[_["coordinatesystem_uuid"]]
                 ),
-                "baseCRS": row[cols.index("basecrs_uuid")],
-                "informationSources": get_citations_by_item(row[cols.index("uuid")])
+                "baseCRS": row[_["basecrs_uuid"]],
+                "informationSources": get_citations_by_item(row[_["uuid"]])
             }
         )
 
@@ -1522,17 +1522,17 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    if ' ' in args.objects[0][0]:
-        arg_objects = args.objects[0][0].split(' ')
+    if " " in args.objects[0][0]:
+        arg_objects = args.objects[0][0].split(" ")
     else:
         arg_objects = [args.objects[0][0]]
 
     for obj in arg_objects:
         if objects_dumpers.get(obj, None):
-            print('Dumping %s' % obj.replace('_dump', ''))
+            print("Dumping %s" % obj.replace("_dump", ""))
             objects_dumpers[obj]()
         else:
             if obj:
-                print('Unknown object type: %s' % obj)
+                print("Unknown object type: %s" % obj)
             else:
-                print('Not specified object(s) to dump.')
+                print("Not specified object(s) to dump.")
