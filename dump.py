@@ -1179,6 +1179,7 @@ def cs_axis_dump():
                 "dateAccepted": row[_["dateaccepted"]],
                 "status": row[_["status"]].lower(),
                 "name": row[_["name"]],
+                "remarks": row[_["remarks"]],
                 "identifier": int(row[_["identifier"]]),
                 "abbreviation": row[_["coord_axis_abbreviation"]],
                 "orientation": row[_["coord_axis_orientation"]],
