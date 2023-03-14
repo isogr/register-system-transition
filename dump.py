@@ -128,9 +128,13 @@ def get_citation(uuid):
 
         # some fields has a garbage:
         if edition_date and edition_date.replace('-', '').isnumeric():
+            # year only:
+            if len(edition_date) == 4:
+                edition_date = "%s-01-01" % edition_date
             edition_date_dt = str_to_dt(edition_date)
         else:
             edition_date_dt = None
+
 
         return {
             "uuid": row[_["uuid"]],
@@ -735,9 +739,8 @@ def cs_spherical_dump():
     print("Not Implemented")
 
 
-def datums_geodetic_dump():
-    cur.execute(
-        """
+def datums_geodetic_dump(uuid=None):
+    query = """
         SELECT
             uuid,
             dateaccepted,
@@ -765,10 +768,15 @@ def datums_geodetic_dump():
         FROM
             geodeticdatum
     """
-    )
+
+    if uuid:
+        query += " WHERE uuid = '%s'" % uuid
+
+    cur.execute(query)
+
+    _ = get_cols_dict()
 
     items = []
-    _ = get_cols_dict()
 
     for row in cur.fetchall():
         items.append(
@@ -792,12 +800,17 @@ def datums_geodetic_dump():
             }
         )
 
-    save_items(items, "datums--geodetic")
+    if uuid:
+        if items:
+            return items[0]
+        else:
+            return None
+    else:
+        save_items(items, "datums--geodetic")
 
 
-def datums_vertical_dump():
-    cur.execute(
-        """
+def datums_vertical_dump(uuid=None):
+    query = """
         SELECT
             uuid,
             dateaccepted,
@@ -823,10 +836,14 @@ def datums_vertical_dump():
         FROM
             verticaldatum
     """
-    )
+
+    if uuid:
+        query += " WHERE uuid = '%s'" % uuid
+
+    cur.execute(query)
+    _ = get_cols_dict()
 
     items = []
-    _ = get_cols_dict()
 
     for row in cur.fetchall():
         items.append(
@@ -848,12 +865,17 @@ def datums_vertical_dump():
             }
         )
 
-    save_items(items, "datums--vertical")
+    if uuid:
+        if items:
+            return items[0]
+        else:
+            return None
+    else:
+        save_items(items, "datums--vertical")
 
 
-def ellipsoid_dump():
-    cur.execute(
-        """
+def ellipsoid_dump(uuid=None):
+    query = """
         SELECT
             uuid,
             dateaccepted,
@@ -881,10 +903,14 @@ def ellipsoid_dump():
         FROM
             ellipsoid
     """
-    )
+
+    if uuid:
+        query += " WHERE uuid = '%s'" % uuid
+
+    cur.execute(query)
+    _ = get_cols_dict()
 
     items = []
-    _ = get_cols_dict()
 
     for row in cur.fetchall():
         items.append(
@@ -908,12 +934,17 @@ def ellipsoid_dump():
             }
         )
 
-    save_items(items, "ellipsoid")
+    if uuid:
+        if items:
+            return items[0]
+        else:
+            return None
+    else:
+        save_items(items, "ellipsoid")
 
 
-def co_method_dump():
-    cur.execute(
-        """
+def co_method_dump(uuid=None):
+    query = """
         SELECT
             uuid,
             dateaccepted,
@@ -939,10 +970,14 @@ def co_method_dump():
         FROM
             operationmethoditem
     """
-    )
+
+    if uuid:
+        query += " WHERE uuid = '%s'" % uuid
+
+    cur.execute(query)
+    _ = get_cols_dict()
 
     items = []
-    _ = get_cols_dict()
 
     for row in cur.fetchall():
         items.append(
@@ -963,12 +998,17 @@ def co_method_dump():
             }
         )
 
-    save_items(items, "coordinate-op-method")
+    if uuid:
+        if items:
+            return items[0]
+        else:
+            return None
+    else:
+        save_items(items, "coordinate-op-method")
 
 
-def co_parameter_dump():
-    cur.execute(
-        """
+def co_parameter_dump(uuid=None):
+    query = """
         SELECT
             uuid,
             dateaccepted,
@@ -990,10 +1030,14 @@ def co_parameter_dump():
         FROM
             operationparameteritem
     """
-    )
+
+    if uuid:
+        query += " WHERE uuid = '%s'" % uuid
+
+    cur.execute(query)
+    _ = get_cols_dict()
 
     items = []
-    _ = get_cols_dict()
 
     for row in cur.fetchall():
         if row[_["minimumoccurs"]]:
@@ -1016,7 +1060,13 @@ def co_parameter_dump():
             }
         )
 
-    save_items(items, "coordinate-op-parameter")
+    if uuid:
+        if items:
+            return items[0]
+        else:
+            return None
+    else:
+        save_items(items, "coordinate-op-parameter")
 
 
 def prime_meridian_dump():
@@ -1132,9 +1182,8 @@ def cs_vertical_dump():
         save_yaml(uuid, "coordinate-sys--vertical", data)
 
 
-def cs_axis_dump():
-    cur.execute(
-        """
+def cs_axis_dump(uuid=None):
+    query = """
         SELECT
             uuid,
             dateaccepted,
@@ -1162,10 +1211,14 @@ def cs_axis_dump():
         FROM
             axis
     """
-    )
+
+    if uuid:
+        query += " WHERE uuid = '%s'" % uuid
+
+    cur.execute(query)
+    _ = get_cols_dict()
 
     items = []
-    _ = get_cols_dict()
 
     for row in cur.fetchall():
         # min_value = str(psycopg2.Binary(row[_["minimumvalue"]]))
@@ -1190,12 +1243,17 @@ def cs_axis_dump():
             }
         )
 
-    save_items(items, "coordinate-sys-axis")
+    if uuid:
+        if items:
+            return items[0]
+        else:
+            return None
+    else:
+        save_items(items, "coordinate-sys-axis")
 
 
-def units_dump():
-    cur.execute(
-        """
+def units_dump(uuid=None):
+    query = """
         SELECT
             uuid,
             dateaccepted,
@@ -1222,10 +1280,14 @@ def units_dump():
         FROM
             unitofmeasure
     """
-    )
+
+    if uuid:
+        query += " WHERE uuid = '%s'" % uuid
+
+    cur.execute(query)
+    _ = get_cols_dict()
 
     items = []
-    _ = get_cols_dict()
 
     for row in cur.fetchall():
         items.append(
@@ -1245,12 +1307,19 @@ def units_dump():
                 "informationSources": get_citations_by_item(row[_["uuid"]])
             }
         )
-    save_items(items, "unit-of-measurement")
+
+    if uuid:
+        if items:
+            return items[0]
+        else:
+            return None
+    else:
+        save_items(items, "unit-of-measurement")
 
 
-def transformations_dump():
-    cur.execute(
-        """
+def transformations_dump(uuid=None):
+    query = """
+
         SELECT
             uuid,
             dateaccepted,
@@ -1272,10 +1341,14 @@ def transformations_dump():
         FROM
             transformationitem
     """
-    )
+
+    if uuid:
+        query += " WHERE uuid = '%s'" % uuid
+
+    cur.execute(query)
+    _ = get_cols_dict()
 
     items = []
-    _ = get_cols_dict()
 
     for row in cur.fetchall():
         items.append(
@@ -1299,12 +1372,17 @@ def transformations_dump():
             }
         )
 
-    save_items(items, "coordinate-ops--transformation")
+    if uuid:
+        if items:
+            return items[0]
+        else:
+            return None
+    else:
+        save_items(items, "coordinate-ops--transformation")
 
 
-def crs_geodetic_dump():
-    cur.execute(
-        """
+def crs_geodetic_dump(uuid=None):
+    query = """
         SELECT
             uuid,
             dateaccepted,
@@ -1331,10 +1409,14 @@ def crs_geodetic_dump():
         FROM
             geodeticcrs
     """
-    )
+
+    if uuid:
+        query += " WHERE uuid = '%s'" % uuid
+
+    cur.execute(query)
+    _ = get_cols_dict()
 
     items = []
-    _ = get_cols_dict()
 
     for row in cur.fetchall():
         items.append(
@@ -1359,12 +1441,17 @@ def crs_geodetic_dump():
             }
         )
 
-    save_items(items, "crs--geodetic")
+    if uuid:
+        if items:
+            return items[0]
+        else:
+            return None
+    else:
+        save_items(items, "crs--geodetic")
 
 
-def crs_vertical_dump():
-    cur.execute(
-        """
+def crs_vertical_dump(uuid=None):
+    query = """
         SELECT
             uuid,
             dateaccepted,
@@ -1391,10 +1478,14 @@ def crs_vertical_dump():
         FROM
             verticalcrs
     """
-    )
+
+    if uuid:
+        query += " WHERE uuid = '%s'" % uuid
+
+    cur.execute(query)
+    _ = get_cols_dict()
 
     items = []
-    _ = get_cols_dict()
 
     for row in cur.fetchall():
         items.append(
@@ -1419,7 +1510,273 @@ def crs_vertical_dump():
             }
         )
 
-    save_items(items, "crs--vertical")
+    if uuid:
+        if items:
+            return items[0]
+        else:
+            return None
+    else:
+        save_items(items, "crs--vertical")
+
+
+def proposals_dump():
+    cur.execute(
+        """
+        SELECT
+            uuid,
+            parent_uuid,
+            sponsor_uuid,
+            title,
+            datesubmitted,
+            isconcluded,
+            status
+        FROM
+            proposal
+    """
+    )
+
+    items = []
+    _ = get_cols_dict()
+
+    for row in cur.fetchall():
+        sp = get_simple_proposal(row[_["uuid"]])
+        skip_classes = [
+            'coordinate-sys--ellipsoidal', 
+            'coordinate-sys--vertical', 
+            'coordinate-ops--conversion', 
+            'prime-meridian',
+            'coordinate-sys--cartesian',
+            'crs--projected'
+        ]
+
+        if sp:
+            item_class = name_classes[sp[0]['itemclassname']]
+            item_uuid = sp[0]['management_information']['item_uuid']
+
+            if not item_class in skip_classes:
+                item = objects_dumpers[item_class](item_uuid)
+                items.append(
+                    {
+                        "target_item": item,
+                        "target_item_class": item_class,
+
+                        "uuid": row[_["uuid"]],
+                        "title": row[_["title"]],
+                        "dateSubmitted": row[_["datesubmitted"]],
+                        "isConcluded": row[_["isconcluded"]],
+                        "status": row[_["status"]],
+                        "simple_proposal": get_simple_proposal(row[_["uuid"]]),
+                        "notes": get_proposals_notes(row[_["uuid"]]),
+                    }
+                )
+            else:
+                print('Skipping %s item: %s' % (sp[0]['itemclassname'], item_uuid))
+
+    for item in items:
+        uuid = item.pop("uuid")
+        date_submitted = item.pop("dateSubmitted")
+        status = item.pop("status")
+        target_item = item.pop("target_item")
+        target_item_class = item.pop("target_item_class")
+
+        data = {
+            "id": uuid,
+            "dateSubmitted": date_submitted,
+            "status": status,
+            "data": item,
+        }
+
+        save_yaml("main", "proposals/%s" % uuid, data)
+        save_yaml(target_item['uuid'], "proposals/%s/%s" % (uuid, target_item_class), target_item)
+
+
+def get_proposals_notes(uuid):
+    cur.execute(
+        """
+        SELECT
+            uuid,
+            note,
+            author_uuid
+        FROM
+            proposalnote
+        WHERE
+            proposal_uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    items = []
+    _ = get_cols_dict()
+
+    for row in cur.fetchall():
+        items.append(
+            {
+                "uuid": row[_["uuid"]],
+                "note": row[_["note"]],
+                "author_uuid": row[_["author_uuid"]]
+            }
+        )
+
+    return items
+
+
+def get_proposals_management(uuid):
+    cur.execute(
+        """
+        SELECT
+            uuid,
+            controlbodydecisionevent,
+            controlbodynotes,
+            datedisposed,
+            dateproposed,
+            disposition,
+            justification,
+            registermanagernotes,
+            status,
+            item_uuid,
+            sponsor_uuid
+        FROM
+            re_proposalmanagementinformation
+        WHERE
+            uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    items = []
+    _ = get_cols_dict()
+
+    for row in cur.fetchall():
+        items.append(
+            {
+                "uuid": row[_["uuid"]],
+                "controlbody_decision_event": row[_["controlbodydecisionevent"]],
+                "controlbody_notes": row[_["controlbodynotes"]],
+                "datedisposed": row[_["datedisposed"]],
+                "dateproposed": row[_["dateproposed"]],
+                "disposition": row[_["disposition"]],
+                "justification": row[_["justification"]],
+                "register_manager_notes": row[_["registermanagernotes"]],
+                "status": row[_["status"]],
+                "item_uuid": row[_["item_uuid"]],
+                "sponsor_uuid": row[_["sponsor_uuid"]]
+            }
+        )
+
+    return items
+
+
+def get_proposals_organization(uuid):
+    cur.execute(
+        """
+        SELECT
+            uuid,
+            name,
+            sponsor_uuid
+
+        FROM
+            re_submittingorganization
+        WHERE
+            uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    items = []
+    _ = get_cols_dict()
+
+    for row in cur.fetchall():
+        items.append(
+            {
+                "uuid": row[_["uuid"]],
+                "name": row[_["name"]],
+                "sponsor_uuid": row[_["sponsor_uuid"]]
+            }
+        )
+
+    return items
+
+
+def get_responsible_party(uuid):
+    cur.execute(
+        """
+        SELECT
+            uuid,
+            individualname,
+            organisationname,
+            positionname,
+            codespace,
+            role,
+            contactinfo_uuid,
+            role_codelist,
+            role_codelistvalue,
+            role_qname
+
+        FROM
+            ci_responsibleparty
+        WHERE
+            contactinfo_uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    items = []
+    _ = get_cols_dict()
+
+    for row in cur.fetchall():
+        items.append(
+            {
+                "uuid": row[_["uuid"]],
+                "individual_name": row[_["individualname"]],
+                "organisation_name": row[_["organisationname"]],
+                "position_name": row[_["positionname"]],
+                "codespace": row[_["codespace"]],
+                "role": row[_["role"]],
+                "contactinfo_uuid": row[_["contactinfo_uuid"]],
+                "role_codelist": row[_["role_codelist"]],
+                "role_codelistvalue": row[_["role_codelistvalue"]],
+                "role_qname": row[_["role_qname"]]
+            }
+        )
+
+    return items
+
+
+def get_simple_proposal(uuid):
+    cur.execute(
+        """
+        SELECT
+            uuid,
+            proposalmanagementinformation_uuid,
+            itemclassname,
+            targetregister_uuid
+        FROM
+            simpleproposal
+        WHERE
+            uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    items = []
+    _ = get_cols_dict()
+
+    for row in cur.fetchall():
+        mg_data = get_proposals_management(row[_["proposalmanagementinformation_uuid"]])
+        if mg_data:
+            mg_data = mg_data[0]
+        else:
+            mg_data = []
+        items.append(
+            {
+                "uuid": row[_["uuid"]],
+                "management_information": mg_data,
+                "itemclassname": row[_["itemclassname"]],
+                "targetregister_uuid": row[_["targetregister_uuid"]]
+            }
+        )
+
+    return items
 
 
 if __name__ == "__main__":
@@ -1506,7 +1863,8 @@ if __name__ == "__main__":
         "coordinate-op-method": co_method_dump,
         "coordinate-op-parameter": co_parameter_dump,
         "prime-meridian": prime_meridian_dump,
-        "unit-of-measurement": units_dump
+        "unit-of-measurement": units_dump,
+        "proposals": proposals_dump
     }
 
     parser = argparse.ArgumentParser(
