@@ -1553,19 +1553,39 @@ def proposals_dump():
             item_class = name_classes[sp[0]['itemclassname']]
             item_uuid = sp[0]['management_information']['item_uuid']
 
+
             if not item_class in skip_classes:
                 item = objects_dumpers[item_class](item_uuid)
+
+                responsible_parties = transform_responsible_parties(sp[0]['management_information']['responsible_party'])
+                role = responsible_parties.pop('role')
                 items.append(
                     {
                         "target_item": item,
                         "target_item_class": item_class,
+                        "target_item_disposition": sp[0]['management_information']['disposition'],
 
-                        "uuid": row[_["uuid"]],
+                        "controlBodyDecisionEvent": sp[0]['management_information']['controlbody_decision_event'],
+                        "controlBodyNotes": sp[0]['management_information']['controlbody_notes'],
+                        "justification": sp[0]['management_information']['justification'],
+                        "sponsor": {
+                            "gitServerUsername": "",
+                            "name": "",
+                            "role": role,
+                            "parties": [responsible_parties]
+                        },
+
+                        "timeProposed": sp[0]['management_information']['datedisposed'],
+                        "timeDisposed": sp[0]['management_information']['dateproposed'],
+                        "timeEdited": "",
+
+                        "items": [],
+
+                        "id": row[_["uuid"]],
                         "title": row[_["title"]],
-                        "dateSubmitted": row[_["datesubmitted"]],
                         "isConcluded": row[_["isconcluded"]],
-                        "status": row[_["status"]],
-                        "simple_proposal": get_simple_proposal(row[_["uuid"]]),
+                        "status": row[_["status"]].lower(),
+                        #"simple_proposal": get_simple_proposal(row[_["uuid"]]),
                         "notes": get_proposals_notes(row[_["uuid"]]),
                     }
                 )
@@ -1573,21 +1593,50 @@ def proposals_dump():
                 print('Skipping %s item: %s' % (sp[0]['itemclassname'], item_uuid))
 
     for item in items:
-        uuid = item.pop("uuid")
-        date_submitted = item.pop("dateSubmitted")
+        uuid = item.get("id")
+        #date_submitted = item.pop("dateSubmitted")
         status = item.pop("status")
         target_item = item.pop("target_item")
         target_item_class = item.pop("target_item_class")
+        target_item_disposition = item.pop("target_item_disposition")
+        if target_item_disposition:
+            target_item_disposition = target_item_disposition.lower()
 
-        data = {
-            "id": uuid,
-            "dateSubmitted": date_submitted,
-            "status": status,
-            "data": item,
-        }
+        item_filename = "/%s/%s.yaml" % (target_item_class, uuid)
+        item['items'].append({
+            item_filename: {
+                "disposition": target_item_disposition,
+                "type": ""
+            }
+        })
 
+        data = item
         save_yaml("main", "proposals/%s" % uuid, data)
         save_yaml(target_item['uuid'], "proposals/%s/%s" % (uuid, target_item_class), target_item)
+
+
+def transform_responsible_parties(data):
+    output = {
+        "contacts": []
+    }
+
+    role = '' 
+    for item in data:
+        name = item.get('name')
+
+        output['contacts'].append({"name": name})
+
+        for party in item['parties']:
+            role = item.get('role')
+            output['contacts'].append({
+                "label": "name",
+                "value": party.get('individual_name')
+            })
+
+
+    output['role'] = role
+    return output
+
 
 
 def get_proposals_notes(uuid):
@@ -1659,7 +1708,8 @@ def get_proposals_management(uuid):
                 "register_manager_notes": row[_["registermanagernotes"]],
                 "status": row[_["status"]],
                 "item_uuid": row[_["item_uuid"]],
-                "sponsor_uuid": row[_["sponsor_uuid"]]
+                "sponsor_uuid": row[_["sponsor_uuid"]],
+                "responsible_party": get_proposals_organization(row[_["sponsor_uuid"]])
             }
         )
 
@@ -1672,7 +1722,7 @@ def get_proposals_organization(uuid):
         SELECT
             uuid,
             name,
-            sponsor_uuid
+            contact_uuid
 
         FROM
             re_submittingorganization
@@ -1690,7 +1740,8 @@ def get_proposals_organization(uuid):
             {
                 "uuid": row[_["uuid"]],
                 "name": row[_["name"]],
-                "sponsor_uuid": row[_["sponsor_uuid"]]
+                "contact_uuid": row[_["contact_uuid"]],
+                "parties": get_responsible_party(row[_["contact_uuid"]])
             }
         )
 
@@ -1715,7 +1766,7 @@ def get_responsible_party(uuid):
         FROM
             ci_responsibleparty
         WHERE
-            contactinfo_uuid = %(uuid)s
+            uuid = %(uuid)s
     """,
         {"uuid": uuid},
     )
