@@ -3,15 +3,25 @@
 # May be necessary on some linux distros:
 # sudo apt-get update -y
 # sudo apt-get install -y python3-psycopg2
+# sudo apt-get install -y python3-venv
 
-project_dir=`pwd`
+read -p "Do you wish to create venv, install requirements and configs files? " -n 1 -r
 
-python3 -m venv ${project_dir}/venv
+echo ""
 
-source ${project_dir}/venv/bin/activate
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    project_dir=`pwd`
 
-pip3 install --upgrade pip
-pip3 install -r ${project_dir}/requirements.txt
+    python3 -m venv "${project_dir}/venv"
 
-cp ${project_dir}/config.py.sample ${project_dir}/config.py
-cp ${project_dir}/run.conf.sample ${project_dir}/run.conf
+    source "${project_dir}/venv/bin/activate"
+
+    pip3 install --upgrade pip
+    pip3 install -r "${project_dir}/requirements.txt"
+
+    cp "${project_dir}/config.py.sample" "${project_dir}/config.py"
+    cp "${project_dir}/run.conf.sample" "${project_dir}/run.conf"
+else
+    echo "Canceled"
+fi
