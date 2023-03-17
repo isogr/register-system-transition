@@ -712,31 +712,31 @@ def save_items(items, class_id):
 
 
 def crs_compound_dump():
-    print("Not Implemented")
+    print("Not Implemented\n")
 
 
 def crs_projected_dump():
-    print("Not Implemented")
+    print("Not Implemented\n")
 
 
 def crs_engineering_dump():
-    print("Not Implemented")
+    print("Not Implemented\n")
 
 
 def concat_operations_dump():
-    print("Not Implemented")
+    print("Not Implemented\n")
 
 
 def datums_engineering_dump():
-    print("Not Implemented")
+    print("Not Implemented\n")
 
 
 def concat_conversion_dump():
-    print("Not Implemented")
+    print("Not Implemented\n")
 
 
 def cs_spherical_dump():
-    print("Not Implemented")
+    print("Not Implemented\n")
 
 
 def datums_geodetic_dump(uuid=None):
@@ -1553,7 +1553,6 @@ def proposals_dump():
             item_class = name_classes[sp[0]['itemclassname']]
             item_uuid = sp[0]['management_information']['item_uuid']
 
-
             if not item_class in skip_classes:
                 item = objects_dumpers[item_class](item_uuid)
 
@@ -1633,10 +1632,8 @@ def transform_responsible_parties(data):
                 "value": party.get('individual_name')
             })
 
-
     output['role'] = role
     return output
-
 
 
 def get_proposals_notes(uuid):
