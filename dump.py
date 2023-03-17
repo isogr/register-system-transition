@@ -732,7 +732,63 @@ def datums_engineering_dump():
 
 
 def concat_conversion_dump():
-    print("Not Implemented")
+    query = """
+            SELECT
+                uuid,
+                dateaccepted,
+                dateamended,
+                definition,
+                description,
+                itemidentifier,
+                name,
+                status,
+                itemclass_uuid,
+                register_uuid,
+                specificationlineage_uuid,
+                specificationsource_uuid,
+                data_source,
+                identifier,
+                information_source,
+                remarks,
+                operationversion,
+                domainofvalidity_uuid,
+                sourcecrs_uuid,
+                targetcrs_uuid,
+                method_uuid,
+                accuracy
+            FROM
+                conversionitem
+        """
+
+    cur.execute(query)
+
+    _ = get_cols_dict()
+
+    items = []
+
+    for row in cur.fetchall():
+        items.append(
+            {
+                "uuid": row[_["uuid"]],
+                "dateAccepted": row[_["dateaccepted"]],
+                "status": row[_["status"]].lower(),
+                "name": row[_["name"]],
+                "identifier": int(row[_["identifier"]]),
+                "aliases": get_aliases(row[_["uuid"]]),
+                "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
+                "remarks": row[_["remarks"]],
+                # "releaseDate": row[_["realization_epoch"]],
+                "definition": row[_["definition"]],
+                # "originDescription": row[_["origin_description"]],
+                # "scope": row[_["datum_scope"]],
+                # "ellipsoid": row[_["ellipsoid_uuid"]],
+                # "primeMeridian": row[_["primemeridian_uuid"]],
+                # "coordinateReferenceEpoch": row[_["coordinatereferenceepoch"]],
+                "informationSources": get_citations_by_item(row[_["uuid"]])
+            }
+        )
+
+    save_items(items, "coordinate-ops--conversion")
 
 
 def cs_spherical_dump():
