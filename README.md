@@ -18,20 +18,26 @@ Setup the environment using the install.sh file:
 ./install.sh
 ```
 
-Run the data extraction tool specifying one of the "objects" to be extracted (you might need to activate the virtual environment manually).
+Run the data extraction tool (this will extract all objects).
 
 ```
-python3 dump.py -o 'proposals'
+./run.sh
 ```
+
+Specific objects can be extracted independently using the following command:
+
+```
+ python3 dump.py -o [OBJECT_NAMES]
+ ```
 
 
 Troubleshooting
 ---------------
 
-If running into issue when installing psycopg2, try installing it manually using:
+If running into issue when installing psycopg2 on a MacOS, try installing it manually using the flag:
 
 ```
 ARCHFLAGS="-arch x86_64" pip install psycopg2
 ```
 
-and run the `./install.sh` again.
+and then run the `./install.sh` command again.
