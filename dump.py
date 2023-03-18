@@ -1538,80 +1538,142 @@ def proposals_dump():
     items = []
     _ = get_cols_dict()
 
+    skip_classes = [
+        'coordinate-sys--ellipsoidal', 
+        'coordinate-sys--vertical', 
+        'coordinate-ops--conversion', 
+        'prime-meridian',
+        'coordinate-sys--cartesian',
+        'crs--projected'
+    ]
+
+
     for row in cur.fetchall():
         sp = get_simple_proposal(row[_["uuid"]])
-        skip_classes = [
-            'coordinate-sys--ellipsoidal', 
-            'coordinate-sys--vertical', 
-            'coordinate-ops--conversion', 
-            'prime-meridian',
-            'coordinate-sys--cartesian',
-            'crs--projected'
-        ]
 
         if sp:
-            item_class = name_classes[sp[0]['itemclassname']]
-            item_uuid = sp[0]['management_information']['item_uuid']
 
-            if not item_class in skip_classes:
-                item = objects_dumpers[item_class](item_uuid)
-
-                responsible_parties = transform_responsible_parties(sp[0]['management_information']['responsible_party'])
-                role = responsible_parties.pop('role')
-                items.append(
-                    {
-                        "target_item": item,
-                        "target_item_class": item_class,
-                        "target_item_disposition": sp[0]['management_information']['disposition'],
-
-                        "controlBodyDecisionEvent": sp[0]['management_information']['controlbody_decision_event'],
-                        "controlBodyNotes": sp[0]['management_information']['controlbody_notes'],
-                        "justification": sp[0]['management_information']['justification'],
-                        "sponsor": {
-                            "gitServerUsername": "",
-                            "name": "",
-                            "role": role,
-                            "parties": [responsible_parties]
-                        },
-
-                        "timeProposed": sp[0]['management_information']['datedisposed'],
-                        "timeDisposed": sp[0]['management_information']['dateproposed'],
-                        "timeEdited": "",
-
-                        "items": [],
-
-                        "id": row[_["uuid"]],
-                        "title": row[_["title"]],
-                        "isConcluded": row[_["isconcluded"]],
-                        "status": row[_["status"]].lower(),
-                        #"simple_proposal": get_simple_proposal(row[_["uuid"]]),
-                        "notes": get_proposals_notes(row[_["uuid"]]),
-                    }
-                )
+            if is_proposal_group(row[_["uuid"]]):
+                items_uuid_list = get_proposals_uuid_by_parent(row[_["parent_uuid"]])
             else:
-                print('Skipping %s item: %s' % (sp[0]['itemclassname'], item_uuid))
+                items_uuid_list = [row[_["uuid"]]]
+
+            _items = {}
+
+            for gp_uuid in items_uuid_list:
+
+                _sp = get_simple_proposal(gp_uuid)
+
+                if _sp:
+                    mgnt_info = get_proposals_management(_sp["proposalmanagementinformation_uuid"])
+                    item_uuid = mgnt_info['item_uuid']
+                    item_class = name_classes[_sp['itemclassname']]
+                    item_filename = "/%s/%s.yaml" % (item_class, mgnt_info['uuid'])
+
+                    if mgnt_info['disposition']:
+                        disposition = mgnt_info['disposition'].lower()
+                    else:
+                        disposition = ""
+
+                    # default type, how to get real value?
+                    item_type = "amendment"
+    
+                    if not item_class in skip_classes:
+                        _items[item_filename] = {
+                            "item_uuid": item_uuid,
+                            "item_body": objects_dumpers[item_class](item_uuid),
+                            "item_class": item_class,
+                            "disposition": disposition,
+                            "type": item_type
+                        }
+                    else:
+                        print('Skipping %s item: %s' % (sp['itemclassname'], sp['uuid']))
+
+
+            mgnt_info = get_proposals_management(sp["proposalmanagementinformation_uuid"])
+            # responsible_party for first item?
+            responsible_parties = transform_responsible_parties(mgnt_info['responsible_party'])
+            role = responsible_parties.pop('role')
+
+            items.append(
+                {
+
+                    "controlBodyDecisionEvent": mgnt_info['controlbody_decision_event'],
+                    "controlBodyNotes": mgnt_info['controlbody_notes'],
+                    "justification": mgnt_info['justification'],
+                    "sponsor": {
+                        "gitServerUsername": "",
+                        "name": "",
+                        "role": role,
+                        "parties": [responsible_parties]
+                    },
+
+                    "timeProposed": mgnt_info['datedisposed'],
+                    "timeDisposed": mgnt_info['dateproposed'],
+                    "timeEdited": "",
+
+                    "items": _items,
+
+                    "id": row[_["uuid"]],
+                    "title": row[_["title"]],
+                    "isConcluded": row[_["isconcluded"]],
+                    "status": row[_["status"]].lower(),
+                    "notes": get_proposals_notes(row[_["uuid"]]),
+                }
+            )
 
     for item in items:
         uuid = item.get("id")
-        #date_submitted = item.pop("dateSubmitted")
         status = item.pop("status")
-        target_item = item.pop("target_item")
-        target_item_class = item.pop("target_item_class")
-        target_item_disposition = item.pop("target_item_disposition")
-        if target_item_disposition:
-            target_item_disposition = target_item_disposition.lower()
 
-        item_filename = "/%s/%s.yaml" % (target_item_class, uuid)
-        item['items'].append({
-            item_filename: {
-                "disposition": target_item_disposition,
-                "type": ""
-            }
-        })
+        for _item in item['items']:
+            _item_uuid = item['items'][_item].pop('item_uuid')
+            _item_class = item['items'][_item].pop('item_class')
+            _body = item['items'][_item].pop('item_body')
+            _dirname = "proposals/%s/%s" % (uuid, _item_class)
 
-        data = item
-        save_yaml("main", "proposals/%s" % uuid, data)
-        save_yaml(target_item['uuid'], "proposals/%s/%s" % (uuid, target_item_class), target_item)
+            save_yaml(_item_uuid, _dirname, _body)
+
+        save_yaml("main", "proposals/%s" % uuid, item)
+
+
+def is_proposal_group(uuid):
+
+    cur.execute(
+        """
+        SELECT
+            count(uuid)
+        FROM
+            proposalgroup
+        WHERE
+            uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    return (cur.fetchone()[0] > 0)
+
+
+def get_proposals_uuid_by_parent(parent_uuid):
+
+    cur.execute(
+        """
+        SELECT
+            uuid
+        FROM
+            proposal
+        WHERE
+            parent_uuid = %(parent_uuid)s
+
+    """,
+        {"parent_uuid": parent_uuid},
+    )
+    items = []
+
+    for row in cur.fetchall():
+        items.append(row[0])
+
+    return items
 
 
 def transform_responsible_parties(data):
@@ -1629,7 +1691,7 @@ def transform_responsible_parties(data):
             role = item.get('role')
             output['contacts'].append({
                 "label": "name",
-                "value": party.get('individual_name')
+                "value": party.get("individual_name")
             })
 
     output['role'] = role
@@ -1710,7 +1772,8 @@ def get_proposals_management(uuid):
             }
         )
 
-    return items
+    # uuid in re_proposalmanagementinformation is uniq (pk)
+    return items[0]
 
 
 def get_proposals_organization(uuid):
@@ -1810,21 +1873,21 @@ def get_simple_proposal(uuid):
     _ = get_cols_dict()
 
     for row in cur.fetchall():
-        mg_data = get_proposals_management(row[_["proposalmanagementinformation_uuid"]])
-        if mg_data:
-            mg_data = mg_data[0]
-        else:
-            mg_data = []
         items.append(
             {
                 "uuid": row[_["uuid"]],
-                "management_information": mg_data,
+                #"management_information": mg_data,
+                "proposalmanagementinformation_uuid": row[_["proposalmanagementinformation_uuid"]],
                 "itemclassname": row[_["itemclassname"]],
                 "targetregister_uuid": row[_["targetregister_uuid"]]
             }
         )
 
-    return items
+    # uuid is PK
+    if items:
+        return items[0]
+    else:
+        return None
 
 
 if __name__ == "__main__":
