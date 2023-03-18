@@ -1598,6 +1598,7 @@ def proposals_dump():
             items.append(
                 {
 
+                    "submittingStakeholderGitServerUsername": "984851E6-82C6-4CE6-AB58-EF09D3FE412B",
                     "controlBodyDecisionEvent": mgnt_info['controlbody_decision_event'],
                     "controlBodyNotes": mgnt_info['controlbody_notes'],
                     "justification": mgnt_info['justification'],
@@ -1630,7 +1631,7 @@ def proposals_dump():
             _item_uuid = item['items'][_item].pop('item_uuid')
             _item_class = item['items'][_item].pop('item_class')
             _body = item['items'][_item].pop('item_body')
-            _dirname = "proposals/%s/%s" % (uuid, _item_class)
+            _dirname = "proposals/%s/items/%s" % (uuid, _item_class)
 
             save_yaml(_item_uuid, _dirname, _body)
 
