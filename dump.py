@@ -731,7 +731,7 @@ def datums_engineering_dump():
     print("Not Implemented\n")
 
 
-def concat_conversion_dump():
+def concat_conversion_dump(uuid=None):
     query = """
             SELECT
                 uuid,
@@ -788,7 +788,13 @@ def concat_conversion_dump():
             }
         )
 
-    save_items(items, "coordinate-ops--conversion")
+    if uuid:
+        if items:
+            return items[0]
+        else:
+            return None
+    else:
+        save_items(items, "coordinate-ops--conversion")
 
 
 def cs_spherical_dump():
@@ -1575,6 +1581,7 @@ def crs_vertical_dump(uuid=None):
         save_items(items, "crs--vertical")
 
 
+
 def proposals_dump():
     cur.execute(
         """
@@ -1597,7 +1604,7 @@ def proposals_dump():
     skip_classes = [
         'coordinate-sys--ellipsoidal', 
         'coordinate-sys--vertical', 
-        'coordinate-ops--conversion', 
+        #'coordinate-ops--conversion', 
         'prime-meridian',
         'coordinate-sys--cartesian',
         'crs--projected'
@@ -1624,20 +1631,25 @@ def proposals_dump():
                     mgnt_info = get_proposals_management(_sp["proposalmanagementinformation_uuid"])
                     item_uuid = mgnt_info['item_uuid']
                     item_class = name_classes[_sp['itemclassname']]
-                    item_filename = "/%s/%s.yaml" % (item_class, mgnt_info['uuid'])
 
-                    if mgnt_info['disposition']:
-                        disposition = mgnt_info['disposition'].lower()
-                    else:
-                        disposition = ""
-
-                    # default type, how to get real value?
-                    item_type = "amendment"
-    
                     if not item_class in skip_classes:
+
+                        item_body = objects_dumpers[item_class](item_uuid)
+
+                        item_filename = "/%s/%s.yaml" % (item_class, item_body.get('uuid'))
+
+                        if mgnt_info['disposition']:
+                            disposition = mgnt_info['disposition'].lower()
+                        else:
+                            disposition = ""
+
+                        # default type, how to get real value?
+                        item_type = "amendment"
+                        # amendment, addition, clarification
+    
                         _items[item_filename] = {
                             "item_uuid": item_uuid,
-                            "item_body": objects_dumpers[item_class](item_uuid),
+                            "item_body": item_body,
                             "item_class": item_class,
                             "disposition": disposition,
                             "type": item_type
@@ -1687,9 +1699,11 @@ def proposals_dump():
             _item_uuid = item['items'][_item].pop('item_uuid')
             _item_class = item['items'][_item].pop('item_class')
             _body = item['items'][_item].pop('item_body')
+            _uuid = _body.get('uuid')
+
             _dirname = "proposals/%s/items/%s" % (uuid, _item_class)
 
-            save_yaml(_item_uuid, _dirname, _body)
+            save_yaml(_uuid, _dirname, _body)
 
         save_yaml("main", "proposals/%s" % uuid, item)
 
