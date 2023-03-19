@@ -1610,7 +1610,6 @@ def proposals_dump():
         'crs--projected'
     ]
 
-
     for row in cur.fetchall():
         sp = get_simple_proposal(row[_["uuid"]])
 
@@ -1643,9 +1642,8 @@ def proposals_dump():
                         else:
                             disposition = ""
 
-                        # default type, how to get real value?
-                        item_type = "amendment"
-                        # amendment, addition, clarification
+                        proposal_type = get_proposal_type(_sp["proposalmanagementinformation_uuid"])
+                        item_type = proposal_type["type"]
     
                         _items[item_filename] = {
                             "item_uuid": item_uuid,
@@ -1654,6 +1652,9 @@ def proposals_dump():
                             "disposition": disposition,
                             "type": item_type
                         }
+                        if item_type == "amendment":
+                            _items[item_filename]["amendmentType"] = proposal_type["amendmentType"]
+
                     else:
                         print('Skipping %s item: %s' % (sp['itemclassname'], sp['uuid']))
 
@@ -1726,7 +1727,6 @@ def is_proposal_group(uuid):
 
 
 def get_proposals_uuid_by_parent(parent_uuid):
-
     cur.execute(
         """
         SELECT
@@ -1735,16 +1735,99 @@ def get_proposals_uuid_by_parent(parent_uuid):
             proposal
         WHERE
             parent_uuid = %(parent_uuid)s
-
     """,
         {"parent_uuid": parent_uuid},
     )
+
     items = []
 
     for row in cur.fetchall():
         items.append(row[0])
 
     return items
+
+
+def get_clarification(uuid):
+    cur.execute(
+        """
+        SELECT
+            proposedchange
+        FROM
+            re_clarificationinformation
+        WHERE
+            uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    _row = cur.fetchone()
+
+    if _row:
+        return _row[0]
+
+
+def is_addition(uuid):
+    cur.execute(
+        """
+        SELECT
+            uuid
+        FROM
+            re_additioninformation
+        WHERE
+            uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    _row = cur.fetchone()
+
+    if _row:
+        return _row[0].lower()
+
+
+def get_amendment_type(uuid):
+    cur.execute(
+        """
+        SELECT
+            amendmenttype
+        FROM
+            re_amendmentinformation
+        WHERE
+            uuid = %(uuid)s
+
+    """,
+        {"uuid": uuid},
+    )
+
+    _row = cur.fetchone()
+
+    if _row:
+        return _row[0].lower()
+
+
+def get_proposal_type(uuid):
+    if is_addition(uuid):
+        return {
+            'type': 'addition'
+        }
+    else:
+        amendment = get_amendment_type(uuid)
+
+    if amendment:
+        return {
+            'type': 'amendment',
+            'amendmentType': amendment
+        }
+    else:
+        clarification = get_clarification(uuid)
+
+    if clarification:
+        return {
+            'type': 'clarification',
+            'proposedChange': clarification
+        }
+    else:
+        print('failed to detect proposal type: %s' % uuid)
 
 
 def transform_responsible_parties(data):
