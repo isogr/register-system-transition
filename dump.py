@@ -1635,6 +1635,12 @@ def proposals_dump():
 
                 if _sp:
                     mgnt_info = get_proposals_management(_sp["proposalmanagementinformation_uuid"])
+
+                    if mgnt_info['disposition']:
+                        disposition = mgnt_info['disposition'].lower()
+                    else:
+                        disposition = ""
+
                     item_uuid = mgnt_info['item_uuid']
                     item_class = name_classes[_sp['itemclassname']]
 
@@ -1644,11 +1650,6 @@ def proposals_dump():
 
                         item_filename = "/%s/%s.yaml" % (item_class, item_body.get('uuid'))
 
-                        if mgnt_info['disposition']:
-                            disposition = mgnt_info['disposition'].lower()
-                        else:
-                            disposition = ""
-
                         proposal_type = get_proposal_type(_sp["proposalmanagementinformation_uuid"])
                         item_type = proposal_type["type"]
     
@@ -1656,28 +1657,29 @@ def proposals_dump():
                             "item_uuid": item_uuid,
                             "item_body": item_body,
                             "item_class": item_class,
-                            "disposition": disposition,
+                            #"disposition": disposition,
                             "type": item_type
                         }
                         if item_type == "amendment":
                             _items[item_filename]["amendmentType"] = proposal_type["amendmentType"]
 
                     else:
+                        # this is group
                         print('Not found simple proposal %s: %s' % (sp['itemclassname'], sp['uuid']))
 
             if (_items) == 0:
                 print ('this group empty', row[_["uuid"]])
+
             mgnt_info = get_proposals_management(sp["proposalmanagementinformation_uuid"])
-            # responsible_party for first item?
             responsible_parties = transform_responsible_parties(mgnt_info['responsible_party'])
             role = responsible_parties.pop('role')
 
-            items.append(
-                {
+            data = {
                     "submittingStakeholderGitServerUsername": "984851E6-82C6-4CE6-AB58-EF09D3FE412B",
                     "controlBodyDecisionEvent": mgnt_info['controlbody_decision_event'],
                     "controlBodyNotes": mgnt_info['controlbody_notes'],
                     "justification": mgnt_info['justification'],
+                    "state": disposition,
                     "sponsor": {
                         "gitServerUsername": "",
                         "name": "",
@@ -1686,8 +1688,6 @@ def proposals_dump():
                     },
 
                     "timeProposed": mgnt_info['datedisposed'],
-                    "timeDisposed": mgnt_info['dateproposed'],
-                    "timeEdited": "",
 
                     "items": _items,
 
@@ -1696,8 +1696,12 @@ def proposals_dump():
                     "isConcluded": row[_["isconcluded"]],
                     "status": row[_["status"]].lower(),
                     "notes": get_proposals_notes(row[_["uuid"]]),
-                }
-            )
+            }
+
+            if mgnt_info['dateproposed']:
+                data['timeDisposed'] = mgnt_info['dateproposed']
+
+            items.append(data)
 
     for item in items:
         uuid = item.get("id")
@@ -1708,6 +1712,7 @@ def proposals_dump():
             _item_class = item['items'][_item].pop('item_class')
             _body = item['items'][_item].pop('item_body')
             _uuid = _body.get('uuid')
+            _body = prepare_single_proposal_item(_body)
 
             _dirname = "proposals/%s/items/%s" % (uuid, _item_class)
 
@@ -1850,6 +1855,22 @@ def get_proposal_type(uuid):
         }
     else:
         print('failed to detect proposal type: %s' % uuid)
+
+
+def prepare_single_proposal_item(item):
+    uuid = item.pop("uuid")
+    date_accepted = item.pop("dateAccepted")
+    status = item.pop("status")
+
+    data = {
+        "id": uuid,
+        "dateAccepted": date_accepted,
+        "status": status,
+        "data": item,
+    }
+
+    return data
+
 
 
 def transform_responsible_parties(data):
