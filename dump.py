@@ -760,6 +760,10 @@ def concat_conversion_dump(uuid=None):
                 conversionitem
         """
 
+    if uuid:
+        query += " WHERE uuid = '%s'" % uuid
+
+
     cur.execute(query)
 
     _ = get_cols_dict()
@@ -1184,7 +1188,7 @@ def cs_cartesian_dump():
         save_yaml(uuid, "coordinate-sys--cartesian", data)
 
 
-def cs_ellipsoidal_dump():
+def cs_ellipsoidal_dump(single_uuid=None):
     data = read_json_dir("ellipsoidal")
 
     for item in data:
@@ -1211,7 +1215,12 @@ def cs_ellipsoidal_dump():
             "data": item
         }
 
-        save_yaml(uuid, "coordinate-sys--ellipsoidal", data)
+        if single_uuid:
+            if single_uuid == uuid:
+                data['uuid'] = uuid
+                return data
+        else:
+            save_yaml(uuid, "coordinate-sys--ellipsoidal", data)
 
 
 def cs_vertical_dump():
@@ -1602,7 +1611,7 @@ def proposals_dump():
     _ = get_cols_dict()
 
     skip_classes = [
-        'coordinate-sys--ellipsoidal', 
+        #'coordinate-sys--ellipsoidal', 
         'coordinate-sys--vertical', 
         #'coordinate-ops--conversion', 
         'prime-meridian',
