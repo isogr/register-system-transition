@@ -1611,9 +1611,7 @@ def proposals_dump():
     _ = get_cols_dict()
 
     skip_classes = [
-        #'coordinate-sys--ellipsoidal', 
         'coordinate-sys--vertical', 
-        #'coordinate-ops--conversion', 
         'prime-meridian',
         'coordinate-sys--cartesian',
         'crs--projected'
@@ -1665,9 +1663,10 @@ def proposals_dump():
                             _items[item_filename]["amendmentType"] = proposal_type["amendmentType"]
 
                     else:
-                        print('Skipping %s item: %s' % (sp['itemclassname'], sp['uuid']))
+                        print('Not found simple proposal %s: %s' % (sp['itemclassname'], sp['uuid']))
 
-
+            if (_items) == 0:
+                print ('this group empty', row[_["uuid"]])
             mgnt_info = get_proposals_management(sp["proposalmanagementinformation_uuid"])
             # responsible_party for first item?
             responsible_parties = transform_responsible_parties(mgnt_info['responsible_party'])
@@ -1675,7 +1674,6 @@ def proposals_dump():
 
             items.append(
                 {
-
                     "submittingStakeholderGitServerUsername": "984851E6-82C6-4CE6-AB58-EF09D3FE412B",
                     "controlBodyDecisionEvent": mgnt_info['controlbody_decision_event'],
                     "controlBodyNotes": mgnt_info['controlbody_notes'],
@@ -1719,7 +1717,22 @@ def proposals_dump():
 
 
 def is_proposal_group(uuid):
+    cur.execute(
+        """
+        SELECT
+            count(uuid)
+        FROM
+            proposal
+        WHERE
+            parent_uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
 
+    return (cur.fetchone()[0] > 0)
+
+
+def is_proposal_group2(uuid):
     cur.execute(
         """
         SELECT
