@@ -1714,8 +1714,8 @@ def proposals_dump():
                         # this is group
                         print('Not found simple proposal %s: %s' % (sp['itemclassname'], sp['uuid']))
 
-            if (_items) == 0:
-                print ('this group empty', row[_["uuid"]])
+            if len(_items) == 0:
+                print('this group empty', row[_["uuid"]])
 
             mgnt_info = get_proposals_management(sp["proposalmanagementinformation_uuid"])
             responsible_parties = transform_responsible_parties(mgnt_info['responsible_party'])
