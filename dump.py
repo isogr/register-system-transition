@@ -715,8 +715,64 @@ def crs_compound_dump():
     print("Not Implemented\n")
 
 
-def crs_projected_dump():
-    print("Not Implemented\n")
+def crs_projected_dump(uuid=None):
+    query = """
+        SELECT
+            uuid,
+            dateaccepted,
+            itemidentifier,
+            name,
+            status,
+            identifier,
+            information_source,
+            remarks,
+            domainofvalidity_uuid,
+            crs_scope,
+            basecrs_uuid,
+            operation_uuid,
+            coordinatesystem_uuid,
+            datum_uuid
+        FROM
+            projectedcrs
+    """
+
+    if uuid:
+        query += " WHERE uuid = '%s'" % uuid
+
+    cur.execute(query)
+    _ = get_cols_dict()
+
+    items = []
+
+    for row in cur.fetchall():
+        items.append(
+            {
+                "uuid": row[_["uuid"]],
+                "dateAccepted": row[_["dateaccepted"]],
+                "status": row[_["status"]].lower(),
+                "name": row[_["name"]],
+                "identifier": int(row[_["identifier"]]),
+                "scope": row[_["crs_scope"]],
+                "aliases": get_aliases(row[_["uuid"]]),
+                "remarks": row[_["remarks"]],
+                "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
+                "operation": row[_["operation_uuid"]],
+                "datum": row[_["datum_uuid"]],
+                "coordinateSystem": get_coord_sys_by_uuid(
+                    row[_["coordinatesystem_uuid"]]
+                ),
+                "baseCRS": row[_["basecrs_uuid"]],
+                "informationSources": get_citations_by_item(row[_["uuid"]])
+            }
+        )
+
+    if uuid:
+        if items:
+            return items[0]
+        else:
+            return None
+    else:
+        save_items(items, "crs--projected")
 
 
 def crs_engineering_dump():
@@ -1580,7 +1636,6 @@ def crs_vertical_dump(uuid=None):
             return None
     else:
         save_items(items, "crs--vertical")
-
 
 
 def proposals_dump():
