@@ -737,32 +737,22 @@ def concat_conversion_dump(uuid=None):
                 uuid,
                 dateaccepted,
                 dateamended,
-                definition,
-                description,
-                itemidentifier,
-                name,
                 status,
-                itemclass_uuid,
-                register_uuid,
-                specificationlineage_uuid,
-                specificationsource_uuid,
-                data_source,
+                name,
                 identifier,
-                information_source,
-                remarks,
-                operationversion,
                 domainofvalidity_uuid,
+                accuracy,
+                remarks,
+                definition,
                 sourcecrs_uuid,
                 targetcrs_uuid,
-                method_uuid,
-                accuracy
+                method_uuid
             FROM
                 conversionitem
         """
 
     if uuid:
         query += " WHERE uuid = '%s'" % uuid
-
 
     cur.execute(query)
 
@@ -775,19 +765,21 @@ def concat_conversion_dump(uuid=None):
             {
                 "uuid": row[_["uuid"]],
                 "dateAccepted": row[_["dateaccepted"]],
+                "dateAmended": row[_["dateamended"]],
                 "status": row[_["status"]].lower(),
                 "name": row[_["name"]],
                 "identifier": int(row[_["identifier"]]),
-                "aliases": get_aliases(row[_["uuid"]]),
-                "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
+                "aliases": get_aliases(row[_["uuid"]]),  #V
+                "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),  #V
+                "accuracy": int(row[_["accuracy"]]) if row[_["accuracy"]] else None,
+                # "accuracy": get_coord_op_accuracy(row[_["uuid"]]),
+                "scope": get_coord_op_scope(row[_["uuid"]]),
                 "remarks": row[_["remarks"]],
-                # "releaseDate": row[_["realization_epoch"]],
+                "parameters": get_op_params_by_method_uuid(row[_["uuid"]]),
                 "definition": row[_["definition"]],
-                # "originDescription": row[_["origin_description"]],
-                # "scope": row[_["datum_scope"]],
-                # "ellipsoid": row[_["ellipsoid_uuid"]],
-                # "primeMeridian": row[_["primemeridian_uuid"]],
-                # "coordinateReferenceEpoch": row[_["coordinatereferenceepoch"]],
+                "sourcecrs_uuid": row[_["sourcecrs_uuid"]],
+                "targetcrs_uuid": row[_["targetcrs_uuid"]],
+                "method_uuid": row[_["method_uuid"]],
                 "informationSources": get_citations_by_item(row[_["uuid"]])
             }
         )
