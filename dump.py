@@ -1271,34 +1271,75 @@ def cs_ellipsoidal_dump(single_uuid=None):
             save_yaml(uuid, "coordinate-sys--ellipsoidal", data)
 
 
-def cs_vertical_dump():
-    data = read_json_dir("vertical")
+def get_coordinate_sys_by_uuid(uuid):
+    cur.execute(
+        """
+        SELECT
+            axes_uuid
+        FROM
+            coordinatesystem_axis
+        WHERE
+            coordinatesystem_uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+    items = []
+    _ = get_cols_dict()
 
-    for item in data:
-        uuid = item.pop("uuid")
-        status = item.pop("status")
-        date_accepted = str_to_dt(item.pop("date_accepted"))
+    for row in cur.fetchall():
+        items.append(row[0])
 
-        coordinate_system_axes = item.pop("coordinate_system_axes")
+    return items
 
-        # information_source = item.pop("information_source")
 
-        _coordinate_system_axes = []
+def cs_vertical_dump(uuid=None):
 
-        for elm in coordinate_system_axes:
-            _coordinate_system_axes.append(elm["uuid"])
+    query = """
+        SELECT
+            uuid,
+            dateaccepted,
+            description,
+            definition,
+            name,
+            status,
+            identifier,
+            remarks,
+            information_source
+        FROM
+            verticalcs
+    """
 
-        item["coordinateSystemAxes"] = _coordinate_system_axes
-        item["informationSources"] = get_citations_by_item(uuid)
+    if uuid:
+        query += " WHERE uuid = '%s'" % uuid
 
-        data = {
-            "id": uuid,
-            "dateAccepted": date_accepted,
-            "status": status,
-            "data": item
-        }
+    cur.execute(query)
+    _ = get_cols_dict()
 
-        save_yaml(uuid, "coordinate-sys--vertical", data)
+    items = []
+
+    for row in cur.fetchall():
+        items.append(
+            {
+                "uuid": row[_["uuid"]],
+                "dateAccepted": row[_["dateaccepted"]],
+                "status": row[_["status"]].lower(),
+                "identifier": row[_["identifier"]],
+                "coordinateSystemAxes": get_coordinate_sys_by_uuid(
+                    row[_["uuid"]]
+                ),
+                "name": row[_["name"]],
+                "remarks": row[_["remarks"]],
+                "informationSources": get_citations_by_item(row[_["uuid"]])
+            }
+        )
+
+    if uuid:
+        if items:
+            return items[0]
+        else:
+            return None
+    else:
+        save_items(items, "coordinate-sys--vertical")
 
 
 def cs_axis_dump(uuid=None):
