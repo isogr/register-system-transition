@@ -1183,92 +1183,163 @@ def co_parameter_dump(uuid=None):
         save_items(items, "coordinate-op-parameter")
 
 
-def prime_meridian_dump():
-    data = read_json_dir("prime-meridian")
+def prime_meridian_dump(uuid=None):
+    """
+    TODO: missing `aliases` and `unit`
+    E.g.
+    unit:
+      name: degree
+      uuid: 1d86d720-ff1a-47ef-819e-2fb3524c9ce9
+    """
+    query = """
+        SELECT
+            uuid,
+            dateaccepted,
+            description,
+            definition,
+            name,
+            status,
+            identifier,
+            remarks,
+            information_source,
+            greenwichlongitude,
+            greenwichlongitudeuom_uuid
+        FROM
+            primemeridian
+    """
 
-    for item in data:
-        uuid = item.pop("uuid")
-        status = item.pop("status")
-        date_accepted = str_to_dt(item.pop("date_accepted"))
-        item["longitudeFromGreenwich"] = item.pop("longitude_from_greenwich")
-        item["longitudeFromGreenwichUoM"] = item.pop("longitude_from_greenwich_uom")
-        item["informationSources"] = get_citations_by_item(uuid)
+    if uuid:
+        query += " WHERE uuid = '%s'" % uuid
 
-        del item["information_source"]
+    cur.execute(query)
+    _ = get_cols_dict()
 
-        data = {
-            "id": uuid,
-            "dateAccepted": date_accepted,
-            "status": status,
-            "data": item
-        }
+    items = []
 
-        save_yaml(uuid, "prime-meridian", data)
+    for row in cur.fetchall():
+        items.append(
+            {
+                "uuid": row[_["uuid"]],
+                "dateAccepted": row[_["dateaccepted"]],
+                "status": row[_["status"]].lower(),
+                "identifier": row[_["identifier"]],
+                "name": row[_["name"]],
+                "remarks": row[_["remarks"]],
+                "informationSources": get_citations_by_item(row[_["uuid"]]),
+                # "aliases": get_citations_by_item(row[_["uuid"]])
+                "longitudeFromGreenwich": row[_["greenwichlongitude"]],
+                "longitudeFromGreenwichUoM": row[_["greenwichlongitudeuom_uuid"]]
+            }
+        )
+
+    if uuid:
+        if items:
+            return items[0]
+        else:
+            return None
+    else:
+        save_items(items, "prime-meridian")
 
 
-def cs_cartesian_dump():
-    data = read_json_dir("cartesian")
+def cs_cartesian_dump(uuid=None):
+    # TODO: missing `aliases`
+    query = """
+            SELECT
+                uuid,
+                dateaccepted,
+                description,
+                definition,
+                name,
+                status,
+                identifier,
+                remarks,
+                information_source
+            FROM
+                cartesiancs
+        """
 
-    for item in data:
-        uuid = item.pop("uuid")
-        status = item.pop("status")
-        date_accepted = str_to_dt(item.pop("date_accepted"))
+    if uuid:
+        query += " WHERE uuid = '%s'" % uuid
 
-        coordinate_system_axes = item.pop("coordinate_system_axes")
+    cur.execute(query)
+    _ = get_cols_dict()
 
-        _coordinate_system_axes = []
+    items = []
 
-        for elm in coordinate_system_axes:
-            _coordinate_system_axes.append(elm["uuid"])
+    for row in cur.fetchall():
+        items.append(
+            {
+                "uuid": row[_["uuid"]],
+                "dateAccepted": row[_["dateaccepted"]],
+                "status": row[_["status"]].lower(),
+                "identifier": row[_["identifier"]],
+                "coordinateSystemAxes": get_coordinate_sys_by_uuid(
+                    row[_["uuid"]]
+                ),
+                "name": row[_["name"]],
+                "remarks": row[_["remarks"]],
+                "informationSources": get_citations_by_item(row[_["uuid"]]),
+                # "aliases": get_citations_by_item(row[_["uuid"]])
+            }
+        )
 
-        item["coordinateSystemAxes"] = _coordinate_system_axes
-        item["informationSources"] = get_citations_by_item(uuid)
-
-        del item["information_source"]
-
-        data = {
-            "id": uuid,
-            "dateAccepted": date_accepted,
-            "status": status,
-            "data": item
-        }
-
-        save_yaml(uuid, "coordinate-sys--cartesian", data)
+    if uuid:
+        if items:
+            return items[0]
+        else:
+            return None
+    else:
+        save_items(items, "coordinate-sys--cartesian")
 
 
 def cs_ellipsoidal_dump(single_uuid=None):
-    data = read_json_dir("ellipsoidal")
+    query = """
+                SELECT
+                    uuid,
+                    dateaccepted,
+                    description,
+                    definition,
+                    name,
+                    status,
+                    identifier,
+                    remarks,
+                    information_source
+                FROM
+                    ellipsoidalcs
+            """
 
-    for item in data:
-        uuid = item.pop("uuid")
-        status = item.pop("status")
-        date_accepted = str_to_dt(item.pop("date_accepted"))
+    if single_uuid:
+        query += " WHERE uuid = '%s'" % single_uuid
 
-        coordinate_system_axes = item.pop("coordinate_system_axes")
+    cur.execute(query)
+    _ = get_cols_dict()
 
-        _coordinate_system_axes = []
+    items = []
 
-        for elm in coordinate_system_axes:
-            _coordinate_system_axes.append(elm["uuid"])
+    for row in cur.fetchall():
+        items.append(
+            {
+                "uuid": row[_["uuid"]],
+                "dateAccepted": row[_["dateaccepted"]],
+                "status": row[_["status"]].lower(),
+                "identifier": row[_["identifier"]],
+                "coordinateSystemAxes": get_coordinate_sys_by_uuid(
+                    row[_["uuid"]]
+                ),
+                "name": row[_["name"]],
+                "remarks": row[_["remarks"]],
+                "informationSources": get_citations_by_item(row[_["uuid"]]),
+                # "aliases": get_citations_by_item(row[_["uuid"]])
+            }
+        )
 
-        item["coordinateSystemAxes"] = _coordinate_system_axes
-        item["informationSources"] = get_citations_by_item(uuid)
-
-        del item["information_source"]
-
-        data = {
-            "id": uuid,
-            "dateAccepted": date_accepted,
-            "status": status,
-            "data": item
-        }
-
-        if single_uuid:
-            if single_uuid == uuid:
-                data['uuid'] = uuid
-                return data
+    if single_uuid:
+        if items:
+            return items[0]
         else:
-            save_yaml(uuid, "coordinate-sys--ellipsoidal", data)
+            return None
+    else:
+        save_items(items, "coordinate-sys--ellipsoidal")
 
 
 def get_coordinate_sys_by_uuid(uuid):
