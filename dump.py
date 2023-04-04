@@ -91,6 +91,50 @@ def get_citations_by_item(uuid):
     return result
 
 
+def get_ci_citation_ci_responsibleparty(citation_uuid):
+    cur.execute(
+        """
+        SELECT
+            citedresponsibleparty_uuid
+        FROM
+            ci_citation_ci_responsibleparty
+        WHERE
+            ci_citation_uuid = %(uuid)s
+    """,
+        {"uuid": citation_uuid},
+    )
+
+    items = []
+
+    for row in cur.fetchall():
+        items.append(row[0])
+
+    return items
+
+
+def get_author_publisher_informationsource(uuid):
+    cur.execute(
+        """
+        SELECT
+            individualname, organisationname, role
+        FROM
+            ci_responsibleparty
+        WHERE
+            uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    _row = cur.fetchone()
+
+    if _row:
+        if _row[2] == 'author':
+            return {"author": _row[0]}
+        elif _row[2] == 'publisher':
+            return {"publisher": _row[1]}
+    return None
+
+
 def get_citation(uuid):
     cur.execute(
         """
@@ -135,8 +179,7 @@ def get_citation(uuid):
         else:
             edition_date_dt = None
 
-
-        return {
+        output = {
             "uuid": row[_["uuid"]],
             "title": row[_["title"]],
             "edition": row[_["edition"]],
@@ -148,6 +191,11 @@ def get_citation(uuid):
             "seriesIssueID": row[_["series_issueidentification"]],
             "seriesPage": row[_["series_page"]],
         }
+
+        responsible_parties = get_ci_citation_ci_responsibleparty(uuid)
+        for responsible_party in responsible_parties:
+            output.update(**get_author_publisher_informationsource(responsible_party))
+        return output
 
 
 def get_geo_datum_by_uuid(uuid):
@@ -2029,7 +2077,6 @@ def prepare_single_proposal_item(item):
     }
 
     return data
-
 
 
 def transform_responsible_parties(data):
