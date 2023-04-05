@@ -1835,6 +1835,7 @@ def proposals_dump():
                 items_uuid_list = [row[_["uuid"]]]
 
             _items = {}
+            disposition = ""
 
             for gp_uuid in items_uuid_list:
 
@@ -1870,12 +1871,9 @@ def proposals_dump():
                         if item_type == "amendment":
                             _items[item_filename]["amendmentType"] = proposal_type["amendmentType"]
 
-                    else:
-                        # this is group
-                        print('Not found simple proposal %s: %s' % (sp['itemclassname'], sp['uuid']))
-
-            if len(_items) == 0:
-                print('this group empty', row[_["uuid"]])
+                else:
+                    # this is group
+                    print('Not found simple proposal %s: %s' % (sp['itemclassname'], sp['uuid']))
 
             mgnt_info = get_proposals_management(sp["proposalmanagementinformation_uuid"])
             responsible_parties = transform_responsible_parties(mgnt_info['responsible_party'])
@@ -1912,18 +1910,19 @@ def proposals_dump():
 
     for item in items:
         uuid = item.get("id")
-        status = item.pop("status")
 
         for _item in item['items']:
-            _item_uuid = item['items'][_item].pop('item_uuid')
-            _item_class = item['items'][_item].pop('item_class')
-            _body = item['items'][_item].pop('item_body')
-            _uuid = _body.get('uuid')
-            _body = prepare_single_proposal_item(_body)
+            if not item['items'][_item].get("type", "") == "addition" and \
+                    item['items'].get(_item) is not None:
+                _item_uuid = item['items'][_item].pop('item_uuid')
+                _item_class = item['items'][_item].pop('item_class')
+                _body = item['items'][_item].pop('item_body')
+                _uuid = _body.get('uuid')
+                _body = prepare_single_proposal_item(_body)
 
-            _dirname = "proposals/%s/items/%s" % (uuid, _item_class)
+                _dirname = "proposals/%s/items/%s" % (uuid, _item_class)
 
-            save_yaml(_uuid, _dirname, _body)
+                save_yaml(_uuid, _dirname, _body)
 
         save_yaml("main", "proposals/%s" % uuid, item)
 
@@ -1941,7 +1940,7 @@ def is_proposal_group(uuid):
         {"uuid": uuid},
     )
 
-    return (cur.fetchone()[0] > 0)
+    return cur.fetchone()[0] > 0
 
 
 def is_proposal_group2(uuid):
@@ -1957,7 +1956,7 @@ def is_proposal_group2(uuid):
         {"uuid": uuid},
     )
 
-    return (cur.fetchone()[0] > 0)
+    return cur.fetchone()[0] > 0
 
 
 def get_proposals_uuid_by_parent(parent_uuid):
