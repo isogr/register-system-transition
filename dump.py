@@ -1833,7 +1833,8 @@ def proposals_dump():
                 items_uuid_list = get_proposals_uuid_by_parent(row[_["parent_uuid"]])
             else:
                 items_uuid_list = [row[_["uuid"]]]
-
+            if row[_["uuid"]] == "ba555afb-e619-4870-b260-c9b7bcd8b54c":
+                import ipdb; ipdb.set_trace()
             _items = {}
             disposition = ""
 
@@ -1852,7 +1853,7 @@ def proposals_dump():
                     item_uuid = mgnt_info['item_uuid']
                     item_class = name_classes[_sp['itemclassname']]
 
-                    if not item_class in skip_classes:
+                    if item_class not in skip_classes:
 
                         item_body = objects_dumpers[item_class](item_uuid)
 
