@@ -1833,8 +1833,6 @@ def proposals_dump():
                 items_uuid_list = get_proposals_uuid_by_parent(row[_["parent_uuid"]])
             else:
                 items_uuid_list = [row[_["uuid"]]]
-            if row[_["uuid"]] == "ba555afb-e619-4870-b260-c9b7bcd8b54c":
-                import ipdb; ipdb.set_trace()
             _items = {}
             disposition = ""
 
