@@ -1823,8 +1823,12 @@ def proposals_dump():
         'coordinate-sys--cartesian',
         'crs--projected'
     ]
-
     for row in cur.fetchall():
+
+        if row[_["status"]].lower() == "not_submitted":
+            # Exclude proposals that have not been submitted
+            continue
+
         sp = get_simple_proposal(row[_["uuid"]])
 
         if sp:
