@@ -190,6 +190,7 @@ def get_citation(uuid):
             "seriesName": row[_["series_name"]],
             "seriesIssueID": row[_["series_issueidentification"]],
             "seriesPage": row[_["series_page"]],
+            # TODO revision_data, edition, issue, page
         }
 
         responsible_parties = get_ci_citation_ci_responsibleparty(uuid)
@@ -1233,7 +1234,7 @@ def co_parameter_dump(uuid=None):
 
 def prime_meridian_dump(uuid=None):
     """
-    TODO: missing `aliases` and `unit`
+    TODO: missing `unit`
     E.g.
     unit:
       name: degree
@@ -1274,7 +1275,7 @@ def prime_meridian_dump(uuid=None):
                 "name": row[_["name"]],
                 "remarks": row[_["remarks"]],
                 "informationSources": get_citations_by_item(row[_["uuid"]]),
-                # "aliases": get_citations_by_item(row[_["uuid"]])
+                "aliases": get_aliases(row[_["uuid"]]),
                 "longitudeFromGreenwich": row[_["greenwichlongitude"]],
                 "longitudeFromGreenwichUoM": row[_["greenwichlongitudeuom_uuid"]]
             }
@@ -1290,7 +1291,6 @@ def prime_meridian_dump(uuid=None):
 
 
 def cs_cartesian_dump(uuid=None):
-    # TODO: missing `aliases`
     query = """
             SELECT
                 uuid,
@@ -1327,7 +1327,7 @@ def cs_cartesian_dump(uuid=None):
                 "name": row[_["name"]],
                 "remarks": row[_["remarks"]],
                 "informationSources": get_citations_by_item(row[_["uuid"]]),
-                # "aliases": get_citations_by_item(row[_["uuid"]])
+                "aliases": get_aliases(row[_["uuid"]]),
             }
         )
 
@@ -1377,7 +1377,7 @@ def cs_ellipsoidal_dump(single_uuid=None):
                 "name": row[_["name"]],
                 "remarks": row[_["remarks"]],
                 "informationSources": get_citations_by_item(row[_["uuid"]]),
-                # "aliases": get_citations_by_item(row[_["uuid"]])
+                "aliases": get_aliases(row[_["uuid"]]),
             }
         )
 
@@ -1448,7 +1448,8 @@ def cs_vertical_dump(uuid=None):
                 ),
                 "name": row[_["name"]],
                 "remarks": row[_["remarks"]],
-                "informationSources": get_citations_by_item(row[_["uuid"]])
+                "informationSources": get_citations_by_item(row[_["uuid"]]),
+                "aliases": get_aliases(row[_["uuid"]]),
             }
         )
 
@@ -1518,7 +1519,8 @@ def cs_axis_dump(uuid=None):
                 "unitOfMeasurement": row[_["axisunit_uuid"]],
                 "minValue": min_value,
                 "maxValue": max_value,
-                "informationSources": get_citations_by_item(row[_["uuid"]])
+                "informationSources": get_citations_by_item(row[_["uuid"]]),
+                "aliases": get_aliases(row[_["uuid"]]),
             }
         )
 
@@ -1647,7 +1649,8 @@ def transformations_dump(uuid=None):
                 "coordOperationMethod": row[_["method_uuid"]],
                 "sourceCRS": get_crs_by_uuid(row[_["sourcecrs_uuid"]]),
                 "targetCRS": get_crs_by_uuid(row[_["targetcrs_uuid"]]),
-                "informationSources": get_citations_by_item(row[_["uuid"]])
+                "informationSources": get_citations_by_item(row[_["uuid"]]),
+                "aliases": get_aliases(row[_["uuid"]]),
             }
         )
 
