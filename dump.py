@@ -1905,7 +1905,6 @@ def proposals_dump():
                     "id": row[_["uuid"]],
                     "title": row[_["title"]],
                     "isConcluded": row[_["isconcluded"]],
-                    "status": row[_["status"]].lower(),
                     "notes": get_proposals_notes(row[_["uuid"]]),
             }
 
@@ -1918,19 +1917,18 @@ def proposals_dump():
         uuid = item.get("id")
 
         for _item in item['items']:
-            if not item['items'][_item].get("type", "") == "addition" and \
-                    item['items'].get(_item) is not None:
-                _item_uuid = item['items'][_item].pop('item_uuid')
-                _item_class = item['items'][_item].pop('item_class')
-                _body = item['items'][_item].pop('item_body')
-                _uuid = _body.get('uuid')
-                _body = prepare_single_proposal_item(_body)
+            _item_uuid = item['items'][_item].pop('item_uuid')
+            _item_class = item['items'][_item].pop('item_class')
+            _body = item['items'][_item].pop('item_body')
+            _uuid = _body.get('uuid')
+            _body = prepare_single_proposal_item(_body)
 
-                _dirname = "proposals/%s/items/%s" % (uuid, _item_class)
+            _dirname = "proposals/%s/items/%s" % (uuid, _item_class)
 
-                save_yaml(_uuid, _dirname, _body)
+            save_yaml(_uuid, _dirname, _body)
 
         save_yaml("main", "proposals/%s" % uuid, item)
+
 
 
 def is_proposal_group(uuid):
