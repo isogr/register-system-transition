@@ -749,6 +749,8 @@ def save_items(items, class_id):
         uuid = item.pop("uuid")
         date_accepted = item.pop("dateAccepted")
         status = item.pop("status")
+        if status.lower() == "not_valid":
+            status = "invalid"
 
         data = {
             "id": uuid,
@@ -836,6 +838,15 @@ def datums_engineering_dump():
     print("Not Implemented\n")
 
 
+def get_conversion_accuracy(accuracy):
+    if not accuracy:
+        return {
+            "unitOfMeasurement": None,
+            "value": None
+        }
+    return accuracy
+
+
 def concat_conversion_dump(uuid=None):
     query = """
             SELECT
@@ -876,7 +887,7 @@ def concat_conversion_dump(uuid=None):
                 "identifier": int(row[_["identifier"]]),
                 "aliases": get_aliases(row[_["uuid"]]),  #V
                 "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),  #V
-                "accuracy": int(row[_["accuracy"]]) if row[_["accuracy"]] else None,
+                "accuracy": get_conversion_accuracy(int(row[_["accuracy"]]) if row[_["accuracy"]] else None),
                 # "accuracy": get_coord_op_accuracy(row[_["uuid"]]),
                 "scope": get_coord_op_scope(row[_["uuid"]]),
                 "remarks": row[_["remarks"]],
@@ -1801,6 +1812,25 @@ def crs_vertical_dump(uuid=None):
         save_items(items, "crs--vertical")
 
 
+def get_supersedingitems_uuid(uuid):
+    cur.execute(
+        """
+        SELECT
+            supersedingitems_uuid
+        FROM
+            supersession_supersedingitems
+        WHERE
+            supersessionid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    _row = cur.fetchone()
+
+    if _row:
+        return _row[0]
+
+
 def proposals_dump():
     cur.execute(
         """
@@ -1876,6 +1906,12 @@ def proposals_dump():
                         }
                         if item_type == "amendment":
                             _items[item_filename]["amendmentType"] = proposal_type["amendmentType"]
+                            if proposal_type["amendmentType"] == "supersession":
+                                if supersedingitems_uuid := get_supersedingitems_uuid(row[_["uuid"]]):
+                                    _items[item_filename]["supersedingItemIDs"] = supersedingitems_uuid
+                                else:
+                                    _items[item_filename]["supersedingItemIDs"] = []
+
 
                 else:
                     # this is group
@@ -1928,7 +1964,6 @@ def proposals_dump():
             save_yaml(_uuid, _dirname, _body)
 
         save_yaml("main", "proposals/%s" % uuid, item)
-
 
 
 def is_proposal_group(uuid):
@@ -2071,6 +2106,8 @@ def prepare_single_proposal_item(item):
     uuid = item.pop("uuid")
     date_accepted = item.pop("dateAccepted")
     status = item.pop("status")
+    if status.lower() == "not_valid":
+        status = "invalid"
 
     data = {
         "id": uuid,
