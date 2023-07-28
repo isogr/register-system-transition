@@ -1847,7 +1847,8 @@ def proposals_dump():
     """
     )
 
-    items = []
+    proposals = []
+    proposals_uuid = set()
     _ = get_cols_dict()
 
     skip_classes = [
@@ -1856,7 +1857,12 @@ def proposals_dump():
         'coordinate-sys--cartesian',
         'crs--projected'
     ]
+
     for row in cur.fetchall():
+
+        if row[_["parent_uuid"]] in proposals_uuid:
+            # Avoid duplicating proposals
+            continue
 
         if row[_["status"]].lower() == "not_submitted":
             # Exclude proposals that have not been submitted
@@ -1867,10 +1873,12 @@ def proposals_dump():
         if sp:
 
             if is_proposal_group(row[_["uuid"]]):
+                proposals_uuid.add(row[_["parent_uuid"]])
                 items_uuid_list = get_proposals_uuid_by_parent(row[_["parent_uuid"]])
             else:
+                proposals_uuid.add(row[_["uuid"]])
                 items_uuid_list = [row[_["uuid"]]]
-            _items = {}
+            proposal_items = {}
             disposition = ""
 
             for gp_uuid in items_uuid_list:
@@ -1897,7 +1905,7 @@ def proposals_dump():
                         proposal_type = get_proposal_type(_sp["proposalmanagementinformation_uuid"])
                         item_type = proposal_type["type"]
     
-                        _items[item_filename] = {
+                        proposal_items[item_filename] = {
                             "item_uuid": item_uuid,
                             "item_body": item_body,
                             "item_class": item_class,
@@ -1905,12 +1913,12 @@ def proposals_dump():
                             "type": item_type
                         }
                         if item_type == "amendment":
-                            _items[item_filename]["amendmentType"] = proposal_type["amendmentType"]
+                            proposal_items[item_filename]["amendmentType"] = proposal_type["amendmentType"]
                             if proposal_type["amendmentType"] == "supersession":
                                 if supersedingitems_uuid := get_supersedingitems_uuid(row[_["uuid"]]):
-                                    _items[item_filename]["supersedingItemIDs"] = supersedingitems_uuid
+                                    proposal_items[item_filename]["supersedingItemIDs"] = supersedingitems_uuid
                                 else:
-                                    _items[item_filename]["supersedingItemIDs"] = []
+                                    proposal_items[item_filename]["supersedingItemIDs"] = []
 
 
                 else:
@@ -1936,7 +1944,7 @@ def proposals_dump():
 
                     "timeProposed": mgnt_info['datedisposed'],
 
-                    "items": _items,
+                    "items": proposal_items,
 
                     "id": row[_["uuid"]],
                     "title": row[_["title"]],
@@ -1947,15 +1955,15 @@ def proposals_dump():
             if mgnt_info['dateproposed']:
                 data['timeDisposed'] = mgnt_info['dateproposed']
 
-            items.append(data)
+            proposals.append(data)
 
-    for item in items:
-        uuid = item.get("id")
+    for proposal in proposals:
+        uuid = proposal.get("id")
 
-        for _item in item['items']:
-            _item_uuid = item['items'][_item].pop('item_uuid')
-            _item_class = item['items'][_item].pop('item_class')
-            _body = item['items'][_item].pop('item_body')
+        for proposal_item in proposal['items']:
+            _item_uuid = proposal['items'][proposal_item].pop('item_uuid')
+            _item_class = proposal['items'][proposal_item].pop('item_class')
+            _body = proposal['items'][proposal_item].pop('item_body')
             _uuid = _body.get('uuid')
             _body = prepare_single_proposal_item(_body)
 
@@ -1963,7 +1971,7 @@ def proposals_dump():
 
             save_yaml(_uuid, _dirname, _body)
 
-        save_yaml("main", "proposals/%s" % uuid, item)
+        save_yaml("main", "proposals/%s" % uuid, proposal)
 
 
 def is_proposal_group(uuid):
