@@ -1860,24 +1860,31 @@ def proposals_dump():
 
     for row in cur.fetchall():
 
-        if row[_["parent_uuid"]] in proposals_uuid:
-            # Avoid duplicating proposals
-            continue
-
         if row[_["status"]].lower() == "not_submitted":
             # Exclude proposals that have not been submitted
             continue
 
         sp = get_simple_proposal(row[_["uuid"]])
 
-        if sp:
+        if row[_["parent_uuid"]] in proposals_uuid:
+            # Avoid duplicating proposals
+            continue
 
+        if sp:
             if is_proposal_group(row[_["uuid"]]):
+                # 1) Proposal group, process all proposals_items associated with parent_uuid
                 proposals_uuid.add(row[_["parent_uuid"]])
                 items_uuid_list = get_proposals_uuid_by_parent(row[_["parent_uuid"]])
-            else:
+                print(f"Group {len(items_uuid_list)}")
+            elif not is_proposal_group(row[_["parent_uuid"]]):
+                # 2) Single proposal
                 proposals_uuid.add(row[_["uuid"]])
                 items_uuid_list = [row[_["uuid"]]]
+                print(f"Single Proposal {items_uuid_list}")
+            else:
+                # 3) Proposal group root node. Skip. Group will be processed in step 1)
+                # when a proposal with parent_uuid == row[_["uuid"]] will be found
+                continue
             proposal_items = {}
             disposition = ""
 
@@ -1885,45 +1892,39 @@ def proposals_dump():
 
                 _sp = get_simple_proposal(gp_uuid)
 
-                if _sp:
-                    mgnt_info = get_proposals_management(_sp["proposalmanagementinformation_uuid"])
+                mgnt_info = get_proposals_management(_sp["proposalmanagementinformation_uuid"])
 
-                    if mgnt_info['disposition']:
-                        disposition = mgnt_info['disposition'].lower()
-                    else:
-                        disposition = ""
-
-                    item_uuid = mgnt_info['item_uuid']
-                    item_class = name_classes[_sp['itemclassname']]
-
-                    if item_class not in skip_classes:
-
-                        item_body = objects_dumpers[item_class](item_uuid)
-
-                        item_filename = "/%s/%s.yaml" % (item_class, item_body.get('uuid'))
-
-                        proposal_type = get_proposal_type(_sp["proposalmanagementinformation_uuid"])
-                        item_type = proposal_type["type"]
-    
-                        proposal_items[item_filename] = {
-                            "item_uuid": item_uuid,
-                            "item_body": item_body,
-                            "item_class": item_class,
-                            #"disposition": disposition,
-                            "type": item_type
-                        }
-                        if item_type == "amendment":
-                            proposal_items[item_filename]["amendmentType"] = proposal_type["amendmentType"]
-                            if proposal_type["amendmentType"] == "supersession":
-                                if supersedingitems_uuid := get_supersedingitems_uuid(row[_["uuid"]]):
-                                    proposal_items[item_filename]["supersedingItemIDs"] = supersedingitems_uuid
-                                else:
-                                    proposal_items[item_filename]["supersedingItemIDs"] = []
-
-
+                if mgnt_info['disposition']:
+                    disposition = mgnt_info['disposition'].lower()
                 else:
-                    # this is group
-                    print('Not found simple proposal %s: %s' % (sp['itemclassname'], sp['uuid']))
+                    disposition = ""
+
+                item_uuid = mgnt_info['item_uuid']
+                item_class = name_classes[_sp['itemclassname']]
+
+                if item_class not in skip_classes:
+
+                    item_body = objects_dumpers[item_class](item_uuid)
+
+                    item_filename = "/%s/%s.yaml" % (item_class, item_body.get('uuid'))
+
+                    proposal_type = get_proposal_type(_sp["proposalmanagementinformation_uuid"])
+                    item_type = proposal_type["type"]
+
+                    proposal_items[item_filename] = {
+                        "item_uuid": item_uuid,
+                        "item_body": item_body,
+                        "item_class": item_class,
+                        #"disposition": disposition,
+                        "type": item_type
+                    }
+                    if item_type == "amendment":
+                        proposal_items[item_filename]["amendmentType"] = proposal_type["amendmentType"]
+                        if proposal_type["amendmentType"] == "supersession":
+                            if supersedingitems_uuid := get_supersedingitems_uuid(row[_["uuid"]]):
+                                proposal_items[item_filename]["supersedingItemIDs"] = supersedingitems_uuid
+                            else:
+                                proposal_items[item_filename]["supersedingItemIDs"] = []
 
             mgnt_info = get_proposals_management(sp["proposalmanagementinformation_uuid"])
             responsible_parties = transform_responsible_parties(mgnt_info['responsible_party'])
@@ -1956,6 +1957,10 @@ def proposals_dump():
                 data['timeDisposed'] = mgnt_info['dateproposed']
 
             proposals.append(data)
+        else:
+            print(f"No simple proposal found for {row[_['uuid']]}")
+            print(f"{row[_['uuid']]}  is parent of a Group = {is_proposal_group(row[_['uuid']])}")
+
 
     for proposal in proposals:
         uuid = proposal.get("id")
