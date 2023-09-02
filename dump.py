@@ -1872,7 +1872,7 @@ def proposals_dump():
 
         if sp:
             if is_proposal_group(row[_["uuid"]]):
-                # 1) Proposal group, process all proposals_items associated with parent_uuid
+                # 1) Proposal group: process all proposals_items associated with parent_uuid
                 proposals_uuid.add(row[_["parent_uuid"]])
                 items_uuid_list = get_proposals_uuid_by_parent(row[_["parent_uuid"]])
                 print(f"Group {len(items_uuid_list)}")
@@ -1882,8 +1882,8 @@ def proposals_dump():
                 items_uuid_list = [row[_["uuid"]]]
                 print(f"Single Proposal {items_uuid_list}")
             else:
-                # 3) Proposal group root node. Skip. Group will be processed in step 1)
-                # when a proposal with parent_uuid == row[_["uuid"]] will be found
+                # 3) Proposal group root node: skip. Group will be processed in step 1)
+                # when a proposal with parent_uuid == row[_["uuid"]] is found
                 continue
             proposal_items = {}
             disposition = ""
