@@ -1852,9 +1852,6 @@ def proposals_dump():
 
     for row in cur.fetchall():
 
-        # if row[_["uuid"]] in ['504d52c6-e531-438e-bdb7-2d036e63892f', 'f4f1b014-d83a-481a-aa64-64721152ba51']:
-        #     import ipdb; ipdb.set_trace()
-
         if row[_["status"]].lower() == "not_submitted":
             # Exclude proposals that have not been submitted
             continue
