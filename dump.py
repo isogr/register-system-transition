@@ -1844,47 +1844,43 @@ def proposals_dump():
             status
         FROM
             proposal
-    """
-    )
+    """)
 
     proposals = []
-    proposals_uuid = set()
+    group_proposals_uuid = set()
     _ = get_cols_dict()
 
-    skip_classes = [
-        'coordinate-sys--vertical', 
-        'prime-meridian',
-        'coordinate-sys--cartesian',
-        'crs--projected'
-    ]
-
     for row in cur.fetchall():
+
+        # if row[_["uuid"]] in ['504d52c6-e531-438e-bdb7-2d036e63892f', 'f4f1b014-d83a-481a-aa64-64721152ba51']:
+        #     import ipdb; ipdb.set_trace()
 
         if row[_["status"]].lower() == "not_submitted":
             # Exclude proposals that have not been submitted
             continue
 
-        sp = get_simple_proposal(row[_["uuid"]])
-
-        if row[_["parent_uuid"]] in proposals_uuid:
+        if row[_["parent_uuid"]] in group_proposals_uuid:
             # Avoid duplicating proposals
             continue
 
+        sp = get_simple_proposal(row[_["uuid"]])
+
         if sp:
-            if is_proposal_group(row[_["uuid"]]):
+            # Some proposals can be both parents of a ProposalGroup
+            # and single Proposals. In this case, a SimpleProposal
+            # is associated with this uuid, thus this is a Proposal
+            if is_proposal_group(row[_["parent_uuid"]]):
                 # 1) Proposal group: process all proposals_items associated with parent_uuid
-                proposals_uuid.add(row[_["parent_uuid"]])
+                if row[_["parent_uuid"]] in group_proposals_uuid:
+                    # Avoid duplicating proposals
+                    continue
+                group_proposals_uuid.add(row[_["parent_uuid"]])
                 items_uuid_list = get_proposals_uuid_by_parent(row[_["parent_uuid"]])
-                print(f"Group {len(items_uuid_list)}")
-            elif not is_proposal_group(row[_["parent_uuid"]]):
+                print(f"Group {row[_['parent_uuid']]}")
+            else:
                 # 2) Single proposal
-                proposals_uuid.add(row[_["uuid"]])
                 items_uuid_list = [row[_["uuid"]]]
                 print(f"Single Proposal {items_uuid_list}")
-            else:
-                # 3) Proposal group root node: skip. Group will be processed in step 1)
-                # when a proposal with parent_uuid == row[_["uuid"]] is found
-                continue
             proposal_items = {}
             disposition = ""
 
@@ -1902,29 +1898,27 @@ def proposals_dump():
                 item_uuid = mgnt_info['item_uuid']
                 item_class = name_classes[_sp['itemclassname']]
 
-                if item_class not in skip_classes:
+                item_body = objects_dumpers[item_class](item_uuid)
 
-                    item_body = objects_dumpers[item_class](item_uuid)
+                item_filename = "/%s/%s.yaml" % (item_class, item_body.get('uuid'))
 
-                    item_filename = "/%s/%s.yaml" % (item_class, item_body.get('uuid'))
+                proposal_type = get_proposal_type(_sp["proposalmanagementinformation_uuid"])
+                item_type = proposal_type["type"]
 
-                    proposal_type = get_proposal_type(_sp["proposalmanagementinformation_uuid"])
-                    item_type = proposal_type["type"]
-
-                    proposal_items[item_filename] = {
-                        "item_uuid": item_uuid,
-                        "item_body": item_body,
-                        "item_class": item_class,
-                        #"disposition": disposition,
-                        "type": item_type
-                    }
-                    if item_type == "amendment":
-                        proposal_items[item_filename]["amendmentType"] = proposal_type["amendmentType"]
-                        if proposal_type["amendmentType"] == "supersession":
-                            if supersedingitems_uuid := get_supersedingitems_uuid(row[_["uuid"]]):
-                                proposal_items[item_filename]["supersedingItemIDs"] = supersedingitems_uuid
-                            else:
-                                proposal_items[item_filename]["supersedingItemIDs"] = []
+                proposal_items[item_filename] = {
+                    "item_uuid": item_uuid,
+                    "item_body": item_body,
+                    "item_class": item_class,
+                    #"disposition": disposition,
+                    "type": item_type
+                }
+                if item_type == "amendment":
+                    proposal_items[item_filename]["amendmentType"] = proposal_type["amendmentType"]
+                    if proposal_type["amendmentType"] == "supersession":
+                        if supersedingitems_uuid := get_supersedingitems_uuid(row[_["uuid"]]):
+                            proposal_items[item_filename]["supersedingItemIDs"] = supersedingitems_uuid
+                        else:
+                            proposal_items[item_filename]["supersedingItemIDs"] = []
 
             mgnt_info = get_proposals_management(sp["proposalmanagementinformation_uuid"])
             responsible_parties = transform_responsible_parties(mgnt_info['responsible_party'])
@@ -1957,10 +1951,8 @@ def proposals_dump():
                 data['timeDisposed'] = mgnt_info['dateproposed']
 
             proposals.append(data)
-        else:
-            print(f"No simple proposal found for {row[_['uuid']]}")
-            print(f"{row[_['uuid']]}  is parent of a Group = {is_proposal_group(row[_['uuid']])}")
-
+        # else:
+        #     print(f"No simple proposal found for {row[_['uuid']]}")
 
     for proposal in proposals:
         uuid = proposal.get("id")
@@ -1988,22 +1980,6 @@ def is_proposal_group(uuid):
             proposal
         WHERE
             parent_uuid = %(uuid)s
-    """,
-        {"uuid": uuid},
-    )
-
-    return cur.fetchone()[0] > 0
-
-
-def is_proposal_group2(uuid):
-    cur.execute(
-        """
-        SELECT
-            count(uuid)
-        FROM
-            proposalgroup
-        WHERE
-            uuid = %(uuid)s
     """,
         {"uuid": uuid},
     )
