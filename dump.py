@@ -7,6 +7,7 @@ import argparse
 import json
 import glob
 
+import javaobj
 from yaml import dump
 import psycopg2
 
@@ -503,18 +504,8 @@ def get_op_simple_param_val(uuid):
     op_param_val = cur.fetchone()
 
     if op_param_val:
-        val_str = str(psycopg2.Binary(op_param_val[0]))
-        val_str = val_str.replace("::bytea", "").strip("'")
-
-        val_str = val_str.replace('\\254\\355\\000\\005sr\\000\\020java.lang.Double\\200\\263\\302J)k\\373\\004\\002\\000\\001D\\000\\005valuexr\\000\\020java.lang.Number\\206\\254\\225\\035\\013\\224\\340\\213\\002\\000\\000xp', '')
-
-        if not val_str.replace('\\000', ''):
-            value = float(0.0)
-        else:
-            value = None
-
         return {
-            "value": value,
+            "value": convert_binary_into_human_readable_string(op_param_val[0].hex()),
             "classID": "unit-of-measurement",
             "uuid": op_param_val[1]
         }
@@ -891,7 +882,7 @@ def concat_conversion_dump(uuid=None):
                 # "accuracy": get_coord_op_accuracy(row[_["uuid"]]),
                 "scope": get_coord_op_scope(row[_["uuid"]]),
                 "remarks": row[_["remarks"]],
-                "parameters": get_op_params_by_method_uuid(row[_["uuid"]]),
+                "parameters": get_conversion_params(row[_["uuid"]]),
                 "definition": row[_["definition"]],
                 "sourcecrs_uuid": row[_["sourcecrs_uuid"]],
                 "targetcrs_uuid": row[_["targetcrs_uuid"]],
@@ -907,6 +898,56 @@ def concat_conversion_dump(uuid=None):
             return None
     else:
         save_items(items, "coordinate-ops--conversion")
+
+
+def get_conversion_params(uuid):
+    cur.execute(
+        """
+        SELECT 
+            C.operationparametervalue_uuid,
+            F.name,
+            D.uuid,
+            C.value
+        FROM 
+            conversionitem A,
+            singleoperationitem_generalparametervalue B,
+            operationparametervalue_parametervalue C,
+            unitofmeasure D,
+            generalparametervalue E,
+            operationparameteritem F
+        WHERE 
+            A.uuid = %(uuid)s
+            AND A.uuid = B.singleoperationitem_uuid
+            AND B.parametervalue_uuid = C.operationparametervalue_uuid
+            AND C.uom_uuid = D.uuid
+            AND E.uuid = C.operationparametervalue_uuid
+            AND F.uuid = E.parameter_uuid;
+        """,
+        {"uuid": uuid},
+    )
+
+    items = []
+
+
+    for row in cur.fetchall():
+        item = {
+            "value": convert_binary_into_human_readable_string(row[3].hex()),
+            "unitOfMeasurement": row[2]
+        }
+
+        param_val_uuid = row[0]
+        _param_val = get_op_param_val(param_val_uuid)
+        item["parameter"] = _param_val["uuid"]
+
+        items.append(item)
+
+    return items
+
+
+def convert_binary_into_human_readable_string(binary_value):
+    binary_data = bytes.fromhex(binary_value)
+    deserialized_object = javaobj.loads(binary_data)
+    return deserialized_object.value
 
 
 def cs_spherical_dump():
@@ -2068,18 +2109,12 @@ def get_proposal_type(uuid):
         return {
             'type': 'addition'
         }
-    else:
-        amendment = get_amendment_type(uuid)
-
-    if amendment:
+    elif amendment := get_amendment_type(uuid):
         return {
             'type': 'amendment',
             'amendmentType': amendment
         }
-    else:
-        clarification = get_clarification(uuid)
-
-    if clarification:
+    elif clarification := get_clarification(uuid):
         return {
             'type': 'clarification',
             'proposedChange': clarification
