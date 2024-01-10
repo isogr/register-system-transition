@@ -136,6 +136,29 @@ def get_author_publisher_informationsource(uuid):
     return None
 
 
+def get_extra_information_source_data(uuid):
+    cur.execute(
+        """
+        SELECT
+            datetype_value, date_date
+        FROM
+            ci_citation_date
+        WHERE
+            ci_citation_uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    _row = cur.fetchone()
+
+    if _row:
+        if _row[0] == 'revision':
+            return {"revisionDate": _row[1]}
+        elif _row[0] == 'publication':
+            return {"publicationDate": _row[1]}
+    return None
+
+
 def get_citation(uuid):
     cur.execute(
         """
@@ -191,8 +214,9 @@ def get_citation(uuid):
             "seriesName": row[_["series_name"]],
             "seriesIssueID": row[_["series_issueidentification"]],
             "seriesPage": row[_["series_page"]],
-            # TODO revision_data, edition, issue, page
         }
+
+        output.update(get_extra_information_source_data(row[_["uuid"]]))
 
         responsible_parties = get_ci_citation_ci_responsibleparty(uuid)
         for responsible_party in responsible_parties:
@@ -1678,10 +1702,11 @@ def transformations_dump(uuid=None):
             method_uuid
         FROM
             transformationitem
+        WHERE identifier > 0
     """
 
     if uuid:
-        query += " WHERE uuid = '%s'" % uuid
+        query += " AND uuid = '%s'" % uuid
 
     cur.execute(query)
     _ = get_cols_dict()
