@@ -1050,10 +1050,12 @@ def datums_vertical_dump(uuid=None):
             coordinatereferenceepoch
         FROM
             verticaldatum
+        WHERE
+            identifier > 0
     """
 
     if uuid:
-        query += " WHERE uuid = '%s'" % uuid
+        query += " AND uuid = '%s'" % uuid
 
     cur.execute(query)
     _ = get_cols_dict()
@@ -1061,24 +1063,25 @@ def datums_vertical_dump(uuid=None):
     items = []
 
     for row in cur.fetchall():
-        items.append(
-            {
-                "uuid": row[_["uuid"]],
-                "dateAccepted": row[_["dateaccepted"]],
-                "status": row[_["status"]].lower(),
-                "name": row[_["name"]],
-                "identifier": int(row[_["identifier"]]),
-                "aliases": get_aliases(row[_["uuid"]]),
-                "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
-                "remarks": row[_["remarks"]],
-                "releaseDate": row[_["realization_epoch"]],
-                "definition": row[_["definition"]],
-                "originDescription": row[_["origin_description"]],
-                "scope": row[_["datum_scope"]],
-                "coordinateReferenceEpoch": row[_["coordinatereferenceepoch"]],
-                "informationSources": get_citations_by_item(row[_["uuid"]])
-            }
-        )
+        if int(row[_["identifier"]]) > 0:
+            items.append(
+                {
+                    "uuid": row[_["uuid"]],
+                    "dateAccepted": row[_["dateaccepted"]],
+                    "status": row[_["status"]].lower(),
+                    "name": row[_["name"]],
+                    "identifier": int(row[_["identifier"]]),
+                    "aliases": get_aliases(row[_["uuid"]]),
+                    "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
+                    "remarks": row[_["remarks"]],
+                    "releaseDate": row[_["realization_epoch"]],
+                    "definition": row[_["definition"]],
+                    "originDescription": row[_["origin_description"]],
+                    "scope": row[_["datum_scope"]],
+                    "coordinateReferenceEpoch": row[_["coordinatereferenceepoch"]],
+                    "informationSources": get_citations_by_item(row[_["uuid"]])
+                }
+            )
 
     if uuid:
         if items:
@@ -1184,10 +1187,12 @@ def co_method_dump(uuid=None):
             formulacitation_uuid
         FROM
             operationmethoditem
+        WHERE
+            identifier > 0
     """
 
     if uuid:
-        query += " WHERE uuid = '%s'" % uuid
+        query += " AND uuid = '%s'" % uuid
 
     cur.execute(query)
     _ = get_cols_dict()
@@ -1811,10 +1816,12 @@ def crs_vertical_dump(uuid=None):
             datum_uuid
         FROM
             verticalcrs
+        WHERE
+            identifier > 0
     """
 
     if uuid:
-        query += " WHERE uuid = '%s'" % uuid
+        query += " AND uuid = '%s'" % uuid
 
     cur.execute(query)
     _ = get_cols_dict()
@@ -1938,6 +1945,8 @@ def proposals_dump():
 
                 item_body = objects_dumpers[item_class](item_uuid)
 
+                if not item_body:
+                    continue
                 item_filename = "/%s/%s.yaml" % (item_class, item_body.get('uuid'))
 
                 proposal_type = get_proposal_type(_sp["proposalmanagementinformation_uuid"])
