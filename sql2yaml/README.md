@@ -1,6 +1,4 @@
-Data Extraction Tools
----------------------
----------------------
+Data migration script that takes SQL data dump and outputs a set of YAML files representing Paneron dataset with the register.
 
 Installation
 ------------
