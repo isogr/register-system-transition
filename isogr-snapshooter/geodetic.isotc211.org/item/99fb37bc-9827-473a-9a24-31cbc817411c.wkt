@@ -1,0 +1,1 @@
+VERTCRS["EVRF2019mean - NHt",VDATUM["European Vertical Reference Frame 2019 mean tide"],CS[vertical,1],AXIS["Gravity-related height (H)",up],LENGTHUNIT["metre",1.0]],ID["ISO",766],REMARK["European Vertical Reference  Frame 2019 in mean tide system. See EVRF2019-NHt for zero-tide realization of EVRF2019 consistent with EVRS conventions."]

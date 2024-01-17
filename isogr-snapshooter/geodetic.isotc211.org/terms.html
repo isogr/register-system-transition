@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script type="text/javascript" async="async" src="www.googletagmanager.com/gtag/js?id=UA-138578173-3"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+
+      function gtag() {
+          dataLayer.push(arguments);
+      }
+
+      gtag('js', new Date());
+
+      gtag('config', 'UA-138578173-3');
+  </script>
+
+
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta http-equiv="Cache-control" content="no-cache" />
+  <title>ISO Geodetic Registry (ISOGR)</title>
+  <script type="text/javascript" src="resources/js/jquery.js"></script>
+  <script type="text/javascript" src="resources/js/jqueryui.js"></script>
+  <script type="text/javascript" src="resources/js/jquery.cookie.js"></script>
+  <script type="text/javascript" src="resources/js/jquery.hotkeys.js"></script>
+  <script type="text/javascript" src="resources/js/jquery.jstree.js"></script>
+  <script type="text/javascript" src="resources/js/jquery.validate.min.js"></script>
+  <script type="text/javascript" src="resources/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="resources/js/moment.min.js"></script>
+  <script type="text/javascript" src="resources/js/bootstrap-datetimepicker.min.js"></script>
+  <script type="text/javascript" src="resources/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="resources/js/datatables.js"></script>
+  <script type="text/javascript" src="resources/js/registry.js"></script>
+  <script type="text/javascript" src="resources/js/select2.js"></script>
+  <!-- 		<script type="text/javascript" src="bespire.atlassian.net/s/5aabcb68bc266b63d9c98db2e18c606b-T/en_USbdmabc/6327/13/1.4.11/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?collectorId=3eddc320"></script> -->
+  <link rel="stylesheet" href="resources/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="resources/css/bootstrap-theme.min.css" />
+  <link rel="stylesheet" href="resources/css/bootstrap-datetimepicker.min.css" />
+  <link rel="stylesheet" href="resources/css/font-titillium.css" type="text/css" />
+  <link rel="stylesheet" href="resources/css/font-awesome.min.css" type="text/css" />
+  <link rel="stylesheet" href="resources/css/datatables.css" />
+  <link rel="stylesheet" href="resources/css/select2.css" />
+  <link rel="stylesheet" href="resources/css/select2-bootstrap.css" />
+  <link rel="stylesheet" href="resources/css/select2-bootstrap-t0m.css" />
+  <link rel="stylesheet" href="resources/css/registry.css" />
+  <style type="text/css">
+    body {
+      padding-top: 110px;
+      padding-bottom: 40px;
+    }
+
+    .sidebartree {
+      padding-left: 20px;
+    }
+
+    /* 			nav[role="navigation"] img { */
+    /* 				background:#013568  */
+    /* 			} */
+
+    .navbar .navbar-brand {
+      max-height: 40px;
+      overflow: visible;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+
+    .bs-sidebar1 {
+      padding-top: 9px 0;
+      position: fixed;
+      left: 20px;
+      top: 60px;
+      width: 250px;
+    }
+
+    .test {
+      -webkit-font-smoothing: antialiased;
+      font-family: 'Titillium Web', sans-serif, Arial, sans-serif;
+      font-size: 18pt;
+    }
+
+    .powered-by {
+      flex: 1;
+      width: 112px;
+      padding-top: 0.5em;
+    }
+
+    .powered-by .powered-by-text {
+      font-size: 0.5em;
+      text-transform: uppercase;
+      font-weight: 600;
+      display: block
+    }
+
+    .powered-by img {
+      width: 100px;
+      display: block
+    }
+  </style>
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+</head>
+<body>
+	<div>
+  <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button id="collapsenavbar" type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+        <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <!-- 				<h1><span>Home</span></h1> -->
+      <img alt="ISO" id="logo" class="img-responsive pull-left" style="padding-top: 10px; padding-left: 10px" src="resources/images/iso.png" />
+      <a style="padding-top:15px" class="test navbar-brand" href="index.html">Geodetic Registry</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse navbar-ex1-collapse" style="margin-top: 40px">
+      <ul class="nav navbar-nav navbar-right">
+        
+        <li class="dropdown">
+          <a href="terms.html#" class="dropdown-toggle" data-toggle="dropdown"><span>Documentation</span> <span class="caret"></span></a>
+          <ul class="dropdown-menu" style="padding: 15px; min-width: 250px;">
+            <li>
+              <a href="iso-tc211.github.io/iso-geodetic-register-docs/" target="_blank">User Guide</a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+      <!-- 				<div class="navbar-form navbar-right"> -->
+      <!-- 					<div class="btn-group"> -->
+      <!--  						<button id="navbar_lang_DE" th:class="'btn btn-default' + (${#locale.language} eq 'de' ? ' active' : '')">DE</button> -->
+      <!-- 						<button id="navbar_lang_EN" th:class="'btn btn-default' + (${#locale.language} eq 'en' ? ' active' : '')">EN</button> -->
+      <!-- 					</div> -->
+      <!-- 				</div> -->
+      <script type="text/javascript">
+          $('#navbar_lang_EN').click(function () {
+              $.cookie('siteLanguage', 'en', {
+                  path: '/'
+              });
+              location.reload();
+          });
+          $('#navbar_lang_DE').click(function () {
+              $.cookie('siteLanguage', 'de', {
+                  path: '/'
+              });
+              location.reload();
+          });
+      </script>
+
+    </div>
+    <!-- /.navbar-collapse -->
+  </nav>
+</div>
+  
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div class="col-md-3">
+				<div>
+  <div class="sidebartree well">
+    <div class="bs-sidebar affix-top">
+      <div style="overflow: hidden">
+        <div id="demo1" class="demo" style="height: 100%;">
+          <ul>
+            <li id="nav_start"><a class="jstest" href="index.html">Welcome</a></li>
+            
+            <li class="jstree-open" id="registergeodetic">
+              <a href="register/geodetic.html" title="ISO Geodetic Register">ISO Geodetic Register</a>
+              <ul>
+                <li>
+                  <a id="registergeodeticcrs" href="register/geodetic/crs.html">Coordinate Reference
+                    Systems</a>
+                  <ul>
+                    
+                    <li id="registergeodeticCompoundCRS">
+                      <a href="register/geodetic/CompoundCRS.html" title="Compound CRS">Compound CRS</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticEngineeringCRS">
+                      <a href="register/geodetic/EngineeringCRS.html" title="Engineering CRS">Engineering CRS</a>
+                    </li>
+                    
+                    <li id="registergeodeticGeodeticCRS">
+                      <a href="register/geodetic/GeodeticCRS.html" title="Geodetic CRS">Geodetic CRS</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticProjectedCRS">
+                      <a href="register/geodetic/ProjectedCRS.html" title="Projected CRS">Projected CRS</a>
+                    </li>
+                    
+                    
+                    
+                    <li id="registergeodeticVerticalCRS">
+                      <a href="register/geodetic/VerticalCRS.html" title="Vertical CRS">Vertical CRS</a>
+                    </li>
+                    
+                    
+                  </ul>
+                </li>
+                <li>
+                  <a id="registergeodeticcs" href="register/geodetic/cs.html">Coordinate Systems</a>
+                  <ul>
+                    <li id="registergeodeticCartesianCS">
+                      <a href="register/geodetic/CartesianCS.html" title="Cartesian Coordinate System">Cartesian Coordinate System</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticEllipsoidalCS">
+                      <a href="register/geodetic/EllipsoidalCS.html" title="Ellipsoidal Coordinate System">Ellipsoidal Coordinate System</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticSphericalCS">
+                      <a href="register/geodetic/SphericalCS.html" title="Spherical Coordinate System">Spherical Coordinate System</a>
+                    </li>
+                    
+                    
+                    
+                    <li id="registergeodeticVerticalCS">
+                      <a href="register/geodetic/VerticalCS.html" title="Vertical Coordinate System">Vertical Coordinate System</a>
+                    </li>
+                    
+                  </ul>
+                </li>
+                <li>
+                  <a id="registergeodeticdatums" href="register/geodetic/datums.html">Datums</a>
+                  <ul>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticEngineeringDatum">
+                      <a href="register/geodetic/EngineeringDatum.html" title="Engineering Datum">Engineering Datum</a>
+                    </li>
+                    
+                    <li id="registergeodeticGeodeticDatum">
+                      <a href="register/geodetic/GeodeticDatum.html" title="Geodetic Datum">Geodetic Datum</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticVerticalDatum">
+                      <a href="register/geodetic/VerticalDatum.html" title="Vertical Datum">Vertical Datum</a>
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  <a id="registergeodeticoperations" href="register/geodetic/operations.html">Coordinate
+                    Operations</a>
+                  <ul>
+                    
+                    
+                    <li id="registergeodeticConcatenatedOperation">
+                      <a href="register/geodetic/ConcatenatedOperation.html" title="Concatenated Operation">Concatenated Operation</a>
+                    </li>
+                    <li id="registergeodeticConversion">
+                      <a href="register/geodetic/Conversion.html" title="Conversion">Conversion</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticTransformation">
+                      <a href="register/geodetic/Transformation.html" title="Transformation">Transformation</a>
+                    </li>
+                    
+                    
+                    
+                    
+                  </ul>
+                </li>
+                <li>
+                  <a id="registergeodeticothers" href="register/geodetic/others.html">Other</a>
+                  <ul>
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticCoordinateSystemAxis">
+                      <a href="register/geodetic/CoordinateSystemAxis.html" title="Coordinate System Axis">Coordinate System Axis</a>
+                    </li>
+                    <li id="registergeodeticEllipsoid">
+                      <a href="register/geodetic/Ellipsoid.html" title="Ellipsoid">Ellipsoid</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticOperationMethod">
+                      <a href="register/geodetic/OperationMethod.html" title="Coordinate Operation Method">Coordinate Operation Method</a>
+                    </li>
+                    <li id="registergeodeticOperationParameter">
+                      <a href="register/geodetic/OperationParameter.html" title="Coordinate Operation Parameter">Coordinate Operation Parameter</a>
+                    </li>
+                    <li id="registergeodeticPrimeMeridian">
+                      <a href="register/geodetic/PrimeMeridian.html" title="Prime Meridian">Prime Meridian</a>
+                    </li>
+                    
+                    
+                    
+                    <li id="registergeodeticUnitOfMeasure">
+                      <a href="register/geodetic/UnitOfMeasure.html" title="Unit of Measurement">Unit of Measurement</a>
+                    </li>
+                    
+                    
+                    
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            
+            
+            
+            <!-- 							<li id="adminproposals" sec:authorize="hasRole('ROLE_ADMIN')"><a th:href="@{__${basePath}__/admin/proposals}" th:text="#{navbar.proposalManagement}">Vorschlagsverwaltung</a></li> -->
+          </ul>
+        </div>
+        <script type="text/javascript">
+            $(function () {
+                var ready = false;
+
+                var cancelHashChange = false,
+                    // method sets the selector based off of URL input
+                    setSelector = function (path) {
+                        var basePath = '';
+                        if (basePath !== '') {
+                            basePath = basePath.replace('~', '');
+                        }
+                        basePath = basePath + '/';
+
+                        var startIndex = path.indexOf(basePath);
+                        if (startIndex > -1) {
+                            path = path.substr(startIndex + basePath.length);
+                        }
+                        path = path.replace(/\//g, '');
+                        if ($.trim(path) === '') {
+                            path = 'nav_start';
+                        }
+                        return '#' + path;
+                    };
+
+                $("#demo1").jstree({
+                    // the `plugins` array allows you to configure the active plugins on this instance
+                    "plugins": ["themes", "html_data", "ui", "crrm", "hotkeys"],
+                    // each plugin you have included can have its own config object
+                    "core": {
+                        "animation": 100,
+                        "initially_open": ["nav_register", "nav_mgmt", "nav_usermgmt"]
+                    },
+                    "ui": {
+                        //"initially_select" : [ "nav_start" ]
+                    },
+                    "cookies": {
+                        "auto_save": true,
+                        "cookie_options": {
+                            "path": '/'
+                        }
+                    },
+                    // set a theme
+                    "themes": {
+                        "theme": "proton",
+                        "dots": false
+                    },
+                })
+                    .bind("reselect.jstree", function () {
+                        ready = true;
+                    })
+                    .bind("select_node.jstree", function (e, data) {
+                        var href = data.rslt.obj.children("a").attr("href");
+                        // this will load content into a div:
+                        //$("#contents").load(href);
+                        // this will follow the link:
+                        if (ready) {
+                            document.location.href = href;
+                        }
+                    })
+                    .bind("loaded.jstree", function (event, data) {
+                        //alert(window.location.pathname);
+                        $.jstree._focused().select_node(setSelector(window.location.pathname));
+                        // when loaded sets initial state based off of priority hash first OR url
+//							        if (window.location.hash) { // if hash defined then set tree state
+//							            $.jstree._focused().select_node(selector);
+//							            $(setSelector(window.location.hash.substr(1)) + ' a:first').trigger('click');
+//							        } else { // otherwise base state off of URL
+//							            $.jstree._focused().select_node(setSelector(window.location.pathname));
+//							        }
+                    });
+            });
+        </script>
+      </div>
+    </div>
+  </div>
+
+  <!-- 	    <footer class="footer"> -->
+  <!-- 	    	<div class="container"> -->
+  <!-- 		      	<div class="pull-right"> -->
+  <!-- 		      		<p class="text-muted">Software version: <span th:text="#{application.version}"></span></p> -->
+  <!-- 		      	</div> -->
+  <!-- 			</div> -->
+  <!-- 	    </footer>			 -->
+
+</div>
+			</div>
+			<div class="col-md-9" role="main">
+			  	
+				<h3>Terms of Use</h3>
+				<div class="col-md-2"></div>
+				<div class="col-md-8">
+					<div class="panel panel-default">
+						<div class="panel-heading">The data in the ISO Geodetic Registry may be used, copied and distributed subject to the following conditions:</div>
+						<div class="panel-body">
+							<p>
+								Whilst every effort has been made to ensure the accuracy of the information contained in the ISO Geodetic Registry facilities, neither the ISO/TC211 nor any of its members, past, present or future, warrants their accuracy or will, regardless of its or their negligence, assume liability for any foreseeable or unforeseeable use made thereof, which liability is hereby excluded. Consequently, such use is at the users' risk. The user is obliged to inform anyone to whom the ISO Geodetic Registry facilities are provided of these Terms of Use.
+							</p>
+							<p>
+								<strong>DATA AND INFORMATION PROVIDED IN THE ISO GEODETIC REGISTRY FACILITIES ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.</strong>
+							</p>
+							<p>
+								The data may be included in any commercial package provided that any commerciality is based on value added by the provider and not on a value ascribed to the ISO Geodetic Registry dataset, which is made available at no charge.
+							</p>
+							<p>
+								Ownership of the ISO Geodetic Registry dataset by ISO/TC 211 must be acknowledged in any publication or transmission (by whatever means) thereof (including permitted modifications).
+							</p>
+							<p>
+								Subsets of information may be extracted from the dataset.
+							</p>
+							<p>
+								Essential elements should preferably be reproduced as described in the dataset. Modification of parameter values is permitted to allow change to the content of the information provided that numeric equivalence is achieved. Numeric equivalence refers to the results of geodetic calculations in which the parameters are used.
+							</p>
+							<p>
+								No data that has been modified, other than as permitted in these Terms of Use, shall be attributed to the ISO Geodetic Registry dataset.
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

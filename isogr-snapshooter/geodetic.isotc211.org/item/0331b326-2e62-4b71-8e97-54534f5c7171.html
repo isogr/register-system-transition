@@ -1,0 +1,2102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="-//W3C//DTD XHTML 1.1//EN">
+<head xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script type="text/javascript" async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-138578173-3"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+
+      function gtag() {
+          dataLayer.push(arguments);
+      }
+
+      gtag('js', new Date());
+
+      gtag('config', 'UA-138578173-3');
+  </script>
+
+
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta http-equiv="Cache-control" content="no-cache" />
+  <title>ISO Geodetic Registry (ISOGR)</title>
+  <script type="text/javascript" src="/resources/js/jquery.js"></script>
+  <script type="text/javascript" src="/resources/js/jqueryui.js"></script>
+  <script type="text/javascript" src="/resources/js/jquery.cookie.js"></script>
+  <script type="text/javascript" src="/resources/js/jquery.hotkeys.js"></script>
+  <script type="text/javascript" src="/resources/js/jquery.jstree.js"></script>
+  <script type="text/javascript" src="/resources/js/jquery.validate.min.js"></script>
+  <script type="text/javascript" src="/resources/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/resources/js/moment.min.js"></script>
+  <script type="text/javascript" src="/resources/js/bootstrap-datetimepicker.min.js"></script>
+  <script type="text/javascript" src="/resources/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="/resources/js/datatables.js"></script>
+  <script type="text/javascript" src="/resources/js/registry.js"></script>
+  <script type="text/javascript" src="/resources/js/select2.js"></script>
+  <!-- 		<script type="text/javascript" src="https://bespire.atlassian.net/s/5aabcb68bc266b63d9c98db2e18c606b-T/en_USbdmabc/6327/13/1.4.11/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?collectorId=3eddc320"></script> -->
+  <link rel="stylesheet" href="/resources/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="/resources/css/bootstrap-theme.min.css" />
+  <link rel="stylesheet" href="/resources/css/bootstrap-datetimepicker.min.css" />
+  <link rel="stylesheet" href="/resources/css/font-titillium.css" type="text/css" />
+  <link rel="stylesheet" href="/resources/css/font-awesome.min.css" type="text/css" />
+  <link rel="stylesheet" href="/resources/css/datatables.css" />
+  <link rel="stylesheet" href="/resources/css/select2.css" />
+  <link rel="stylesheet" href="/resources/css/select2-bootstrap.css" />
+  <link rel="stylesheet" href="/resources/css/select2-bootstrap-t0m.css" />
+  <link rel="stylesheet" href="/resources/css/registry.css" />
+  <style type="text/css">
+    body {
+      padding-top: 110px;
+      padding-bottom: 40px;
+    }
+
+    .sidebartree {
+      padding-left: 20px;
+    }
+
+    /* 			nav[role="navigation"] img { */
+    /* 				background:#013568  */
+    /* 			} */
+
+    .navbar .navbar-brand {
+      max-height: 40px;
+      overflow: visible;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+
+    .bs-sidebar1 {
+      padding-top: 9px 0;
+      position: fixed;
+      left: 20px;
+      top: 60px;
+      width: 250px;
+    }
+
+    .test {
+      -webkit-font-smoothing: antialiased;
+      font-family: 'Titillium Web', sans-serif, Arial, sans-serif;
+      font-size: 18pt;
+    }
+
+    .powered-by {
+      flex: 1;
+      width: 112px;
+      padding-top: 0.5em;
+    }
+
+    .powered-by .powered-by-text {
+      font-size: 0.5em;
+      text-transform: uppercase;
+      font-weight: 600;
+      display: block
+    }
+
+    .powered-by img {
+      width: 100px;
+      display: block
+    }
+  </style>
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+</head>
+<body xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+	<div>
+  <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button id="collapsenavbar" type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+        <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <!-- 				<h1><span>Home</span></h1> -->
+      <img alt="ISO" id="logo" class="img-responsive pull-left" style="padding-top: 10px; padding-left: 10px" src="/resources/images/iso.png" />
+      <a style="padding-top:15px" class="test navbar-brand" href="/">Geodetic Registry</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse navbar-ex1-collapse" style="margin-top: 40px">
+      <ul class="nav navbar-nav navbar-right">
+        
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span>Documentation</span> <span class="caret"></span></a>
+          <ul class="dropdown-menu" style="padding: 15px; min-width: 250px;">
+            <li>
+              <a href="https://iso-tc211.github.io/iso-geodetic-register-docs/" target="_blank">User Guide</a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+      <!-- 				<div class="navbar-form navbar-right"> -->
+      <!-- 					<div class="btn-group"> -->
+      <!--  						<button id="navbar_lang_DE" th:class="'btn btn-default' + (${#locale.language} eq 'de' ? ' active' : '')">DE</button> -->
+      <!-- 						<button id="navbar_lang_EN" th:class="'btn btn-default' + (${#locale.language} eq 'en' ? ' active' : '')">EN</button> -->
+      <!-- 					</div> -->
+      <!-- 				</div> -->
+      <script type="text/javascript">
+          $('#navbar_lang_EN').click(function () {
+              $.cookie('siteLanguage', 'en', {
+                  path: '/'
+              });
+              location.reload();
+          });
+          $('#navbar_lang_DE').click(function () {
+              $.cookie('siteLanguage', 'de', {
+                  path: '/'
+              });
+              location.reload();
+          });
+      </script>
+
+    </div>
+    <!-- /.navbar-collapse -->
+  </nav>
+</div>
+	
+	<div class="col-md-3">
+ 		<button id="topback" class="btn btn-default" onclick="history.back();">Back</button>
+		<div>
+  <div class="sidebartree well">
+    <div class="bs-sidebar affix-top">
+      <div style="overflow: hidden">
+        <div id="demo1" class="demo" style="height: 100%;">
+          <ul>
+            <li id="nav_start"><a class="jstest" href="/">Welcome</a></li>
+            
+            <li class="jstree-open" id="registergeodetic">
+              <a href="/register/geodetic.html" title="ISO Geodetic Register">ISO Geodetic Register</a>
+              <ul>
+                <li>
+                  <a id="registergeodeticcrs" href="/register/geodetic/crs.html">Coordinate Reference
+                    Systems</a>
+                  <ul>
+                    
+                    <li id="registergeodeticCompoundCRS">
+                      <a href="/register/geodetic/CompoundCRS.html" title="Compound CRS">Compound CRS</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticEngineeringCRS">
+                      <a href="/register/geodetic/EngineeringCRS.html" title="Engineering CRS">Engineering CRS</a>
+                    </li>
+                    
+                    <li id="registergeodeticGeodeticCRS">
+                      <a href="/register/geodetic/GeodeticCRS.html" title="Geodetic CRS">Geodetic CRS</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticProjectedCRS">
+                      <a href="/register/geodetic/ProjectedCRS.html" title="Projected CRS">Projected CRS</a>
+                    </li>
+                    
+                    
+                    
+                    <li id="registergeodeticVerticalCRS">
+                      <a href="/register/geodetic/VerticalCRS.html" title="Vertical CRS">Vertical CRS</a>
+                    </li>
+                    
+                    
+                  </ul>
+                </li>
+                <li>
+                  <a id="registergeodeticcs" href="/register/geodetic/cs.html">Coordinate Systems</a>
+                  <ul>
+                    <li id="registergeodeticCartesianCS">
+                      <a href="/register/geodetic/CartesianCS.html" title="Cartesian Coordinate System">Cartesian Coordinate System</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticEllipsoidalCS">
+                      <a href="/register/geodetic/EllipsoidalCS.html" title="Ellipsoidal Coordinate System">Ellipsoidal Coordinate System</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticSphericalCS">
+                      <a href="/register/geodetic/SphericalCS.html" title="Spherical Coordinate System">Spherical Coordinate System</a>
+                    </li>
+                    
+                    
+                    
+                    <li id="registergeodeticVerticalCS">
+                      <a href="/register/geodetic/VerticalCS.html" title="Vertical Coordinate System">Vertical Coordinate System</a>
+                    </li>
+                    
+                  </ul>
+                </li>
+                <li>
+                  <a id="registergeodeticdatums" href="/register/geodetic/datums.html">Datums</a>
+                  <ul>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticEngineeringDatum">
+                      <a href="/register/geodetic/EngineeringDatum.html" title="Engineering Datum">Engineering Datum</a>
+                    </li>
+                    
+                    <li id="registergeodeticGeodeticDatum">
+                      <a href="/register/geodetic/GeodeticDatum.html" title="Geodetic Datum">Geodetic Datum</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticVerticalDatum">
+                      <a href="/register/geodetic/VerticalDatum.html" title="Vertical Datum">Vertical Datum</a>
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  <a id="registergeodeticoperations" href="/register/geodetic/operations.html">Coordinate
+                    Operations</a>
+                  <ul>
+                    
+                    
+                    <li id="registergeodeticConcatenatedOperation">
+                      <a href="/register/geodetic/ConcatenatedOperation.html" title="Concatenated Operation">Concatenated Operation</a>
+                    </li>
+                    <li id="registergeodeticConversion">
+                      <a href="/register/geodetic/Conversion.html" title="Conversion">Conversion</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticTransformation">
+                      <a href="/register/geodetic/Transformation.html" title="Transformation">Transformation</a>
+                    </li>
+                    
+                    
+                    
+                    
+                  </ul>
+                </li>
+                <li>
+                  <a id="registergeodeticothers" href="/register/geodetic/others.html">Other</a>
+                  <ul>
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticCoordinateSystemAxis">
+                      <a href="/register/geodetic/CoordinateSystemAxis.html" title="Coordinate System Axis">Coordinate System Axis</a>
+                    </li>
+                    <li id="registergeodeticEllipsoid">
+                      <a href="/register/geodetic/Ellipsoid.html" title="Ellipsoid">Ellipsoid</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticOperationMethod">
+                      <a href="/register/geodetic/OperationMethod.html" title="Coordinate Operation Method">Coordinate Operation Method</a>
+                    </li>
+                    <li id="registergeodeticOperationParameter">
+                      <a href="/register/geodetic/OperationParameter.html" title="Coordinate Operation Parameter">Coordinate Operation Parameter</a>
+                    </li>
+                    <li id="registergeodeticPrimeMeridian">
+                      <a href="/register/geodetic/PrimeMeridian.html" title="Prime Meridian">Prime Meridian</a>
+                    </li>
+                    
+                    
+                    
+                    <li id="registergeodeticUnitOfMeasure">
+                      <a href="/register/geodetic/UnitOfMeasure.html" title="Unit of Measurement">Unit of Measurement</a>
+                    </li>
+                    
+                    
+                    
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            
+            
+            
+            <!-- 							<li id="adminproposals" sec:authorize="hasRole('ROLE_ADMIN')"><a th:href="@{__${basePath}__/admin/proposals}" th:text="#{navbar.proposalManagement}">Vorschlagsverwaltung</a></li> -->
+          </ul>
+        </div>
+        <script type="text/javascript">
+            $(function () {
+                var ready = false;
+
+                var cancelHashChange = false,
+                    // method sets the selector based off of URL input
+                    setSelector = function (path) {
+                        var basePath = '';
+                        if (basePath !== '') {
+                            basePath = basePath.replace('~', '');
+                        }
+                        basePath = basePath + '/';
+
+                        var startIndex = path.indexOf(basePath);
+                        if (startIndex > -1) {
+                            path = path.substr(startIndex + basePath.length);
+                        }
+                        path = path.replace(/\//g, '');
+                        if ($.trim(path) === '') {
+                            path = 'nav_start';
+                        }
+                        return '#' + path;
+                    };
+
+                $("#demo1").jstree({
+                    // the `plugins` array allows you to configure the active plugins on this instance
+                    "plugins": ["themes", "html_data", "ui", "crrm", "hotkeys"],
+                    // each plugin you have included can have its own config object
+                    "core": {
+                        "animation": 100,
+                        "initially_open": ["nav_register", "nav_mgmt", "nav_usermgmt"]
+                    },
+                    "ui": {
+                        //"initially_select" : [ "nav_start" ]
+                    },
+                    "cookies": {
+                        "auto_save": true,
+                        "cookie_options": {
+                            "path": '/'
+                        }
+                    },
+                    // set a theme
+                    "themes": {
+                        "theme": "proton",
+                        "dots": false
+                    },
+                })
+                    .bind("reselect.jstree", function () {
+                        ready = true;
+                    })
+                    .bind("select_node.jstree", function (e, data) {
+                        var href = data.rslt.obj.children("a").attr("href");
+                        // this will load content into a div:
+                        //$("#contents").load(href);
+                        // this will follow the link:
+                        if (ready) {
+                            document.location.href = href;
+                        }
+                    })
+                    .bind("loaded.jstree", function (event, data) {
+                        //alert(window.location.pathname);
+                        $.jstree._focused().select_node(setSelector(window.location.pathname));
+                        // when loaded sets initial state based off of priority hash first OR url
+//							        if (window.location.hash) { // if hash defined then set tree state
+//							            $.jstree._focused().select_node(selector);
+//							            $(setSelector(window.location.hash.substr(1)) + ' a:first').trigger('click');
+//							        } else { // otherwise base state off of URL
+//							            $.jstree._focused().select_node(setSelector(window.location.pathname));
+//							        }
+                    });
+            });
+        </script>
+      </div>
+    </div>
+  </div>
+
+  <!-- 	    <footer class="footer"> -->
+  <!-- 	    	<div class="container"> -->
+  <!-- 		      	<div class="pull-right"> -->
+  <!-- 		      		<p class="text-muted">Software version: <span th:text="#{application.version}"></span></p> -->
+  <!-- 		      	</div> -->
+  <!-- 			</div> -->
+  <!-- 	    </footer>			 -->
+
+</div>
+	</div>
+	<div class="col-md-9">
+		<div class="container">
+			<a id="downloadPdf" class="btn btn-sm btn-default pull-right" target="_blank" style="margin-top: 0px" href="/item/0331b326-2e62-4b71-8e97-54534f5c7171.pdf"><span>Download PDF</span>&nbsp;&nbsp;<span class="fa fa-file-pdf-o"></span></a>												
+			<ul class="nav nav-tabs" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+			<li class="active" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve"><a href="#item" data-toggle="tab" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve" shape="rect">Item details</a></li>
+			
+			
+			<li xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve"><a href="#managementInformation" data-toggle="tab" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve" shape="rect">Management information</a></li>
+		</ul>
+	
+			<div class="tab-content">
+				<div id="item" class="tab-pane in active" style="padding-top: 10px">
+					<div class="span6">
+	
+						<div class="panel panel-default">
+							<div class="panel-heading">
+								<h3 id="panelTitle" class="panel-title">Transformation</h3>
+							</div>
+							
+							<div class="panel-body">
+								<div>
+	<div class="row">
+		<div class="col-md-6"> <!-- LEFT -->
+			<div class="row">
+	<div class="col-md-8">
+		<div class="form-group has-feedback"> 
+	<div class="control-label" for="name">
+	<label class="control-label" for="name">
+		<span>Name</span> <a href="#" rel="popover" data-placement="right" data-container="body" data-trigger="hover" data-html="true" data-content="The primary name by which this object is identified." data-original-title="Name" id="popover-help-name"><span class="glyphicon glyphicon-info-sign" data-trigger="hover" style="margin-left: 5px; vertical-align:top;"></span></a>
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-name').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="name"><big>ITRF2014 to ETRF2000 [EUREF v1]</big></p>
+	
+	
+</div>
+	</div>
+	
+	<div class="col-md-4">
+<!-- 		<div th:replace="globals :: textField(${property}, ${inputType}, ${label}, ${placeholder}, ${isRequired})"/> -->
+		<div class="control-label" for="identifier">
+	<label class="control-label" for="identifier">
+		<span>Identifier</span> <a href="#" rel="popover" data-placement="right" data-container="body" data-trigger="hover" data-html="true" data-content="The unique code used to reference an object in this register." data-original-title="Identifier" id="popover-help-identifier"><span class="glyphicon glyphicon-info-sign" data-trigger="hover" style="margin-left: 5px; vertical-align:top;"></span></a>
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-identifier').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+		<p><big>761</big></p>
+	</div>
+</div>
+			<div class="row">
+<!--
+	handled in back-end 
+-->
+</div>
+			<div class="row">
+	
+	
+		
+</div>
+			<div class="row">
+				<div class="col-md-12">
+					<div class="form-group">
+	<label class="control-label" for="domainOfValidity">Extent</label>
+	<div>
+		<a id="domainOfValidity" href="#dialog-extent" data-toggle="modal"><big>Europe - onshore and offshore: Albania, Andorra, Austria, Belgium, Bosnia and Herzegovina, Bulgaria, Croatia, Cyprus, Czech Republic, Denmark, Estonia, Faroe Islands, Finland, France, Germany, Gibraltar, Greece, Hungary, Ireland, Italy, Latvia, Liechtenstein, Lithuania, Luxembourg, Macedonia, Malta, Monaco, Montenegro, Netherlands, Norway including Svalbard and Jan Mayen, Poland, Portugal, Romania, San Marino, Serbia, Slovakia, Slovenia, Spain, Sweden, Switzerland, United Kingdom (UK) including Channel Islands and Isle of Man, Vatican City State.</big></a>
+		
+	</div>
+	
+	
+	<div class="modal fade" id="dialog-extent" role="dialog">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4>Extent</h4>
+				</div>
+				<div class="modal-body">
+					<div>
+	
+
+	<div class="row">
+		<div class="col-md-12">
+			<div class="form-group has-feedback">
+	<div class="control-label" for="description">
+	<label class="control-label" for="description">
+		<span>Description</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-description').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="description-extent"><big>Europe - onshore and offshore: Albania, Andorra, Austria, Belgium, Bosnia and Herzegovina, Bulgaria, Croatia, Cyprus, Czech Republic, Denmark, Estonia, Faroe Islands, Finland, France, Germany, Gibraltar, Greece, Hungary, Ireland, Italy, Latvia, Liechtenstein, Lithuania, Luxembourg, Macedonia, Malta, Monaco, Montenegro, Netherlands, Norway including Svalbard and Jan Mayen, Poland, Portugal, Romania, San Marino, Serbia, Slovakia, Slovenia, Spain, Sweden, Switzerland, United Kingdom (UK) including Channel Islands and Isle of Man, Vatican City State.</big></p>
+	
+	
+</div>
+		</div>
+		
+	</div>
+
+	<ul class="nav nav-tabs">
+				<li class="active"><a href="#geographicExtent" data-toggle="tab">Geographic extent</a></li>
+<!-- 				<li class="disabled"><a href="#verticalExtent" data-toggle="tab" th:text="#{tabs.verticalExtent}"></a></li> -->
+<!-- 				<li class="disabled"><a href="#temporalExtent" data-toggle="tab" th:text="#{tabs.temporalExtent}"></a></li> -->
+	</ul>
+
+	<div class="tab-content">
+		<div id="geographicExtent" class="tab-pane in active" style="padding-top: 10px">
+			<div class="row">
+				<div class="col-md-12">
+					<table id="bboxTable" class="datatable table table-striped">
+						<thead>
+							<tr>
+								<th>Northern Lat</th>
+								<th>Eastern Lon</th>
+								<th>Southern Lat</th>
+								<th>Western Lon</th>
+								<th>
+									
+<!-- 											<button th:if="${isEditable}" th:text="#{button.addRow}" id="addRow" type="button" name="addRow" class="btn btn-sm btn-default">Add row</button> -->
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr id="row-0">
+								<td>
+									<input disabled="disabled" id="domainOfValidity.geographicBoundingBoxes0.northBoundLatitude" name="domainOfValidity.geographicBoundingBoxes[0].northBoundLatitude" value="84.17" />
+								</td>
+								<td>
+									<input disabled="disabled" id="domainOfValidity.geographicBoundingBoxes0.eastBoundLongitude" name="domainOfValidity.geographicBoundingBoxes[0].eastBoundLongitude" value="39.65" />
+								</td>
+								<td>
+									<input disabled="disabled" id="domainOfValidity.geographicBoundingBoxes0.southBoundLatitude" name="domainOfValidity.geographicBoundingBoxes[0].southBoundLatitude" value="32.88" />
+								</td>
+								<td>
+									<input disabled="disabled" id="domainOfValidity.geographicBoundingBoxes0.westBoundLongitude" name="domainOfValidity.geographicBoundingBoxes[0].westBoundLongitude" value="-16.1" />
+								</td>
+								<td>
+									
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="row">
+<!-- 						<a th:unless="!${isProposal} or ${proposal.isClarification()}" href="#dialog-boundingpolygon" id="addBoundingPolygon" data-toggle="modal" class="btn btn-default btn-sm disabled" th:text="#{button.addBoundingPolygon}"/> -->
+<!-- 						<a th:unless="!${isProposal} or ${proposal.isClarification()}" href="#dialog-geographicdescription" id="addGeographicDescription" data-toggle="modal" class="btn btn-default btn-sm disabled" th:text="#{button.addGeographicDescription}"/> -->
+			</div>
+
+			<div class="modal fade" id="dialog-boundingbox" role="dialog">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h4>Extent</h4>
+						</div>
+						<div class="modal-body">
+							<div class="row">
+								<div class="col-md-3"></div>
+								<div class="col-md-6">
+									<label class="control-label" for="northBoundLatitude">Northern Lat</label>
+									<input type="number" class="form-control" id="northBoundLatitude" name="northBoundLatitude" />
+								</div>
+							</div>
+						
+							<div class="row">
+								<div class="col-md-5">
+									<label class="control-label" for="westBoundLongitude">Western Lon</label>
+									<input type="number" class="form-control" id="westBoundLongitude" name="westBoundLongitude" />
+								</div>
+								<div class="col-md-1"></div>
+								<div class="col-md-5">
+									<label class="control-label" for="eastBoundLongitude">Eastern Lon</label>
+									<input type="number" class="form-control" id="eastBoundLongitude" name="eastBoundLongitude" />
+								</div>
+							</div>
+		
+							<div class="row">
+								<div class="col-md-3"></div>
+								<div class="col-md-6">
+									<label class="control-label" for="southBoundLatitude">Southern Lat</label>
+									<input type="number" class="form-control" id="southBoundLatitude" name="southBoundLatitude" />
+								</div>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" id="extentPopup_cancel" class="btn btn-default" data-dismiss="modal">Cancel</button>
+							<button type="button" id="extentPopup_ok" class="btn btn-primary" data-dismiss="modal">Ok</button>
+						</div>
+					</div>
+				</div>
+			</div>				
+													
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		/* <![CDATA[ */
+			$(document).ready(function() {
+				bboxtable = $('#bboxTable').dataTable({
+					"bPaginate": false,
+					"bFilter": false,
+					"oLanguage": {
+						  "sEmptyTable": "No items found",
+						  "sInfo": "Showing _START_ to _END_ of _TOTAL_ items",
+						  "sInfoEmpty": "No items",
+						  "sInfoFiltered": "(filtered from _MAX_ total items)",
+						  "sLengthMenu": "Show _MENU_ items per page",
+						  "sLoadingRecords": "Loading...",
+						  "sProcessing": "Processing...",
+						  "sZeroRecords": "No items found",
+						  "oPaginate": {
+						        "sFirst":    "First",
+						        "sLast":     "Last",
+						        "sNext":     "Next",
+						        "sPrevious": "Previous"
+						    }
+						},
+					 "aaSorting": [[ 0, "asc" ]],
+		 			 aoColumns: [
+ 		 				{ 
+		 					"bSortable" : false,
+			 					"sWidth" : "20%",
+		 				},
+		 				{ 
+		 					"bSortable" : false,
+			 					"sWidth" : "20%",
+		 				},
+		 				{ 
+		 					"bSortable" : false,
+			 					"sWidth" : "20%" 
+		 				},
+		 				{ 
+		 					"bSortable" : false,
+			 					"sWidth" : "20%" 
+		 				},
+		 				{ 
+		 					"bSortable" : false,
+							"sWidth" : "20%"
+		 				}
+		 			]
+			});	
+
+			var extentCount = bboxtable.fnGetData().length;
+
+			$('#extentPopup_ok').click(function(e) {
+				bboxtable = $('#bboxTable').dataTable();
+				bboxtable.fnAddData([
+				    "<input type='number' name='domainOfValidity.geographicBoundingBoxes[" + extentCount + "].northBoundLatitude' value='" + $('#northBoundLatitude').val() + "'/>",
+				    "<input type='number' name='domainOfValidity.geographicBoundingBoxes[" + extentCount + "].eastBoundLongitude' value='" + $('#eastBoundLongitude').val() + "'/>",
+				    "<input type='number' name='domainOfValidity.geographicBoundingBoxes[" + extentCount + "].southBoundLatitude' value='" + $('#southBoundLatitude').val() + "'/>",
+				    "<input type='number' name='domainOfValidity.geographicBoundingBoxes[" + extentCount + "].westBoundLongitude' value='" + $('#westBoundLongitude').val() + "'/>",
+					"<button type='button' class='btn btn-sm btn-default btn-deleterow' name='removeRow' data-index='" + extentCount + "' value='" + extentCount + "'>Remove row</button>"
+				]);
+				extentCount++;
+			});
+
+			$(document).on('click', '.btn-deleterow', function(e) {
+				var index = '#row-' + $(this).data('index');
+				var row = $(index);
+				bboxtable = $('#bboxTable').dataTable();
+				bboxtable.fnDeleteRow(row);
+			});
+			
+			$(document).on('change', '#selectExtent', function(e) {
+				var val = $(this).val();
+				$.ajax({
+					url: "/entities/extents/json",
+					data: {
+							uuid: $(this).val(),
+		            },
+				}).done(function(data) {
+					bboxtable.fnClearTable();
+					$('#description').val(data.description);
+					$.each(data.geographicElement, function(index, value) {
+						if (value.eastBoundLatitude !== null) {
+							bboxtable.fnAddData([
+							    "<input type='number' name='domainOfValidity.geographicBoundingBoxes[" + extentCount + "].northBoundLatitude' value='" + value.northBoundLatitude + "'/>",
+							    "<input type='number' name='domainOfValidity.geographicBoundingBoxes[" + extentCount + "].eastBoundLongitude' value='" + value.eastBoundLongitude + "'/>",
+							    "<input type='number' name='domainOfValidity.geographicBoundingBoxes[" + extentCount + "].southBoundLatitude' value='" + value.southBoundLatitude + "'/>",
+							    "<input type='number' name='domainOfValidity.geographicBoundingBoxes[" + extentCount + "].westBoundLongitude' value='" + value.westBoundLongitude + "'/>",
+								"<button type='button' class='btn btn-sm btn-default btn-deleterow' name='removeRow' data-index='" + extentCount + "' value='" + extentCount + "'>Remove row</button>"
+							]);
+							extentCount++;
+						}
+					});
+				});
+			});
+			
+			$(document).on('change', '#selectExtent', function(e) {
+				var val = $(this).val();
+				$.ajax({
+					url: "/entities/extents/json",
+					data: {
+							uuid: $(this).val(),
+		            },
+				}).done(function(data) {
+					bboxtable.fnClearTable();
+					$('#description-extent').val(data.description);
+					$.each(data.geographicElement, function(index, value) {
+						if (value.eastBoundLatitude !== null) {
+							bboxtable.fnAddData([
+							    "<input type='number' name='domainOfValidity.geographicBoundingBoxes[" + extentCount + "].northBoundLatitude' value='" + value.northBoundLatitude + "'/>",
+							    "<input type='number' name='domainOfValidity.geographicBoundingBoxes[" + extentCount + "].eastBoundLongitude' value='" + value.eastBoundLongitude + "'/>",
+							    "<input type='number' name='domainOfValidity.geographicBoundingBoxes[" + extentCount + "].southBoundLatitude' value='" + value.southBoundLatitude + "'/>",
+							    "<input type='number' name='domainOfValidity.geographicBoundingBoxes[" + extentCount + "].westBoundLongitude' value='" + value.westBoundLongitude + "'/>",
+								"<button type='button' class='btn btn-sm btn-default btn-deleterow' name='removeRow' data-index='" + extentCount + "' value='" + extentCount + "'>Remove row</button>"
+							]);
+							extentCount++;
+						}
+					});
+				});
+			});
+		});				
+	/* ]]> */		
+	</script>
+</div>
+				</div>
+				
+				<div class="modal-footer">
+					<button type="button" id="extentPopup_ok" class="btn btn-default" data-dismiss="modal">Ok</button>
+				</div>
+			</div>
+		</div>							
+	</div>
+	
+</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<div class="form-group">
+	<div class="control-label" for="sourceCrs">
+	<label class="control-label" for="sourceCrs">
+		<span>Source CRS</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-sourceCrs').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<div>
+		<!-- form-backing bean: RegisterItemViewBean -->
+		<div>
+			<a href="/item/53740382-efb9-4f4d-8a99-3db85f700f02.html" title="ITRF2014 - XYZ [425]"><big>ITRF2014 - XYZ</big></a>&nbsp;<big class="text-muted">[425]</big>
+		</div>
+				
+	</div>
+	
+</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<div class="form-group">
+	<div class="control-label" for="targetCrs">
+	<label class="control-label" for="targetCrs">
+		<span>Target CRS</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-targetCrs').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<div>
+		<!-- form-backing bean: RegisterItemViewBean -->
+		<div>
+			<a href="/item/3279de06-d889-4826-aef8-6a95c2241df4.html" title="ETRF2000 - XYZ [260]"><big>ETRF2000 - XYZ</big></a>&nbsp;<big class="text-muted">[260]</big>
+		</div>
+				
+	</div>
+	
+</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-4">
+					<div class="form-group">
+	<div class="control-label" for="accuracy">
+	<label class="control-label" for="accuracy">
+		<span>Accuracy</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-accuracy').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="accuracy"><big>0.0</big></p>
+	
+	
+</div>
+				</div>
+				<div class="col-md-8">
+					<div class="form-group">
+	<div class="control-label" for="accuracyUom">
+	<label class="control-label" for="accuracyUom">
+		<span>Accuracy unit</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-accuracyUom').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<div>
+		<!-- form-backing bean: RegisterItemViewBean -->
+		<div>
+			<a href="/item/932dce03-daeb-4762-ac71-81c69c41746b.html" title="metre [3]"><big>metre</big></a>&nbsp;<big class="text-muted">[3]</big>
+		</div>
+				
+	</div>
+	
+</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12">
+					<div class="form-group">
+						<label class="control-label" for="method">Coordinate Operation Method</label>
+						<div>
+							<!-- form-backing bean: RegisterItemViewBean -->
+							<div>
+								<big><a href="/item/3460c77c-1172-4fe9-ae3f-9c1685a55267.html">Time-Dependent Position Vector Transformation (geocentric Cartesian domain)</a>&nbsp;<span class="text-muted">[82]</span></big>
+							</div>
+									
+						</div>
+						
+						
+					</div>
+				</div>				
+			</div>
+
+			<div>
+				<div class="form-group">
+	<div class="control-label" for="operationVersion">
+	<label class="control-label" for="operationVersion">
+		<span>Operation Version</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-operationVersion').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="operationVersion"><big>EUREF v1</big></p>
+	
+	
+</div>
+			</div>
+
+		</div>	<!-- END OF LEFT -->
+		
+		<div class="col-md-6"> <!-- RIGHT -->
+			<div class="row">
+	<div class="col-md-12">
+		<div class="panel">
+			<div class="panel-body">
+				<table class="datatable table table-condensed table-striped" id="scopeTable_transformation">
+					<thead>
+						<tr>
+							<th>Scope</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Spatial referencing</td>
+							<td></td>
+						</tr>
+					</tbody>
+				</table>
+				
+			</div>
+		</div>
+
+		<script type="text/javascript">
+		/* <![CDATA[ */
+				table = $('#scopeTable_transformation').dataTable({
+				"sPaginationType": "bs_normal",
+				"bFilter": false,
+				"bInfo": false,
+				"bPaginate": false,
+				"bSearchable": false,
+				"oLanguage": {
+					  "sEmptyTable": "No items found",
+					  "sInfo": "Showing _START_ to _END_ of _TOTAL_ items",
+					  "sInfoEmpty": "No items",
+					  "sInfoFiltered": "(filtered from _MAX_ total items)",
+					  "sLengthMenu": "Show _MENU_ items per page",
+					  "sLoadingRecords": "Loading...",
+					  "sProcessing": "Processing...",
+					  "sZeroRecords": "No items found",
+					  "oPaginate": {
+					        "sFirst":    "First",
+					        "sLast":     "Last",
+					        "sNext":     "Next",
+					        "sPrevious": "Previous"
+					    }
+					},
+				 "aaSorting": [[ 0, "asc" ]],
+				 aoColumns: [
+				    null,
+					{"bSortable" : false}
+				]
+			});
+		/* ]]> */
+		</script>
+	</div>
+	
+		
+</div>
+			<div class="row">
+	<div class="col-md-12">
+		<div class="form-group"> 
+	<div class="control-label" for="remarks">
+	<label class="control-label" for="remarks">
+		<span>Remarks</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-remarks').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="remarks"><big>Accuracy of transformation is given at the reference epoch for the transformation parameters (2010.0); actual accuracy then depends on the epoch at which the transformation parameters are applied (refer to Citation for accuracies of velocities of the para</big></p>
+	
+	
+</div>
+	</div>
+</div>
+			<div class="row">
+	<div class="col-md-12">
+		<div class="form-group">
+	<label class="control-label" for="informationSource">Information Source</label>
+	<div>
+		<span class="text-muted">1.</span>&nbsp;<a data-toggle="modal" id="informationSource-0" href="#dialog-info-src-0"><big>Guidelines for EUREF Densifications</big></a>
+		
+		<div class="modal fade" role="dialog" id="dialog-info-src-0">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4>Information Source</h4>
+					</div>
+					<div class="modal-body">
+						<div>
+	
+
+	<div class="row">
+		<div class="col-md-12">
+			<div class="form-group has-feedback"> 
+	<div class="control-label" for="title">
+	<label class="control-label" for="title">
+		<span>Title</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-title').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="title"><big>Guidelines for EUREF Densifications</big></p>
+	
+	
+</div>
+		</div>
+	</div>
+	<div data-count="0" class="alternate-title-row-0"></div>
+	
+		
+	
+	
+	<div class="row">
+		<div class="col-md-12">
+			<div class="form-group has-feedback">
+	<div class="control-label" for="author">
+	<label class="control-label" for="author">
+		<span>Author</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-author').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="author-informationSource-0"><big>C. Bruyninx, Z. Altamimi, A. Caporali, A. Kenyeres, J. Legrand, M. Lidberg</big></p>
+	
+	
+</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<div class="form-group">
+	<div class="control-label" for="publisher">
+	<label class="control-label" for="publisher">
+		<span>Publisher</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-publisher').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="publisher-informationSource"><big>IAG sub-commission for the European Reference Frame – EUREF</big></p>
+	
+	
+</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6">
+			<div class="form-group">
+	<div class="control-label" for="publicationDate">
+	<label class="control-label" for="publicationDate">
+		<span>Publication date</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-publicationDate').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="publicationDate-informationSource-0"><big></big></p>
+	
+	
+</div>
+		</div>
+		<div class="col-md-6">
+			<div class="form-group">
+	<div class="control-label" for="revisionDate">
+	<label class="control-label" for="revisionDate">
+		<span>Revision date</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-revisionDate').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="revisionDate-informationSource-0"><big>2018-03-09</big></p>
+	
+	
+</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6">
+			<div class="form-group">
+	<div class="control-label" for="edition">
+	<label class="control-label" for="edition">
+		<span>Edition</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-edition').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="edition-informationSource"><big></big></p>
+	
+	
+</div>
+		</div>
+		<div class="col-md-6">
+			<div class="form-group">
+	<div class="control-label" for="editionDate">
+	<label class="control-label" for="editionDate">
+		<span>Edition date</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-editionDate').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="editionDate-informationSource"><big></big></p>
+	
+	
+</div>
+		</div>
+	</div>
+	
+	
+	<div class="row">
+		<div class="col-md-12">
+			<div class="form-group"> 
+	<div class="control-label" for="otherCitationDetails">
+	<label class="control-label" for="otherCitationDetails">
+		<span>Other citation details</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-otherCitationDetails').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="otherCitationDetails"><big>http://www.epncb.oma.be/_documentation/guidelines/Guidelines_for_EUREF_Densifications.pdf (accessed 2020-20-14)</big></p>
+	
+	
+</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		/* <![CDATA[ */
+		$(document).ready(function() {
+// 			$('#alternateTitle').select2({
+// 				tags: [],
+// 				multiple: true,
+// 				formatNoMatches: "Please enter an alternate title. You may enter multiple titles by entering ~.",
+// 				separator: '~',
+// 				tokenSeparators: ['~'],
+// 				initSelection : function (element, callback) {
+// 					var data = [];
+// 		        	$(element.val().split('~')).each(function () {
+// 				        data.push({
+// 			            	id: this, 
+// 			            	text: this
+// 			            });
+// 			        });
+// 			        callback(data);
+// 			    }
+// 			});
+
+			$('body').on('click', '.button-add-alternate-title', function() {
+				var idx = $(this).data('index');
+				var count = $('.alternate-title-row-' + idx).data('count');
+				if (false) {
+					$('.alternate-title-row-' + idx).last().after("<div class='row alternate-title-row'><div class='form-group col-md-12'><div class='control-label' for='alternateTitle'><label class='control-label' for='alternateTitle'><span>Alternate title</span></label></div><div class='input-group'><input class='form-control' name='null.alternateTitle[" + count + "]' value=''/><span class='input-group-btn'><button type='button' class='btn btn-default button-delete-alt-title' id='delete-alt-title-" + count + "'><span class='glyphicon glyphicon-remove'/></button></span></div></div></div>");
+				}
+				else {
+					$('.alternate-title-row-' + idx).last().after("<div class='row alternate-title-row'><div class='form-group col-md-12'><div class='control-label' for='alternateTitle'><label class='control-label' for='alternateTitle'><span>Alternate title</span></label></div><div class='input-group'><input class='form-control' name='informationSource[" + idx + "].alternateTitle[" + count + "]' value=''/><span class='input-group-btn'><button type='button' class='btn btn-default button-delete-alt-title' id='delete-alt-title-" + count + "'><span class='glyphicon glyphicon-remove'/></button></span></div></div></div>");
+				}
+				$('.alternate-title-row-' + idx).data('count', ++count);
+			});
+			
+			$('body').on('click', '.button-delete-alt-title', function(e) {
+				$(this).closest('.alternate-title-row').remove();
+			});
+		});				
+	/* ]]> */		
+	</script>
+</div>
+					</div>
+					
+					<div class="modal-footer">
+						<button type="button" id="infosrcPopup_ok" class="btn btn-default" data-dismiss="modal">Ok</button>
+					</div>
+				</div>
+			</div>							
+		</div>
+	</div>
+	<div>
+		<span class="text-muted">2.</span>&nbsp;<a data-toggle="modal" id="informationSource-1" href="#dialog-info-src-1"><big>EUREF Technical Note 1: Relationship and Transformation between the International and the European Terrestrial Reference Systems</big></a>
+		
+		<div class="modal fade" role="dialog" id="dialog-info-src-1">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4>Information Source</h4>
+					</div>
+					<div class="modal-body">
+						<div>
+	
+
+	<div class="row">
+		<div class="col-md-12">
+			<div class="form-group has-feedback"> 
+	<div class="control-label" for="title">
+	<label class="control-label" for="title">
+		<span>Title</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-title').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="title"><big>EUREF Technical Note 1: Relationship and Transformation between the International and the European Terrestrial Reference Systems</big></p>
+	
+	
+</div>
+		</div>
+	</div>
+	<div data-count="0" class="alternate-title-row-1"></div>
+	
+		
+	
+	
+	<div class="row">
+		<div class="col-md-12">
+			<div class="form-group has-feedback">
+	<div class="control-label" for="author">
+	<label class="control-label" for="author">
+		<span>Author</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-author').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="author-informationSource-1"><big>Z. Altamimi</big></p>
+	
+	
+</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<div class="form-group">
+	<div class="control-label" for="publisher">
+	<label class="control-label" for="publisher">
+		<span>Publisher</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-publisher').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="publisher-informationSource"><big>Institut National de l’Information Géographique et Forestière (IGN), France</big></p>
+	
+	
+</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6">
+			<div class="form-group">
+	<div class="control-label" for="publicationDate">
+	<label class="control-label" for="publicationDate">
+		<span>Publication date</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-publicationDate').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="publicationDate-informationSource-1"><big></big></p>
+	
+	
+</div>
+		</div>
+		<div class="col-md-6">
+			<div class="form-group">
+	<div class="control-label" for="revisionDate">
+	<label class="control-label" for="revisionDate">
+		<span>Revision date</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-revisionDate').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="revisionDate-informationSource-1"><big>2018-06-28</big></p>
+	
+	
+</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6">
+			<div class="form-group">
+	<div class="control-label" for="edition">
+	<label class="control-label" for="edition">
+		<span>Edition</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-edition').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="edition-informationSource"><big></big></p>
+	
+	
+</div>
+		</div>
+		<div class="col-md-6">
+			<div class="form-group">
+	<div class="control-label" for="editionDate">
+	<label class="control-label" for="editionDate">
+		<span>Edition date</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-editionDate').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="editionDate-informationSource"><big></big></p>
+	
+	
+</div>
+		</div>
+	</div>
+	
+		<div class="row">
+			<div class="col-md-12">
+				<div class="form-group">
+	<div class="control-label" for="series.name">
+	<label class="control-label" for="series.name">
+		<span>Name of series/journal/periodical</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-series.name').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="series.name-informationSource"><big>EUREF Technical Notes</big></p>
+	
+	
+</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-6">
+				<div class="form-group">
+	<div class="control-label" for="series.issueIdentification">
+	<label class="control-label" for="series.issueIdentification">
+		<span>Issue</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-series.issueIdentification').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="series.issueIdentification-informationSource"><big></big></p>
+	
+	
+</div>
+			</div>
+			<div class="col-md-6">
+				<div class="form-group">
+	<div class="control-label" for="series.page">
+	<label class="control-label" for="series.page">
+		<span>Page</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-series.page').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="series.page-informationSource"><big></big></p>
+	
+	
+</div>
+			</div>
+		</div>
+	
+	
+	<div class="row">
+		<div class="col-md-12">
+			<div class="form-group"> 
+	<div class="control-label" for="otherCitationDetails">
+	<label class="control-label" for="otherCitationDetails">
+		<span>Other citation details</span> 
+	</label>
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+		$(document).ready(function() {
+			$('#popover-help-otherCitationDetails').popover();
+		});
+	/* ]]> */
+	</script>
+</div>
+	
+	<p id="otherCitationDetails"><big>http://etrs89.ensg.ign.fr/pub/EUREF-TN-1.pdf (accessed 2020-10-14)</big></p>
+	
+	
+</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		/* <![CDATA[ */
+		$(document).ready(function() {
+// 			$('#alternateTitle').select2({
+// 				tags: [],
+// 				multiple: true,
+// 				formatNoMatches: "Please enter an alternate title. You may enter multiple titles by entering ~.",
+// 				separator: '~',
+// 				tokenSeparators: ['~'],
+// 				initSelection : function (element, callback) {
+// 					var data = [];
+// 		        	$(element.val().split('~')).each(function () {
+// 				        data.push({
+// 			            	id: this, 
+// 			            	text: this
+// 			            });
+// 			        });
+// 			        callback(data);
+// 			    }
+// 			});
+
+			$('body').on('click', '.button-add-alternate-title', function() {
+				var idx = $(this).data('index');
+				var count = $('.alternate-title-row-' + idx).data('count');
+				if (false) {
+					$('.alternate-title-row-' + idx).last().after("<div class='row alternate-title-row'><div class='form-group col-md-12'><div class='control-label' for='alternateTitle'><label class='control-label' for='alternateTitle'><span>Alternate title</span></label></div><div class='input-group'><input class='form-control' name='null.alternateTitle[" + count + "]' value=''/><span class='input-group-btn'><button type='button' class='btn btn-default button-delete-alt-title' id='delete-alt-title-" + count + "'><span class='glyphicon glyphicon-remove'/></button></span></div></div></div>");
+				}
+				else {
+					$('.alternate-title-row-' + idx).last().after("<div class='row alternate-title-row'><div class='form-group col-md-12'><div class='control-label' for='alternateTitle'><label class='control-label' for='alternateTitle'><span>Alternate title</span></label></div><div class='input-group'><input class='form-control' name='informationSource[" + idx + "].alternateTitle[" + count + "]' value=''/><span class='input-group-btn'><button type='button' class='btn btn-default button-delete-alt-title' id='delete-alt-title-" + count + "'><span class='glyphicon glyphicon-remove'/></button></span></div></div></div>");
+				}
+				$('.alternate-title-row-' + idx).data('count', ++count);
+			});
+			
+			$('body').on('click', '.button-delete-alt-title', function(e) {
+				$(this).closest('.alternate-title-row').remove();
+			});
+		});				
+	/* ]]> */		
+	</script>
+</div>
+					</div>
+					
+					<div class="modal-footer">
+						<button type="button" id="infosrcPopup_ok" class="btn btn-default" data-dismiss="modal">Ok</button>
+					</div>
+				</div>
+			</div>							
+		</div>
+	</div>
+		
+</div>
+	</div>
+</div>
+			<div class="row">
+	<div class="col-md-12">
+		<input type="hidden" id="dataSource" name="dataSource" value="ISO Geodetic Registry" />
+	</div>
+</div>
+		</div>	<!-- END OF RIGHT -->
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<table id="parametersTable" class="table table-striped">
+				<thead>
+					<tr>
+						<th>Parameter</th>
+						<th>Parameter type</th>
+						<th>Value</th>
+						<th>Unit of Measure</th>
+						<th>Citation</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>
+							<a target="_blank" href="/item/ea1eb77f-bb0a-4046-bd47-5c396c58f5ec.html"><span>Time reference</span></a> <span class="text-muted">[56]</span>
+						</td>
+						<td>
+							<input type="hidden" class="select-paramtype" readonly="readonly" style="width: 100%" data-index="0" id="paramValueType_0" value="MEASURE" />
+						</td>
+						<td>
+							<span>2010.0</span>
+						</td>
+						<td>
+							<a href="/item/2f8575eb-0c68-4abc-aa3c-8969abd89b25.html">year</a>&nbsp;<span class="text-muted">[12]</span>
+						</td>							
+						<td>
+							
+						</td>
+						<td>0</td>			
+					</tr>
+					<tr>
+						<td>
+							<a target="_blank" href="/item/884b428c-57f0-4c0b-a054-4a49ca76ee06.html"><span>Rate of change of scale difference</span></a> <span class="text-muted">[55]</span>
+						</td>
+						<td>
+							<input type="hidden" class="select-paramtype" readonly="readonly" style="width: 100%" data-index="1" id="paramValueType_1" value="MEASURE" />
+						</td>
+						<td>
+							<span>0.11</span>
+						</td>
+						<td>
+							<a href="/item/0a7eb618-4789-4f1b-a5a1-107c7476867e.html">parts per billion per year</a>&nbsp;<span class="text-muted">[14]</span>
+						</td>							
+						<td>
+							
+						</td>
+						<td>1</td>			
+					</tr>
+					<tr>
+						<td>
+							<a target="_blank" href="/item/88228e9d-3b44-41ff-8ca7-a73a8acdc881.html"><span>Rate of change of Z-axis rotation</span></a> <span class="text-muted">[53]</span>
+						</td>
+						<td>
+							<input type="hidden" class="select-paramtype" readonly="readonly" style="width: 100%" data-index="2" id="paramValueType_2" value="MEASURE" />
+						</td>
+						<td>
+							<span>-0.792</span>
+						</td>
+						<td>
+							<a href="/item/9b083c4d-cf0c-4d71-afc1-4dd1a1109c42.html">milliarc-second per year</a>&nbsp;<span class="text-muted">[21]</span>
+						</td>							
+						<td>
+							
+						</td>
+						<td>2</td>			
+					</tr>
+					<tr>
+						<td>
+							<a target="_blank" href="/item/a9e25756-e699-420d-a9be-d0f83f7115d9.html"><span>Rate of change of Y-axis rotation</span></a> <span class="text-muted">[69]</span>
+						</td>
+						<td>
+							<input type="hidden" class="select-paramtype" readonly="readonly" style="width: 100%" data-index="3" id="paramValueType_3" value="MEASURE" />
+						</td>
+						<td>
+							<span>0.49</span>
+						</td>
+						<td>
+							<a href="/item/9b083c4d-cf0c-4d71-afc1-4dd1a1109c42.html">milliarc-second per year</a>&nbsp;<span class="text-muted">[21]</span>
+						</td>							
+						<td>
+							
+						</td>
+						<td>3</td>			
+					</tr>
+					<tr>
+						<td>
+							<a target="_blank" href="/item/c127d884-6f2f-4491-99ab-1c918bd2c954.html"><span>Rate of change of X-axis rotation</span></a> <span class="text-muted">[50]</span>
+						</td>
+						<td>
+							<input type="hidden" class="select-paramtype" readonly="readonly" style="width: 100%" data-index="4" id="paramValueType_4" value="MEASURE" />
+						</td>
+						<td>
+							<span>0.081</span>
+						</td>
+						<td>
+							<a href="/item/9b083c4d-cf0c-4d71-afc1-4dd1a1109c42.html">milliarc-second per year</a>&nbsp;<span class="text-muted">[21]</span>
+						</td>							
+						<td>
+							
+						</td>
+						<td>4</td>			
+					</tr>
+					<tr>
+						<td>
+							<a target="_blank" href="/item/42c379ed-303e-4a5f-87f2-04c95d2f4b63.html"><span>Rate of change of Z-axis translation</span></a> <span class="text-muted">[68]</span>
+						</td>
+						<td>
+							<input type="hidden" class="select-paramtype" readonly="readonly" style="width: 100%" data-index="5" id="paramValueType_5" value="MEASURE" />
+						</td>
+						<td>
+							<span>-1.9</span>
+						</td>
+						<td>
+							<a href="/item/831ce33a-56af-4acf-addc-4f1a9428a7b8.html">millimetre per year</a>&nbsp;<span class="text-muted">[15]</span>
+						</td>							
+						<td>
+							
+						</td>
+						<td>5</td>			
+					</tr>
+					<tr>
+						<td>
+							<a target="_blank" href="/item/76fd4ed1-3f83-47dc-839f-3ecf111c2636.html"><span>Rate of change of Y-axis translation</span></a> <span class="text-muted">[48]</span>
+						</td>
+						<td>
+							<input type="hidden" class="select-paramtype" readonly="readonly" style="width: 100%" data-index="6" id="paramValueType_6" value="MEASURE" />
+						</td>
+						<td>
+							<span>0.1</span>
+						</td>
+						<td>
+							<a href="/item/831ce33a-56af-4acf-addc-4f1a9428a7b8.html">millimetre per year</a>&nbsp;<span class="text-muted">[15]</span>
+						</td>							
+						<td>
+							
+						</td>
+						<td>6</td>			
+					</tr>
+					<tr>
+						<td>
+							<a target="_blank" href="/item/89e37670-d103-4c57-94f5-fca410189132.html"><span>Rate of change of X-axis translation</span></a> <span class="text-muted">[59]</span>
+						</td>
+						<td>
+							<input type="hidden" class="select-paramtype" readonly="readonly" style="width: 100%" data-index="7" id="paramValueType_7" value="MEASURE" />
+						</td>
+						<td>
+							<span>0.1</span>
+						</td>
+						<td>
+							<a href="/item/831ce33a-56af-4acf-addc-4f1a9428a7b8.html">millimetre per year</a>&nbsp;<span class="text-muted">[15]</span>
+						</td>							
+						<td>
+							
+						</td>
+						<td>7</td>			
+					</tr>
+					<tr>
+						<td>
+							<a target="_blank" href="/item/d6e758cd-a010-4b4b-b5b4-4ad3ac37dfdd.html"><span>Scale difference</span></a> <span class="text-muted">[65]</span>
+						</td>
+						<td>
+							<input type="hidden" class="select-paramtype" readonly="readonly" style="width: 100%" data-index="8" id="paramValueType_8" value="MEASURE" />
+						</td>
+						<td>
+							<span>2.12</span>
+						</td>
+						<td>
+							<a href="/item/40a1a0e1-19ca-40e5-9d56-66b9735e51cd.html">parts per billion</a>&nbsp;<span class="text-muted">[22]</span>
+						</td>							
+						<td>
+							
+						</td>
+						<td>8</td>			
+					</tr>
+					<tr>
+						<td>
+							<a target="_blank" href="/item/8552ec2b-c9e8-4a37-9cbb-2f0ffe80fdbe.html"><span>Z-axis rotation</span></a> <span class="text-muted">[52]</span>
+						</td>
+						<td>
+							<input type="hidden" class="select-paramtype" readonly="readonly" style="width: 100%" data-index="9" id="paramValueType_9" value="MEASURE" />
+						</td>
+						<td>
+							<span>-16.632</span>
+						</td>
+						<td>
+							<a href="/item/99ee8718-40a7-4240-983a-d81f038e6cc3.html">milliarc-second</a>&nbsp;<span class="text-muted">[9]</span>
+						</td>							
+						<td>
+							
+						</td>
+						<td>9</td>			
+					</tr>
+					<tr>
+						<td>
+							<a target="_blank" href="/item/ce8ddaf4-68b2-43d1-baa9-88656ee12322.html"><span>Y-axis rotation</span></a> <span class="text-muted">[62]</span>
+						</td>
+						<td>
+							<input type="hidden" class="select-paramtype" readonly="readonly" style="width: 100%" data-index="10" id="paramValueType_10" value="MEASURE" />
+						</td>
+						<td>
+							<span>10.29</span>
+						</td>
+						<td>
+							<a href="/item/99ee8718-40a7-4240-983a-d81f038e6cc3.html">milliarc-second</a>&nbsp;<span class="text-muted">[9]</span>
+						</td>							
+						<td>
+							
+						</td>
+						<td>10</td>			
+					</tr>
+					<tr>
+						<td>
+							<a target="_blank" href="/item/e5c3331d-b1a1-47a7-b7aa-560e3c110928.html"><span>X-axis rotation</span></a> <span class="text-muted">[58]</span>
+						</td>
+						<td>
+							<input type="hidden" class="select-paramtype" readonly="readonly" style="width: 100%" data-index="11" id="paramValueType_11" value="MEASURE" />
+						</td>
+						<td>
+							<span>1.701</span>
+						</td>
+						<td>
+							<a href="/item/99ee8718-40a7-4240-983a-d81f038e6cc3.html">milliarc-second</a>&nbsp;<span class="text-muted">[9]</span>
+						</td>							
+						<td>
+							
+						</td>
+						<td>11</td>			
+					</tr>
+					<tr>
+						<td>
+							<a target="_blank" href="/item/49198a70-aaa8-4e12-9014-efb789f5a004.html"><span>Z-axis translation</span></a> <span class="text-muted">[47]</span>
+						</td>
+						<td>
+							<input type="hidden" class="select-paramtype" readonly="readonly" style="width: 100%" data-index="12" id="paramValueType_12" value="MEASURE" />
+						</td>
+						<td>
+							<span>-74.1</span>
+						</td>
+						<td>
+							<a href="/item/dba7ef74-c9bd-4f8e-bcc2-b29163e95565.html">millimetre</a>&nbsp;<span class="text-muted">[11]</span>
+						</td>							
+						<td>
+							
+						</td>
+						<td>12</td>			
+					</tr>
+					<tr>
+						<td>
+							<a target="_blank" href="/item/c815b6d3-19c5-4a59-8bbc-bec6416ddf28.html"><span>Y-axis translation</span></a> <span class="text-muted">[61]</span>
+						</td>
+						<td>
+							<input type="hidden" class="select-paramtype" readonly="readonly" style="width: 100%" data-index="13" id="paramValueType_13" value="MEASURE" />
+						</td>
+						<td>
+							<span>52.2</span>
+						</td>
+						<td>
+							<a href="/item/dba7ef74-c9bd-4f8e-bcc2-b29163e95565.html">millimetre</a>&nbsp;<span class="text-muted">[11]</span>
+						</td>							
+						<td>
+							
+						</td>
+						<td>13</td>			
+					</tr>
+					<tr>
+						<td>
+							<a target="_blank" href="/item/f2b42193-1669-4320-a2b0-c1ecf71520cb.html"><span>X-axis translation</span></a> <span class="text-muted">[54]</span>
+						</td>
+						<td>
+							<input type="hidden" class="select-paramtype" readonly="readonly" style="width: 100%" data-index="14" id="paramValueType_14" value="MEASURE" />
+						</td>
+						<td>
+							<span>54.7</span>
+						</td>
+						<td>
+							<a href="/item/dba7ef74-c9bd-4f8e-bcc2-b29163e95565.html">millimetre</a>&nbsp;<span class="text-muted">[11]</span>
+						</td>							
+						<td>
+							
+						</td>
+						<td>14</td>			
+					</tr>
+				</tbody>
+				
+			</table>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+	/*<![CDATA[ */
+	    var paramTypeSelect = function(element) {
+			element.select2({
+				width: 'resolve',
+				dropdownAutoWidth : true,
+				data: [
+						{ id: 'MEASURE', text: 'measure (w/ UoM)' },
+						{ id: 'FILE', text: 'parameter file name' },
+// 						{ id: 'STRING', text: 'text' },
+// 						{ id: 'INTEGER', text: 'number' },
+				]				
+			});
+		};
+	            
+	    var uomSelect = function(element) {
+			element.select2({
+				width: 'resolve',
+				ajax: {
+					url: "/entities/by-class/UnitOfMeasureItem",
+					dataType: "json",
+					data: function(term, page) {
+						return {
+							orderBy: 'name',
+							q: term
+						};
+					},
+					results: function (data) {
+						return { 
+							results : $.map(data, function (item) { 
+								return { 
+									text: item[2] + " [" + item[1] + "]", 
+									id: item[0] 
+								} 
+							}) 
+						};
+					},
+				},
+	            initSelection: function(element, callback) {
+               		var result = [];
+               		// Collect AJAX requests needed to resolve initially
+               		// selected items
+                	$.when($.ajax("/entities/by-uuid/" + $(element).val(), {
+                    	dataType: "json"
+                	}))
+                	.done(function(data) {
+                		item = data[0];
+                		result.push({
+                			id: item[0],
+							text: item[2] + " [" + item[1] + "]", 
+                		});
+		                callback(result[0]); 
+                	});
+	            }						            
+			});        						
+		};
+
+       	$(document).ready(function() {
+       		$('#parametersTable').dataTable({
+       			"bPaginate": false,
+       			"bFilter": false,
+       			"aaSorting": [[ "5", "asc" ]],
+	   			 aoColumns: [
+   						{"bSortable" : false, "sWidth": "25%"},
+  						{"bSortable" : false, "sWidth": "10%"},
+   						{"bSortable" : false, "sWidth": "20%"},
+   						{"bSortable" : false, "sWidth": "25%"},
+   						{"bSortable" : false, "sWidth": "20%"},
+   						{"bVisible" : false},
+   					]
+       		});
+       		
+       		$('.select-uom').each(function() {
+				uomSelect($(this));
+       		});
+
+       		$('.select-paramtype').each(function() {
+				paramTypeSelect($(this));
+       		});
+       		
+       		$('#parametersTable').on('change', '.select-paramtype', function(e) {
+       			var idx = $(this).data('index');
+       			
+       			if ($(this).val() == 'MEASURE') {
+       				$('#parameterUom_' + idx).removeAttr('disabled');
+       				$('#parameterUom_' + idx).select2('enable', true);
+       				$('#parameterUom_' + idx).select2('readonly', false);
+       				$('#parameterUom_' + idx).select2('val', '');
+       				$('#parameterUom_' + idx).attr('required', 'required');
+       				$('#parameter-value-' + idx).val('');
+    				$('#citation-' + idx).empty();
+    				$('#x-dialog-citation-' + idx).empty();
+       			}
+       			else {
+       				$('#parameterUom_' + idx).val('');
+       				$('#parameterUom_' + idx).select2('enable', false);
+       				$('#parameterUom_' + idx).select2('val', '');
+       				$('#parameterUom_' + idx).removeAttr('required');
+       				$('#parameter-value-' + idx).val('');
+    				$('#citation-' + idx).text('Edit');
+    				$('#x-dialog-citation-' + idx).load('/entities/fragments/citationpopup?index=' + idx + '&objectPath=parameterValues%5B' + idx + '%5D.valueFileCitation', null, function() {});
+       			}
+       		});
+
+			$('#method').change(function(e) {
+				table = $('#parametersTable').dataTable();
+				table.fnClearTable();
+            	$.when($.ajax("/entities/parameters/" + $(this).val(), {
+                	dataType: "json"
+            	}))
+            	.done(function (data) {
+            		$.each(data, function(idx, item) {
+        				table.fnAddData([
+        					"<a href='/item/" + item[0] + "' target='_blank'><span>" + item[2] + "</span></a><input type='hidden' name='parameterValues[" + idx + "].parameter.referencedItemUuid' value='" + item[0] + "'/>",
+        					"<input type='hidden' id='paramValueType_" + idx + "' data-index='" + idx + "' class='select-paramtype' name='parameterValues[" + idx + "].parameterType' value='MEASURE' required='required' style='width: 100%'/>",
+        					"<div class='form-group'><input type='text' class='form-control input-sm col-md-12' name='parameterValues[" + idx + "].value' required='required'/></div>",
+    						"<input type='hidden' class='form-control' id='parameterUom_" + idx + "' name='parameterValues[" + idx + "].parameterUnit.referencedItemUuid' required='required' style='width: 100%'/>",
+     						"<a id='citation-" + idx + "' href='#dialog-citation-" + idx + "' data-toggle='modal'></a><div id='x-dialog-citation-" + idx + "'/>",
+							"",
+    						idx
+						]);
+        				uomSelect($('#parameterUom_' + idx));
+        				paramTypeSelect($('#paramValueType_' + idx));
+            		});
+            	});
+			});
+       	});		
+	/* ]]> */
+	</script>
+	
+</div>
+							</div>
+						</div>
+					</div>
+				</div>
+	
+				<div id="predecessors" class="tab-pane in" style="padding-top: 10px" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+				<ul xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+					
+				</ul>
+			</div>
+				<div id="successors" class="tab-pane in" style="padding: 10px" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+				<ul xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+					
+				</ul>
+			</div>
+				<div id="managementInformation" class="tab-pane in" style="padding-top: 10px" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+				<div class="panel-group" id="accordion" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+					<div xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+						<div xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+							
+							<div class="panel panel-success" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+								<div class="panel-heading" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+									<h3 class="panel-title" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+										<a data-toggle="collapse" data-parent="#accordion" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve" shape="rect" href="#additionInformation_9713a8ce-b295-42bb-85b6-19d87eaa072d">Item added on 2021-02-01</a>
+									</h3>
+								</div>
+								<div class="panel-collapse" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve" id="additionInformation_9713a8ce-b295-42bb-85b6-19d87eaa072d">
+									<table class="table table-striped" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+										<colgroup xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve" span="1">
+											<col span="1" style="width: 20%;" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve" />
+											<col span="1" style="width: 80%;" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve" />
+										</colgroup>
+										<tbody xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+											<tr xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+												<td xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve" rowspan="1" colspan="1">Sponsor</td>
+												<td xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve" rowspan="1" colspan="1">Control Body for the ISO Geodetic Registry Network</td>
+											</tr>
+											<tr xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+												<td xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve" rowspan="1" colspan="1">Date proposed</td>
+												<td xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve" rowspan="1" colspan="1">2021-02-01</td>
+											</tr>
+											<tr xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+												<td xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve" rowspan="1" colspan="1">Justification</td>
+												<td xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve" rowspan="1" colspan="1">New reference frame transformation for Europe. Submitted by Thierry Gattacceca and Brice Virly, IGN France.</td>
+											</tr>
+											
+											
+											<tr xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+												<td xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve" rowspan="1" colspan="1">Date disposed</td>
+												<td xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve" rowspan="1" colspan="1">2021-02-01</td>
+											</tr>
+											<tr xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+												<td xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve" rowspan="1" colspan="1">Disposition</td>
+												<td xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve" rowspan="1" colspan="1">accepted</td>
+											</tr>
+											<tr xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+												<td xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve" rowspan="1" colspan="1">Status</td>
+												<td xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve" rowspan="1" colspan="1">final</td>
+											</tr>
+											
+										</tbody>
+									</table>
+								</div>
+							</div>
+
+							
+	
+							
+
+							
+
+						</div>
+					</div>
+				</div>
+			</div>
+	
+			</div>
+	
+			<button id="back" class="btn btn-default" onclick="history.back();" style="margin-top: 20px">Back</button>
+		</div>
+	</div>
+	
+	<div>
+  <footer class="footer">
+			<span class="powered-by pull-right">
+					<span class="powered-by-text">Powered by</span>
+					<a href="https://open.ribose.com" class="powered-by-logo">
+						<img class="img-responsive" alt="Ribose" src="/resources/images/brands/ribose/logo-ribose.svg" />
+					</a>
+			</span>
+
+    <p class="text-muted">
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Last
+      updated:&nbsp;<span>2023-10-02T11:41Z</span>
+      <!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;E-Mail: <a href="mailto:registry@isotc211.org">registry@isotc211.org</a>-->
+      <span><span>-2c0f2a3</span></span>
+    </p>
+  </footer>
+
+  <div class="loading-modal" style="background: rgba( 255, 255, 255, .8 ) url(/resources/images/loader-lg.gif) 50% 50% no-repeat;"></div>
+</div>
+	
+	<script type="text/javascript" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:space="preserve">
+/* <![CDATA[ */
+	$(document).ready(function() {
+		$('.tab-content :input').attr('readonly', 'readonly').removeAttr('placeholder');
+		$('.feedback').hide();
+	});
+/* ]]> */
+</script>
+</body>
+</html>

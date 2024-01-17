@@ -1,0 +1,1 @@
+GEODCRS["ATS77 - LatLon",DATUM["Average Terrestrial System of 1977",ELLIPSOID["Average Terrestrial System 1977",6378135.0,298.257]],CS[ellipsoidal,2],AXIS["Geodetic latitude (Lat)",north,ORDER[1]],AXIS["Geodetic longitude (Lon)",east,ORDER[2]],ANGLEUNIT["degree (supplier to define representation)",0.017453292522222223]],ID["ISO",225]

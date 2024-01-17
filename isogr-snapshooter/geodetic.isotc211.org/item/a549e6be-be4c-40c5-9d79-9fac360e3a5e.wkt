@@ -1,0 +1,1 @@
+GEODCRS["AGD84 - LatLon",DATUM["Australian Geodetic Datum 1984",ELLIPSOID["Australian National Spheroid",6378160.0,298.25]],CS[ellipsoidal,2],AXIS["Geodetic latitude (Lat)",north,ORDER[1]],AXIS["Geodetic longitude (Lon)",east,ORDER[2]],ANGLEUNIT["degree (supplier to define representation)",0.017453292522222223]],ID["ISO",350]

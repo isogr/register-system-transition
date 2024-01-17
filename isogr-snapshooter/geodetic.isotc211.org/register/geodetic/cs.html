@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script type="text/javascript" async="async" src="www.googletagmanager.com/gtag/js?id=UA-138578173-3"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+
+      function gtag() {
+          dataLayer.push(arguments);
+      }
+
+      gtag('js', new Date());
+
+      gtag('config', 'UA-138578173-3');
+  </script>
+
+
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta http-equiv="Cache-control" content="no-cache" />
+  <title>Coordinate Systems - ISO Geodetic Registry (ISOGR)</title>
+  <script type="text/javascript" src="../../resources/js/jquery.js"></script>
+  <script type="text/javascript" src="../../resources/js/jqueryui.js"></script>
+  <script type="text/javascript" src="../../resources/js/jquery.cookie.js"></script>
+  <script type="text/javascript" src="../../resources/js/jquery.hotkeys.js"></script>
+  <script type="text/javascript" src="../../resources/js/jquery.jstree.js"></script>
+  <script type="text/javascript" src="../../resources/js/jquery.validate.min.js"></script>
+  <script type="text/javascript" src="../../resources/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="../../resources/js/moment.min.js"></script>
+  <script type="text/javascript" src="../../resources/js/bootstrap-datetimepicker.min.js"></script>
+  <script type="text/javascript" src="../../resources/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="../../resources/js/datatables.js"></script>
+  <script type="text/javascript" src="../../resources/js/registry.js"></script>
+  <script type="text/javascript" src="../../resources/js/select2.js"></script>
+  <!-- 		<script type="text/javascript" src="bespire.atlassian.net/s/5aabcb68bc266b63d9c98db2e18c606b-T/en_USbdmabc/6327/13/1.4.11/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?collectorId=3eddc320"></script> -->
+  <link rel="stylesheet" href="../../resources/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="../../resources/css/bootstrap-theme.min.css" />
+  <link rel="stylesheet" href="../../resources/css/bootstrap-datetimepicker.min.css" />
+  <link rel="stylesheet" href="../../resources/css/font-titillium.css" type="text/css" />
+  <link rel="stylesheet" href="../../resources/css/font-awesome.min.css" type="text/css" />
+  <link rel="stylesheet" href="../../resources/css/datatables.css" />
+  <link rel="stylesheet" href="../../resources/css/select2.css" />
+  <link rel="stylesheet" href="../../resources/css/select2-bootstrap.css" />
+  <link rel="stylesheet" href="../../resources/css/select2-bootstrap-t0m.css" />
+  <link rel="stylesheet" href="../../resources/css/registry.css" />
+  <style type="text/css">
+    body {
+      padding-top: 110px;
+      padding-bottom: 40px;
+    }
+
+    .sidebartree {
+      padding-left: 20px;
+    }
+
+    /* 			nav[role="navigation"] img { */
+    /* 				background:#013568  */
+    /* 			} */
+
+    .navbar .navbar-brand {
+      max-height: 40px;
+      overflow: visible;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+
+    .bs-sidebar1 {
+      padding-top: 9px 0;
+      position: fixed;
+      left: 20px;
+      top: 60px;
+      width: 250px;
+    }
+
+    .test {
+      -webkit-font-smoothing: antialiased;
+      font-family: 'Titillium Web', sans-serif, Arial, sans-serif;
+      font-size: 18pt;
+    }
+
+    .powered-by {
+      flex: 1;
+      width: 112px;
+      padding-top: 0.5em;
+    }
+
+    .powered-by .powered-by-text {
+      font-size: 0.5em;
+      text-transform: uppercase;
+      font-weight: 600;
+      display: block
+    }
+
+    .powered-by img {
+      width: 100px;
+      display: block
+    }
+  </style>
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+</head>
+<body>
+	<div>
+  <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button id="collapsenavbar" type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+        <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <!-- 				<h1><span>Home</span></h1> -->
+      <img alt="ISO" id="logo" class="img-responsive pull-left" style="padding-top: 10px; padding-left: 10px" src="../../resources/images/iso.png" />
+      <a style="padding-top:15px" class="test navbar-brand" href="../../index.html">Geodetic Registry</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse navbar-ex1-collapse" style="margin-top: 40px">
+      <ul class="nav navbar-nav navbar-right">
+        
+        <li class="dropdown">
+          <a href="cs.html#" class="dropdown-toggle" data-toggle="dropdown"><span>Documentation</span> <span class="caret"></span></a>
+          <ul class="dropdown-menu" style="padding: 15px; min-width: 250px;">
+            <li>
+              <a href="iso-tc211.github.io/iso-geodetic-register-docs/" target="_blank">User Guide</a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+      <!-- 				<div class="navbar-form navbar-right"> -->
+      <!-- 					<div class="btn-group"> -->
+      <!--  						<button id="navbar_lang_DE" th:class="'btn btn-default' + (${#locale.language} eq 'de' ? ' active' : '')">DE</button> -->
+      <!-- 						<button id="navbar_lang_EN" th:class="'btn btn-default' + (${#locale.language} eq 'en' ? ' active' : '')">EN</button> -->
+      <!-- 					</div> -->
+      <!-- 				</div> -->
+      <script type="text/javascript">
+          $('#navbar_lang_EN').click(function () {
+              $.cookie('siteLanguage', 'en', {
+                  path: '/'
+              });
+              location.reload();
+          });
+          $('#navbar_lang_DE').click(function () {
+              $.cookie('siteLanguage', 'de', {
+                  path: '/'
+              });
+              location.reload();
+          });
+      </script>
+
+    </div>
+    <!-- /.navbar-collapse -->
+  </nav>
+</div>
+  
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div class="col-md-3">
+				<div>
+  <div class="sidebartree well">
+    <div class="bs-sidebar affix-top">
+      <div style="overflow: hidden">
+        <div id="demo1" class="demo" style="height: 100%;">
+          <ul>
+            <li id="nav_start"><a class="jstest" href="../../index.html">Welcome</a></li>
+            
+            <li class="jstree-open" id="registergeodetic">
+              <a href="../geodetic.html" title="ISO Geodetic Register">ISO Geodetic Register</a>
+              <ul>
+                <li>
+                  <a id="registergeodeticcrs" href="crs.html">Coordinate Reference
+                    Systems</a>
+                  <ul>
+                    
+                    <li id="registergeodeticCompoundCRS">
+                      <a href="CompoundCRS.html" title="Compound CRS">Compound CRS</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticEngineeringCRS">
+                      <a href="EngineeringCRS.html" title="Engineering CRS">Engineering CRS</a>
+                    </li>
+                    
+                    <li id="registergeodeticGeodeticCRS">
+                      <a href="GeodeticCRS.html" title="Geodetic CRS">Geodetic CRS</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticProjectedCRS">
+                      <a href="ProjectedCRS.html" title="Projected CRS">Projected CRS</a>
+                    </li>
+                    
+                    
+                    
+                    <li id="registergeodeticVerticalCRS">
+                      <a href="VerticalCRS.html" title="Vertical CRS">Vertical CRS</a>
+                    </li>
+                    
+                    
+                  </ul>
+                </li>
+                <li>
+                  <a id="registergeodeticcs" href="cs.html">Coordinate Systems</a>
+                  <ul>
+                    <li id="registergeodeticCartesianCS">
+                      <a href="CartesianCS.html" title="Cartesian Coordinate System">Cartesian Coordinate System</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticEllipsoidalCS">
+                      <a href="EllipsoidalCS.html" title="Ellipsoidal Coordinate System">Ellipsoidal Coordinate System</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticSphericalCS">
+                      <a href="SphericalCS.html" title="Spherical Coordinate System">Spherical Coordinate System</a>
+                    </li>
+                    
+                    
+                    
+                    <li id="registergeodeticVerticalCS">
+                      <a href="VerticalCS.html" title="Vertical Coordinate System">Vertical Coordinate System</a>
+                    </li>
+                    
+                  </ul>
+                </li>
+                <li>
+                  <a id="registergeodeticdatums" href="datums.html">Datums</a>
+                  <ul>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticEngineeringDatum">
+                      <a href="EngineeringDatum.html" title="Engineering Datum">Engineering Datum</a>
+                    </li>
+                    
+                    <li id="registergeodeticGeodeticDatum">
+                      <a href="GeodeticDatum.html" title="Geodetic Datum">Geodetic Datum</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticVerticalDatum">
+                      <a href="VerticalDatum.html" title="Vertical Datum">Vertical Datum</a>
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  <a id="registergeodeticoperations" href="operations.html">Coordinate
+                    Operations</a>
+                  <ul>
+                    
+                    
+                    <li id="registergeodeticConcatenatedOperation">
+                      <a href="ConcatenatedOperation.html" title="Concatenated Operation">Concatenated Operation</a>
+                    </li>
+                    <li id="registergeodeticConversion">
+                      <a href="Conversion.html" title="Conversion">Conversion</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticTransformation">
+                      <a href="Transformation.html" title="Transformation">Transformation</a>
+                    </li>
+                    
+                    
+                    
+                    
+                  </ul>
+                </li>
+                <li>
+                  <a id="registergeodeticothers" href="others.html">Other</a>
+                  <ul>
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticCoordinateSystemAxis">
+                      <a href="CoordinateSystemAxis.html" title="Coordinate System Axis">Coordinate System Axis</a>
+                    </li>
+                    <li id="registergeodeticEllipsoid">
+                      <a href="Ellipsoid.html" title="Ellipsoid">Ellipsoid</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    
+                    <li id="registergeodeticOperationMethod">
+                      <a href="OperationMethod.html" title="Coordinate Operation Method">Coordinate Operation Method</a>
+                    </li>
+                    <li id="registergeodeticOperationParameter">
+                      <a href="OperationParameter.html" title="Coordinate Operation Parameter">Coordinate Operation Parameter</a>
+                    </li>
+                    <li id="registergeodeticPrimeMeridian">
+                      <a href="PrimeMeridian.html" title="Prime Meridian">Prime Meridian</a>
+                    </li>
+                    
+                    
+                    
+                    <li id="registergeodeticUnitOfMeasure">
+                      <a href="UnitOfMeasure.html" title="Unit of Measurement">Unit of Measurement</a>
+                    </li>
+                    
+                    
+                    
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            
+            
+            
+            <!-- 							<li id="adminproposals" sec:authorize="hasRole('ROLE_ADMIN')"><a th:href="@{__${basePath}__/admin/proposals}" th:text="#{navbar.proposalManagement}">Vorschlagsverwaltung</a></li> -->
+          </ul>
+        </div>
+        <script type="text/javascript">
+            $(function () {
+                var ready = false;
+
+                var cancelHashChange = false,
+                    // method sets the selector based off of URL input
+                    setSelector = function (path) {
+                        var basePath = '';
+                        if (basePath !== '') {
+                            basePath = basePath.replace('~', '');
+                        }
+                        basePath = basePath + '/';
+
+                        var startIndex = path.indexOf(basePath);
+                        if (startIndex > -1) {
+                            path = path.substr(startIndex + basePath.length);
+                        }
+                        path = path.replace(/\//g, '');
+                        if ($.trim(path) === '') {
+                            path = 'nav_start';
+                        }
+                        return '#' + path;
+                    };
+
+                $("#demo1").jstree({
+                    // the `plugins` array allows you to configure the active plugins on this instance
+                    "plugins": ["themes", "html_data", "ui", "crrm", "hotkeys"],
+                    // each plugin you have included can have its own config object
+                    "core": {
+                        "animation": 100,
+                        "initially_open": ["nav_register", "nav_mgmt", "nav_usermgmt"]
+                    },
+                    "ui": {
+                        //"initially_select" : [ "nav_start" ]
+                    },
+                    "cookies": {
+                        "auto_save": true,
+                        "cookie_options": {
+                            "path": '/'
+                        }
+                    },
+                    // set a theme
+                    "themes": {
+                        "theme": "proton",
+                        "dots": false
+                    },
+                })
+                    .bind("reselect.jstree", function () {
+                        ready = true;
+                    })
+                    .bind("select_node.jstree", function (e, data) {
+                        var href = data.rslt.obj.children("a").attr("href");
+                        // this will load content into a div:
+                        //$("#contents").load(href);
+                        // this will follow the link:
+                        if (ready) {
+                            document.location.href = href;
+                        }
+                    })
+                    .bind("loaded.jstree", function (event, data) {
+                        //alert(window.location.pathname);
+                        $.jstree._focused().select_node(setSelector(window.location.pathname));
+                        // when loaded sets initial state based off of priority hash first OR url
+//							        if (window.location.hash) { // if hash defined then set tree state
+//							            $.jstree._focused().select_node(selector);
+//							            $(setSelector(window.location.hash.substr(1)) + ' a:first').trigger('click');
+//							        } else { // otherwise base state off of URL
+//							            $.jstree._focused().select_node(setSelector(window.location.pathname));
+//							        }
+                    });
+            });
+        </script>
+      </div>
+    </div>
+  </div>
+
+  <!-- 	    <footer class="footer"> -->
+  <!-- 	    	<div class="container"> -->
+  <!-- 		      	<div class="pull-right"> -->
+  <!-- 		      		<p class="text-muted">Software version: <span th:text="#{application.version}"></span></p> -->
+  <!-- 		      	</div> -->
+  <!-- 			</div> -->
+  <!-- 	    </footer>			 -->
+
+</div>
+			</div>
+			<div class="col-md-9" role="main">
+			  	
+			  	
+				
+				
+				<h3>Coordinate Systems</h3>
+				
+<!-- 				<div th:replace="home :: demo"/> -->
+
+				
+
+				
+
+				
+
+				<ul class="nav nav-tabs">
+					<li><a href="cs.html#overview" data-toggle="tab">Overview</a></li>
+					<li class="active"> <!-- th:classappend="(${viewMode} == 'contents') ? 'active'"--><a href="cs.html#contents" data-toggle="tab">Contents</a></li>
+<!-- 					<li sec:authorize="isAuthenticated()" th:classappend="(${viewMode} == 'proposals') ? 'active'"><a href="#proposals" data-toggle="tab" th:text="#{tabs.proposals}">Vorgeschlagene Inhalte</a></li> -->
+				</ul>
+				
+				<div class="tab-content">
+					<div id="overview" class="tab-pane in">
+						<p>Overview</p>
+					</div>
+					
+					<div id="contents" class="tab-pane in active">
+						
+						<div style="padding: 10px">				
+							<table id="contentsTable" class="datatable table table-striped">
+								<thead>
+									<tr>
+										<th>Identifier</th>
+										<th>Name</th>
+										<th>Item class</th>
+										<th>Status</th>
+										<th></th>
+									</tr>
+								</thead>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div>
+  <footer class="footer">
+			<span class="powered-by pull-right">
+					<span class="powered-by-text">Powered by</span>
+					<a href="open.ribose.com" class="powered-by-logo">
+						<img class="img-responsive" alt="Ribose" src="../../resources/images/brands/ribose/logo-ribose.svg" />
+					</a>
+			</span>
+
+    <p class="text-muted">
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Last
+      updated:&nbsp;<span>2023-10-02T11:41Z</span>
+      <!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;E-Mail: <a href="mailto:registry@isotc211.org">registry@isotc211.org</a>-->
+      <span><span>-2c0f2a3</span></span>
+    </p>
+  </footer>
+
+  <div class="loading-modal" style="background: rgba( 255, 255, 255, .8 ) url(../../resources/images/loader-lg.gif) 50% 50% no-repeat;"></div>
+</div>
+
+	<script type="text/javascript">
+/* <![CDATA[ */
+  	var itemActionButton = function(action, itemUuid, bsclass, text) {
+		return '<button type="button" id="' + action + '-' + itemUuid + '" class="btn btn-' + bsclass + ' btn-xs button-' + action + ' action-' + itemUuid + '" data-uuid="' + itemUuid + '">' + text + '</button>';
+	};
+
+	var clarifyButton = function(item) {
+		return itemActionButton('clarify', item.uuid, 'primary', 'Clarify');
+	}
+	
+	var supersedeButton = function(item) {
+		return itemActionButton('supersede', item.uuid, 'warning', 'Supersede');
+	};
+
+	var detailsButton = function(itemUuid, additionalClasses) {
+		var classes;
+		if (typeof additionalClasses === 'undefined') {
+			classes = '';
+		}
+		else {
+			classes = additionalClasses;
+		}
+		return '<button type="button" id="details-' + itemUuid + '" class="btn btn-default btn-xs button-details ' + classes + ' action-' + itemUuid + '" data-uuid="' + itemUuid + '">Details</button>';
+	};
+
+	var editButton = function(itemUuid, additionalClasses) {
+		var classes;
+		if (typeof additionalClasses === 'undefined') {
+			classes = '';
+		}
+		else {
+			classes = additionalClasses;
+		}
+		return '<button type="button" id="edit-' + itemUuid + '" class="btn btn-default btn-xs button-edit ' + classes + ' action-' + itemUuid + '" data-uuid="' + itemUuid + '">Edit</button>';
+	};
+
+	var addToGroupButton = function(item) {
+		return '<a href="cs.html#addtogrouppopup-' + item.proposalUuid + '" id="addtogroup-' + item.proposalUuid + '" data-toggle="modal" class="btn btn-default btn-xs button-addtogroup action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">Add to group</a>';
+	}
+
+	var addToGroupButtonNoPopup = function(item) {
+		return '<button type="button" id="addtogroup-' + item.proposalUuid + '" class="btn btn-default btn-xs button-addtogroup action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">Add to group</button>';
+	}
+
+	var removeFromGroupButton = function(item) {
+		return '<a href="cs.html#removefromgrouppopup-' + item.proposalUuid + '" id="removefromgroup-' + item.proposalUuid + '" data-toggle="modal" class="btn btn-danger btn-xs button-removefromgroup action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">Remove from group</a>';
+	}
+
+	var dissolveGroupButton = function(item) {
+		return '<a href="cs.html#dissolvegrouppopup-' + item.proposalUuid + '" id="dissolvegroup-' + item.proposalUuid + '" data-toggle="modal" class="btn btn-default btn-xs action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">Dissolve group</a>';
+	}
+	
+	var discussionButton = function(item) {
+		return '<button type="button" id="details_' + item.proposalUuid + '" class="btn btn-primary btn-xs button-discussion action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">Discussion</button>';
+	}
+
+	var startDiscussionButton = function(item) {
+		return '<a href="cs.html#startdiscussionpopup-' + item.proposalUuid + '" id="startdiscussion-' + item.proposalUuid + '" data-toggle="modal" class="btn btn-warning btn-xs action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">button.startProposalDiscussion</a>';
+	}
+
+	var endDiscussionButton = function(item) {
+		return '<a href="cs.html#enddiscussionpopup-' + item.proposalUuid + '" id="enddiscussion-' + item.proposalUuid + '" data-toggle="modal" class="btn btn-warning btn-xs action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">button.endProposalDiscussion</a>';
+	}
+
+	var voteButton = function(item) {
+		return '<button type="button" id="ballot_' + item.proposalUuid + '" class="btn btn-primary btn-xs button-ballot action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">button.voteProposal</button>';
+	}
+
+	var ballotButton = function(item) {
+		return '<button type="button" id="ballot_' + item.proposalUuid + '" class="btn btn-primary btn-xs button-ballot action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">button.ballotDetails</button>';
+	}
+
+	var startBallotButton = function(item) {
+		return '<a href="cs.html#startballotpopup-' + item.proposalUuid + '" id="startballot-' + item.proposalUuid + '" data-toggle="modal" class="btn btn-warning btn-xs action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">button.startProposalBallot</a>';
+	}
+
+	var endBallotButton = function(item) {
+		return '<a href="cs.html#endballotpopup-' + item.proposalUuid + '" id="endballot-' + item.proposalUuid + '" data-toggle="modal" class="btn btn-warning btn-xs action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">button.endProposalBallot</a>';
+	}
+
+	var endAppealButton = function(item) {
+		return '<a href="cs.html#endappealpopup-' + item.proposalUuid + '" id="endappeal-' + item.proposalUuid + '" data-toggle="modal" class="btn btn-warning btn-xs action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">End appeal period</a>';
+	}
+
+	var submitButton = function(item) {
+		return '<a href="cs.html#submitpopup-' + item.proposalUuid + '" id="submit-' + item.proposalUuid + '" data-toggle="modal" class="btn btn-success btn-xs action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">Submit proposal</a>';
+	};
+	
+	var withdrawButton = function(item) {
+		return '<a href="cs.html#withdrawpopup-' + item.proposalUuid + '" id="withdraw-' + item.proposalUuid + '" data-toggle="modal" class="btn btn-warning btn-xs action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">Withdraw</a>';
+	};
+
+	var deleteButton = function(item) {
+		return '<a href="cs.html#deletepopup-' + item.proposalUuid + '" id="delete-' + item.proposalUuid + '" data-toggle="modal" class="btn btn-danger btn-xs action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">Delete proposal</a>';
+	};
+
+	var appealButton = function(item) {
+		return '<button type="button" id="appeal-' + item.proposalUuid + '" class="btn btn-warning btn-xs button-appealproposal action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">Appeal to owner</button>';
+	};
+
+	var acceptAppealButton = function(item) {
+		return '<a href="cs.html#acceptappealpopup-' + item.proposalUuid + '" id="acceptappeal-' + item.proposalUuid + '" data-toggle="modal" class="btn btn-success btn-xs action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">Accept appeal</a>';
+	}
+
+	var rejectAppealButton = function(item) {
+		return '<a href="cs.html#rejectappealpopup-' + item.proposalUuid + '" id="rejectappeal-' + item.proposalUuid + '" data-toggle="modal" class="btn btn-danger btn-xs action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">Reject appeal</a>';
+	}
+
+	var reviewButton = function(item) {
+		return '<button type="button" id="review-' + item.proposalUuid + '" class="btn btn-primary btn-xs button-reviewproposal" data-uuid="' + item.proposalUuid + '">Review</button>';	
+	};
+
+	var decideButton = function(item) {
+		return '<button type="button" id="decide-' + item.proposalUuid + '" class="btn btn-primary btn-xs button-decideproposal" data-uuid="' + item.proposalUuid + '">Decide</button>';	
+	};
+	
+	var addToGroupPopup = function(item) {
+		var result = 
+			'<div class="modal fade" id="addtogrouppopup-' + item.proposalUuid + '" role="dialog">' +
+				'<div class="modal-dialog">' +
+					'<div class="modal-content">' +
+						'<div class="modal-header">' +
+							'<h4>Add proposal to group</h4>' +
+						'</div>' +
+						'<div class="modal-body">' +
+							groupSelect(item) +
+						'</div>' +
+						'<div class="modal-footer">' +
+							'<button type="button" id="addtogroup-' + item.proposalUuid + '" class="btn btn-success button-addtogroup" disabled="disabled" data-uuid="' + item.proposalUuid + '">Add to group</button>' +
+							'<button type="button" id="cancelaccept" class="btn btn-default" data-dismiss="modal">Cancel</button>' +
+						'</div>' +
+					'</div>' +
+				'</div>' +
+			'</div>';
+		
+		return result;
+	};
+
+	var removeFromGroupPopup = function(item) {
+		var proposalUuid = item.proposalUuid;
+		
+		var result = 
+			'<div class="modal fade" id="removefromgrouppopup-' + item.proposalUuid + '" role="dialog">' +
+				'<div class="modal-dialog">' +
+					'<div class="modal-content">' +
+						'<div class="modal-header">' +
+							'<h4>Remove proposal from group</h4>' +
+						'</div>' +
+						'<div class="modal-body">' +
+							'<span>Do you want to remove the proposal "{0}" from the group?</span>' +
+						'</div>' +
+						'<div class="modal-footer">' +
+							'<button type="button" id="doremovefromgroup-' + item.proposalUuid + '" class="btn btn-danger button-doremovefromgroup" data-uuid="' + item.proposalUuid + '">Remove from group</button>' +
+							'<button type="button" id="cancelaccept" class="btn btn-default" data-dismiss="modal">Cancel</button>' +
+						'</div>' +
+					'</div>' +
+				'</div>' +
+			'</div>';
+		
+		result = result.replace('\{0\}', item.title);
+
+		return result;
+	};
+
+	var groupSelect = function(item) {
+		var result =
+			'<input type="hidden" class="select-group" id="groupselect-' + item.proposalUuid + '" style="width: 100%"/>';
+			
+		return result;
+	};
+	
+	var dissolveGroupPopup = function(item) {
+		var result = 
+			'<div class="modal fade" id="dissolvegrouppopup-' + item.proposalUuid + '" role="dialog">' +
+				'<div class="modal-dialog">' +
+					'<div class="modal-content">' +
+						'<div class="modal-header">' +
+							'<h4>Dissolve proposal group</h4>' +
+						'</div>' +
+						'<div class="modal-body">' +
+							'<p>Do you want to dissolve the proposal group "{0}"?</p>' +
+						'</div>' +
+						'<div class="modal-footer">' +
+							'<button type="button" class="btn btn-danger button-dissolvegroup" data-uuid="' + item.proposalUuid + '">Dissolve group</button>' +
+							'<button type="button" id="cancelaccept" class="btn btn-default" data-dismiss="modal">Cancel</button>' +
+						'</div>' +
+					'</div>' +
+				'</div>' +
+			'</div>';
+		
+		result = result.replace('\{0\}', item.name);
+		
+		return result;
+	};
+	
+	var itemPopup = function(itemUuid, itemTitle, action, headerText, bodyHtml, okText, okType) {
+		var result = 
+			'<div class="modal fade" id="' + action + 'popup-' + itemUuid + '" role="dialog">' +
+				'<div class="modal-dialog">' +
+					'<div class="modal-content">' +
+						'<div class="modal-header">' +
+							'<h4>' + headerText + '</h4>' +
+						'</div>' +
+						'<div class="modal-body">' +
+							bodyHtml +
+						'</div>' +
+						'<div class="modal-footer">' +
+							'<button type="button" class="btn btn-' + okType + ' button-popup-' + action + '" data-uuid="' + itemUuid + '">' + okText + '</button>' +
+							'<button type="button" id="cancelaccept" class="btn btn-default" data-dismiss="modal">Cancel</button>' +
+						'</div>' +
+					'</div>' +
+				'</div>' +
+			'</div>';
+		
+		result = result.replace('\{0\}', itemTitle);
+		
+		return result;		
+	};
+	
+	var submitPopup = function(item) {
+		var result = 
+			'<div class="modal fade" id="submitpopup-' + item.proposalUuid + '" role="dialog">' +
+				'<div class="modal-dialog">' +
+					'<div class="modal-content">' +
+						'<div class="modal-header">' +
+							'<h4>Submit proposal</h4>' +
+						'</div>' +
+						'<div class="modal-body">' +
+							'<p>Do you want to submit the proposal "{0}"?</p>' +
+						'</div>' +
+						'<div class="modal-footer">' +
+							'<button type="button" class="btn btn-success button-submitproposal" data-uuid="' + item.proposalUuid + '">Submit proposal</button>' +
+							'<button type="button" id="cancelaccept" class="btn btn-default" data-dismiss="modal">Cancel</button>' +
+						'</div>' +
+					'</div>' +
+				'</div>' +
+			'</div>';
+		
+		result = result.replace('\{0\}', item.title);
+		
+		return result;
+	};
+	
+	var withdrawPopup = function(item) {
+		var result = 
+			'<div class="modal fade" id="withdrawpopup-' + item.proposalUuid + '" role="dialog">' +
+				'<div class="modal-dialog">' +
+					'<div class="modal-content">' +
+						'<div class="modal-header">' +
+							'<h4>Withdraw proposal</h4>' +
+						'</div>' +
+						'<div class="modal-body">' +
+							'<p>Do you want to withdraw the proposal "{0}"?</p>' +
+						'</div>' +
+						'<div class="modal-footer">' +
+							'<button type="button" class="btn btn-warning button-withdrawproposal" data-uuid="' + item.proposalUuid + '">Withdraw</button>' +
+							'<button type="button" id="cancelaccept" class="btn btn-default" data-dismiss="modal">Cancel</button>' +
+						'</div>' +
+					'</div>' +
+				'</div>' +
+			'</div>';
+		
+		result = result.replace('\{0\}', item.name);
+		
+		return result;
+	};
+
+	var deletePopup = function(item) {
+		var result = 
+			'<div class="modal fade" id="deletepopup-' + item.proposalUuid + '" role="dialog">' +
+				'<div class="modal-dialog">' +
+					'<div class="modal-content">' +
+						'<div class="modal-header">' +
+							'<h4>Delete proposal</h4>' +
+						'</div>' +
+						'<div class="modal-body">' +
+							'<p>Do you want to delete the proposal "{0}"?</p>' +
+						'</div>' +
+						'<div class="modal-footer">' +
+							'<button type="button" class="btn btn-danger button-deleteproposal" data-uuid="' + item.proposalUuid + '">Delete proposal</button>' +
+							'<button type="button" id="cancelaccept" class="btn btn-default" data-dismiss="modal">Cancel</button>' +
+						'</div>' +
+					'</div>' +
+				'</div>' +
+			'</div>';
+		
+		result = result.replace('\{0\}', item.title);
+		
+		return result;
+	};
+
+	var startDiscussionPopup = function(item) {
+		var result = 
+			'<div class="modal fade" id="startdiscussionpopup-' + item.proposalUuid + '" role="dialog">' +
+				'<div class="modal-dialog">' +
+					'<div class="modal-content">' +
+						'<div class="modal-header">' +
+							'<h4>popup.startDiscussion.header</h4>' +
+						'</div>' +
+						'<div class="modal-body">' +
+							'<p>popup.startDiscussion.reallyStart</p>' +
+						'</div>' +
+						'<div class="modal-footer">' +
+							'<button type="button" class="btn btn-warning button-startdiscussion" data-uuid="' + item.proposalUuid + '">button.startProposalDiscussion</button>' +
+							'<button type="button" id="cancelstart" class="btn btn-default" data-dismiss="modal">Cancel</button>' +
+						'</div>' +
+					'</div>' +
+				'</div>' +
+			'</div>';
+		
+		result = result.replace('\{0\}', item.title);
+		
+		return result;
+	};
+
+	var endDiscussionPopup = function(item) {
+		var result = 
+			'<div class="modal fade" id="enddiscussionpopup-' + item.proposalUuid + '" role="dialog">' +
+				'<div class="modal-dialog">' +
+					'<div class="modal-content">' +
+						'<div class="modal-header">' +
+							'<h4>popup.endDiscussion.header</h4>' +
+						'</div>' +
+						'<div class="modal-body">' +
+							'<p>popup.endDiscussion.reallyEnd</p>' +
+						'</div>' +
+						'<div class="modal-footer">' +
+							'<button type="button" class="btn btn-warning button-enddiscussion" data-uuid="' + item.proposalUuid + '">button.endProposalDiscussion</button>' +
+							'<button type="button" id="cancelstart" class="btn btn-default" data-dismiss="modal">Cancel</button>' +
+						'</div>' +
+					'</div>' +
+				'</div>' +
+			'</div>';
+		
+		result = result.replace('\{0\}', item.title);
+		
+		return result;
+	};
+
+	var startBallotPopup = function(item) {
+		var result = 
+			'<div class="modal fade" id="startballotpopup-' + item.proposalUuid + '" role="dialog">' +
+				'<div class="modal-dialog">' +
+					'<div class="modal-content">' +
+						'<div class="modal-header">' +
+							'<h4>popup.startBallot.header</h4>' +
+						'</div>' +
+						'<div class="modal-body">' +
+							'<p>popup.startBallot.reallyStart</p>' +
+						'</div>' +
+						'<div class="modal-footer">' +
+							'<button type="button" class="btn btn-warning button-startballot" data-uuid="' + item.proposalUuid + '">button.startProposalBallot</button>' +
+							'<button type="button" id="cancelstart" class="btn btn-default" data-dismiss="modal">Cancel</button>' +
+						'</div>' +
+					'</div>' +
+				'</div>' +
+			'</div>';
+		
+		result = result.replace('\{0\}', item.title);
+		
+		return result;
+	};
+
+	var endBallotPopup = function(item) {
+		var result = 
+			'<div class="modal fade" id="endballotpopup-' + item.proposalUuid + '" role="dialog">' +
+				'<div class="modal-dialog">' +
+					'<div class="modal-content">' +
+						'<div class="modal-header">' +
+							'<h4>popup.endBallot.header</h4>' +
+						'</div>' +
+						'<div class="modal-body">' +
+							'<p>popup.endBallot.reallyEnd</p>' +
+						'</div>' +
+						'<div class="modal-footer">' +
+							'<button type="button" class="btn btn-warning button-endballot" data-uuid="' + item.proposalUuid + '">button.endProposalBallot</button>' +
+							'<button type="button" id="cancelstart" class="btn btn-default" data-dismiss="modal">Cancel</button>' +
+						'</div>' +
+					'</div>' +
+				'</div>' +
+			'</div>';
+		
+		result = result.replace('\{0\}', item.title);
+		
+		return result;
+	};
+
+	var endAppealPopup = function(item) {
+		var result = 
+			'<div class="modal fade" id="endappealpopup-' + item.proposalUuid + '" role="dialog">' +
+				'<div class="modal-dialog">' +
+					'<div class="modal-content">' +
+						'<div class="modal-header">' +
+							'<h4>popup.endAppealPeriod.header</h4>' +
+						'</div>' +
+						'<div class="modal-body">' +
+							'<p>popup.endAppealPeriod.reallyEnd</p>' +
+						'</div>' +
+						'<div class="modal-footer">' +
+							'<button type="button" class="btn btn-warning button-endappeal" data-uuid="' + item.proposalUuid + '">End appeal period</button>' +
+							'<button type="button" id="cancelstart" class="btn btn-default" data-dismiss="modal">Cancel</button>' +
+						'</div>' +
+					'</div>' +
+				'</div>' +
+			'</div>';
+		
+		result = result.replace('\{0\}', item.title);
+		
+		return result;
+	};
+
+	var acceptAppealPopup = function(item) {
+		var result = 
+			'<div class="modal fade" id="acceptappealpopup-' + item.proposalUuid + '" role="dialog">' +
+				'<div class="modal-dialog">' +
+					'<div class="modal-content">' +
+						'<div class="modal-header">' +
+							'<h4>Accept appeal</h4>' +
+						'</div>' +
+						'<div class="modal-body">' +
+							'<p>Do you want to accept the appeal of proposal "{0}"?</p>' +
+						'</div>' +
+						'<div class="modal-footer">' +
+							'<button type="button" class="btn btn-success button-acceptappeal" data-uuid="' + item.proposalUuid + '">Accept appeal</button>' +
+							'<button type="button" id="cancelstart" class="btn btn-default" data-dismiss="modal">Cancel</button>' +
+						'</div>' +
+					'</div>' +
+				'</div>' +
+			'</div>';
+		
+		result = result.replace('\{0\}', item.title);
+		
+		return result;
+	};
+
+	var rejectAppealPopup = function(item) {
+		var result = 
+			'<div class="modal fade" id="rejectappealpopup-' + item.proposalUuid + '" role="dialog">' +
+				'<div class="modal-dialog">' +
+					'<div class="modal-content">' +
+						'<div class="modal-header">' +
+							'<h4>Reject appeal</h4>' +
+						'</div>' +
+						'<div class="modal-body">' +
+							'<p>Do you want to reject the appeal of proposal "{0}"?</p>' +
+						'</div>' +
+						'<div class="modal-footer">' +
+							'<button type="button" class="btn btn-danger button-rejectappeal" data-uuid="' + item.proposalUuid + '">Reject appeal</button>' +
+							'<button type="button" id="cancelstart" class="btn btn-default" data-dismiss="modal">Cancel</button>' +
+						'</div>' +
+					'</div>' +
+				'</div>' +
+			'</div>';
+		
+		result = result.replace('\{0\}', item.title);
+		
+		return result;
+	};
+
+	var showLoader = function(uuid, idx) {
+		$('#proposalrow-' + uuid + ' td:nth-child(' + idx + ')').html('<img style="margin-left: 20px" src="../../resources/images/loader.gif"/>');
+	}
+	
+	var showReload = function(uuid, idx) {
+		$('#proposalrow-' + uuid + ' td:nth-child(' + idx + ')').text('datatable.pleaseReload');		
+	}
+	
+	var dropdownMenu = function(uuid, actions) {
+		var result = '<div class="btn-group">' +
+		         '<button id="actions-' + uuid + '" type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">' +
+				   '<span>Action</span> <span class="caret"></span>' +
+				 '</button>' +
+				 '<ul class="dropdown-menu" role="menu">';
+	
+		$.each(actions, function(i, val) {
+			result += '<li><div style="margin-left: 10px; margin-top: 5px">' + val + '</div></li>';	
+		});
+				 
+		result += '</ul></div>';
+		
+		return result;
+	};
+	
+	var initGroupSelect = function(proposalUuid) {
+		$('#groupselect-' + proposalUuid).select2({
+			width: 'resolve',
+			dropdownCssClass: "bigdrop",
+			dropdownAutoWidth: "true",
+			ajax: {
+				url: "/entities/proposalgroups",
+				dataType: "json",
+				data: function(term, page) {
+					return {
+						orderBy: 'name',
+						q: term
+					};
+				},
+				results: function (data) {
+					return { 
+						results : $.map(data, function (item) { 
+							return { 
+								text: item[1], 
+								id: item[0] 
+							} 
+						}) 
+					};
+				},
+			},
+		});
+		
+		$('#groupselect-' + proposalUuid).change(function() {
+			$('#addtogroup-' + proposalUuid).removeAttr('disabled');
+		});
+	
+		$('#addtogroup-' + proposalUuid).click(function() {
+			var groupUuid = $('#groupselect-' + proposalUuid).val();
+			var data = { 'addedProposalUuid' : proposalUuid };
+			postForm('/proposals/' + groupUuid + '/addproposal', data, function(success, errorThrown) {
+				if (success) {
+					location.reload();
+				}
+				else {
+					showError(errorThrown, '[[@{__${basePath}__}]]');
+				}
+			});
+		});	
+	};
+
+	var showNotesButton = function(item) {
+		return '<a href="cs.html#notespopup-' + item.proposalUuid + '" id="notes-' + item.proposalUuid + '" data-toggle="modal" class="action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '"><span class="fa fa-envelope"></span></a>';
+	}
+
+	var notesPopup = function(item) {
+		var result =
+			'<div class="modal fade" id="notespopup-' + item.proposalUuid + '" role="dialog">' +
+				'<div class="modal-dialog">' +
+					'<div class="modal-content">' +
+						'<div class="modal-header">' +
+							'<h4>Proposal Notes</h4>' +
+						'</div>' +
+						'<div class="modal-body">';
+		$.each(item.additionalData['notes'], function(idx, note) {
+			result +=
+				'<blockquote>' +
+				  '<p>' + note.note + '</p>' +
+				  '<footer>' + note.authorName + '</footer>' +
+				'</blockquote>';
+		});
+
+		result +=
+					'</div>' +
+						'<div class="modal-footer">' +
+							'<button type="button" id="close" class="btn btn-default" data-dismiss="modal">Cancel</button>' +
+						'</div>' +
+					'</div>' +
+				'</div>' +
+			'</div>';
+
+		return result;
+	}
+	/* ]]> */
+</script>
+<script type="text/javascript">
+/*<![CDATA[ */
+            
+	var datatable2Rest = function(sSource, aoData, fnCallback) {
+	    //extract name/value pairs into a simpler map for use later
+	    var paramMap = {};
+	    for ( var i = 0; i < aoData.length; i++) {
+	        paramMap[aoData[i].name] = aoData[i].value;
+	    }
+
+	    //page calculations
+	    var pageSize = 1000;
+	    var start = paramMap.iDisplayStart;
+	    var pageNum = start / pageSize; // pageNum is 0 based
+
+	    // extract sort information
+	    var sortCol = paramMap.iSortCol_0;
+	    var sortDir = paramMap.sSortDir_0;
+	    var sortName = paramMap['mDataProp_' + sortCol];
+
+	    //create new json structure for parameters for REST request
+	    var restParams = new Array();
+	    restParams.push({"name" : "limit", "value" : pageSize});
+	    restParams.push({"name" : "page", "value" : pageNum });
+	    restParams.push({"name" : "sort", "value" : sortName });
+	    restParams.push({"name" : sortName + ".dir", "value" : sortDir });
+
+	    //if we are searching by name, override the url and add the name parameter
+	    var url = sSource;
+	    alert(url);
+// 	    if (paramMap.sSearch != '') {
+// 	        url = "${baseUrl}rest/customer/search/findByNameContains";
+// 	        restParams.push({ "name" : "name", "value" :  paramMap.sSearch});
+// 	    }
+
+	    //finally, make the request
+	    $.ajax({
+	        "dataType" : 'json',
+	        "type" : "GET",
+	        "url" : url,
+	        "data" : restParams,
+	        "success" : function(data) {
+	            data.iTotalRecords = data.totalCount;
+	            data.iTotalDisplayRecords = data.totalCount;
+
+	            fnCallback(data);
+	        }
+	    });
+	};
+
+	var retireButton = function(item) {
+		return '<button type="button" id="retire_' + item.uuid + '" class="btn btn-xs btn-danger" href="#confirmretirement-' + item.uuid +'" data-toggle="modal">Retire</button>';
+	};
+
+	var retirePopup = function(item) {
+		return '<div class="modal fade" id="confirmretirement-' + item.uuid + '" role="dialog">' +
+			      '<div class="modal-dialog">' +
+				    '<div class="modal-content">' +
+					  '<form action="/item/' + item.uuid + '/retire" method="get">' +
+					    '<div class="modal-header"><h4>Retire item</h4></div>' +
+						  '<div class="modal-body">' +
+							'<div class="form-group">' +
+							  '<label class="form-label" for="justification">Please provide a justification for the retirement:</label>' +
+							  '<div class="controls">' +
+							    '<textarea id="justification" name="justification" rows="4" cols="80" class="form-control" required="true" type="text"></textarea>' +  
+							  '</div>' +
+							'</div>' +
+							'<div class="form-group">' +
+							  '<label class="form-label" for="registerManagerNotes">Notes for the register manager:</label>' +
+							  '<div class="controls">' +
+							    '<textarea id="registerManagerNotes" name="registerManagerNotes" rows="2" cols="80" class="form-control" required="true" type="text"></textarea>' +  
+							  '</div>' +
+							'</div>' +
+							'<div class="form-group">' +
+							  '<label class="form-label" for="controlBodyNotes">Notes for the control body:</label>' +
+							  '<div class="controls">' +
+							    '<textarea id="controlBodyNotes" name="controlBodyNotes" rows="2" cols="80" class="form-control" required="true" type="text"></textarea>' +  
+							  '</div>' +
+							'</div>' +
+						  '</div>' +
+						  '<div class="modal-footer">' +
+							'<button id="confirmretirement" type="submit" class="btn btn-danger">Confirm</button>' +
+							'<button id="denyretirement" class="btn btn-default" data-dismiss="modal">Cancel</button>' +
+						'</div>' +
+					  '</form>' +
+				    '</div>' +
+			      '</div>' +
+		        '</div>' +
+	          '</div>';
+	}
+
+	var invalidateButton = function(item) {
+		return '<button type="button" id="invalidate_' + item.uuid + '" class="btn btn-xs btn-danger" href="#confirminvalidation-' + item.uuid +'" data-toggle="modal">Invalidate</button>';
+	};
+
+	var invalidatePopup = function(item) {
+		return '<div class="modal fade" id="confirminvalidation-' + item.uuid + '" role="dialog">' +
+			      '<div class="modal-dialog">' +
+				    '<div class="modal-content">' +
+					  '<form action="/item/' + item.uuid + '/invalidate" method="get">' +
+					    '<div class="modal-header"><h4>Invalidate item</h4></div>' +
+						  '<div class="modal-body">' +
+							'<div class="form-group">' +
+							  '<label class="form-label" for="justification">Please provide a justification for the invalidation:</label>' +
+							  '<div class="controls">' +
+							    '<textarea id="justification" name="justification" rows="4" cols="80" class="form-control" required="true" type="text"></textarea>' +  
+							  '</div>' +
+							'</div>' +
+							'<div class="form-group">' +
+							  '<label class="form-label" for="registerManagerNotes">Notes for the register manager:</label>' +
+							  '<div class="controls">' +
+							    '<textarea id="registerManagerNotes" name="registerManagerNotes" rows="2" cols="80" class="form-control" required="true" type="text"></textarea>' +  
+							  '</div>' +
+							'</div>' +
+							'<div class="form-group">' +
+							  '<label class="form-label" for="controlBodyNotes">Notes for the control body:</label>' +
+							  '<div class="controls">' +
+							    '<textarea id="controlBodyNotes" name="controlBodyNotes" rows="2" cols="80" class="form-control" required="true" type="text"></textarea>' +  
+							  '</div>' +
+							'</div>' +
+						  '</div>' +
+						  '<div class="modal-footer">' +
+							'<button id="confirminvalidation" type="submit" class="btn btn-danger">Confirm</button>' +
+							'<button id="denyinvalidation" class="btn btn-default" data-dismiss="modal">Cancel</button>' +
+						'</div>' +
+					  '</form>' +
+				    '</div>' +
+			      '</div>' +
+		        '</div>' +
+	          '</div>';
+	}
+
+	$('#contentsTable').on('click', '.button-details', function(e) {
+		var uuid = $(this).data('uuid');
+		location.href = '/item/' + uuid + '.html';
+	});
+
+	$('#contentsTable').on('click', '.button-clarify', function(e) {
+		var uuid = $(this).data('uuid');
+		location.href = '/item/' + uuid + '/clarify';
+	});
+
+	$('#contentsTable').on('click', '.button-supersede', function(e) {
+		var uuid = $(this).data('uuid');
+		location.href = '/item/' + uuid + '/supersede';
+	});
+
+	$('#contentsTable').on('click', '.button-retire', function(e) {
+		var uuid = $(this).data('uuid');
+		location.href = '/item/' + uuid + '/retire';
+	});
+
+	$('#contentsTable').on('click', '.button-invalidate', function(e) {
+		var uuid = $(this).data('uuid');
+		location.href = '/item/' + uuid + '/invalidate';
+	});
+
+	$(document).ready(function() {
+		var table;
+		
+		table = $('#contentsTable').dataTable({
+			"sAjaxSource": "/register/11c2a251-e7eb-4daf-bcd1-8823e737d93d/containedItems-cs",
+			"bProcessing": true,
+			"bServerSide": true,
+			"bStateSave": true,
+			"fnServerParams": function (aoData) {
+				if (false) {
+		            aoData.push({
+			            	name: "itemClass", 
+			            	value: "[[${itemClass.uuid}]]"
+		            });
+				}
+				if (true) {
+		            aoData.push({
+			            	name: "itemClassFilter", 
+			            	value: "cs"
+		            });
+				}
+				aoData.push({
+					name: "statusFilter",
+					value: "valid,superseded,retired,invalid"
+				});
+	        },
+// 			"fnServerData" : datatable2Rest,
+			"sPaginationType": "bs_normal",
+			"bPaginate": false,
+ 			"bFilter": false,
+// 			"bFilter": false,
+			"oLanguage": {
+				  "sEmptyTable": "No items found",
+				  "sInfo": "Showing all _TOTAL_ items",
+				  "sInfoEmpty": "No items",
+				  "sInfoFiltered": "(filtered from _MAX_ total items)",
+				  "sLengthMenu": "Showing all items for the current item class",
+				  "sLoadingRecords": "Loading...",
+				  "sProcessing": "<img style='margin-left: 20px' src='../../resources/images/loader.gif'/>",
+				  "sZeroRecords": "No items found",
+				  "oPaginate": {
+				        "sFirst":    "First",
+				        "sLast":     "Last",
+				        "sNext":     "Next",
+				        "sPrevious": "Previous"
+				    }
+				},
+			"fnDrawCallback": function( oSettings ) {
+// 				alert( 'DataTables has redrawn the table' );
+			},				
+			"aaSorting": [[ 0, "asc" ]],
+			"aoColumns": [
+				{ 
+					"mDataProp": "itemIdentifier",
+					"sWidth": "8%"
+				},
+				{ 
+					"mDataProp": "name",
+					"sWidth": "50%",
+					"bSortable": false
+				},
+				{ 	
+					"mDataProp": "itemClassName",
+					"sWidth": "15%",
+				 	"bSortable": false
+				},
+				{ 
+					"mDataProp": "status",
+					"sWidth": "10%",
+					"bSortable": false
+				},
+			],
+			"aoColumnDefs": [
+				{ "aTargets": [4],
+				  "mData": null,
+				  "mRender": function (data, type, full) {
+					  var actions = detailsButton(full.uuid);
+					  
+					  if (false && full.status === 'valid') {
+						  var dropdownActions = []; 
+						  dropdownActions.push(clarifyButton(full));
+						  dropdownActions.push(supersedeButton(full));
+						  dropdownActions.push(retireButton(full));
+						  dropdownActions.push(invalidateButton(full));
+						  
+						  actions += dropdownMenu(full.itemUuid, dropdownActions);
+						  actions += retirePopup(full);
+						  actions += invalidatePopup(full);
+					  }
+					  
+					  return actions;
+																		
+// 						<div class="btn-group" sec:authorize="@registrySecurity.hasEntityRelatedRole('ROLE_SUBMITTER_', #vars.register)">
+// 							<button type="button" th:if="${item.isValid()}" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+// 								<span th:text="#{button.action}">Aktion</span> <span class="caret"></span>
+// 							</button>
+// 							<ul class="dropdown-menu" role="menu">
+// 								<li><div style="margin-left: 10px"><button th:id="'clarify_' + ${item.uuid}" class="btn btn-primary btn-xs" th:onclick="'location.href = \'' + @{${basePath} + '/item/' + ${item.uuid} + '/clarify'} + '\''" th:text="#{button.clarification}">Klarstellen</button></div></li>
+// 								<li>
+// 									<div style="margin-left: 10px; margin-top: 5px">
+// 										<button td:id="'retire_' + ${item.uuid}" class="btn btn-xs btn-danger" th:href="'#confirmretirement-' + ${item.uuid}" data-toggle="modal" th:text="#{button.retirement}">Aufgeben</button>
+// 									</div>
+									
+// 								</li>
+// 							</ul>
+									
+// 							<div class="modal fade" th:id="'confirmretirement-' + ${item.uuid}" role="dialog">
+// 								<div class="modal-dialog">
+// 									<div class="modal-content">
+// 										<form th:action="@{__${basePath}__/item/__${item.uuid}__/retire}" method="get">
+// 											<div class="modal-header">
+// 												<h4 th:text="#{popup.retire.header}">Registereintrag aufgeben</h4>
+// 											</div>
+// 											<div class="modal-body">
+// 												<p th:text="#{popup.retire.justification}">
+// 													Bitte geben Sie eine Begründung für die Aufgabe des Eintrags an.
+// 												</p>
+												
+// 												Text input
+// 												<div class="form-group">
+// 													<div class="controls">
+// 														<textarea id="justification" name="justification" rows="3" cols="40" class="form-control" required="true" type="text" /> 
+// 													</div>
+// 												</div>
+												
+// 											</div>
+// 											<div class="modal-footer">
+// 												<button id="confirmretirement" type="submit" class="btn btn-warning" th:text="#{button.confirm}">Bestätgigen</button>
+// 												<button id="denyretirement" class="btn btn-primary" data-dismiss="modal" th:text="#{button.cancel}">Abbrechen</button>
+// 											</div>
+// 										</form>
+// 									</div>
+// 								</div>
+// 							</div>
+
+// 						</div>
+
+					  
+				  }
+				}
+			]
+// 			aoColumns: [
+// 				null,
+// 				null,
+// 				null,
+// 				null,
+// 				{"bSortable" : false}
+// 			]
+		});	
+
+		table = $('#proposalsTable').dataTable({
+			"sPaginationType": "bs_normal",
+			"bPaginate": false,
+ 			"bFilter": false,
+			"bStateSave": true,
+			"oLanguage": {
+				  "sEmptyTable": "No items found",
+				  "sInfo": "Showing all _TOTAL_ items",
+				  "sInfoEmpty": "No items",
+				  "sInfoFiltered": "(filtered from _MAX_ total items)",
+				  "sLengthMenu": "Showing all items for the current item class",
+				  "sLoadingRecords": "Loading...",
+				  "sProcessing": "<img src='../../resources/images/loader.gif'/>",
+				  "sZeroRecords": "No items found",
+				  "oPaginate": {
+				        "sFirst":    "First",
+				        "sLast":     "Last",
+				        "sNext":     "Next",
+				        "sPrevious": "Previous"
+				    }
+				},
+			 "aaSorting": [[ 2, "asc" ]],
+			 aoColumns: [
+				null,
+				null,
+				null,
+				null,
+				null,
+				{"bSortable" : false}
+			]
+		});	
+
+		$('.datatable').each(function(){
+			var datatable = $(this);
+			// SEARCH - Add the placeholder for Search and Turn this into in-line form control
+			var search_input = datatable.closest('.dataTables_wrapper').find('div[id$=_filter] input');
+			search_input.attr('placeholder', 'Search');
+			search_input.addClass('form-control input-sm');
+			// LENGTH - Inline-Form control
+			var length_sel = datatable.closest('.dataTables_wrapper').find('div[id$=_length] select');
+			length_sel.addClass('form-control input-sm');
+		});
+		
+		$('#file').change(function() {
+			$('#submitUpload').removeAttr('disabled');
+		});
+		
+		$('#submitUpload').click(function() {
+			$('body').addClass('loading');				
+			$('#uploadForm').submit();
+		});
+	});
+	
+	
+/* ]]> */
+</script>
+
+</body>
+</html>
