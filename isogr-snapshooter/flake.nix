@@ -55,6 +55,12 @@
             help = "Scrape the site's HTML, JSON, static assets, etc.";
             category = "Scraper";
           }
+          {
+            name = "deploy-patch";
+            command = "scripts/deploy-patch \"$@\"";
+            help = "Patch base paths for all links before deployment";
+            category = "Scraper";
+          }
         ];
         packages = with pkgs; [
           bash

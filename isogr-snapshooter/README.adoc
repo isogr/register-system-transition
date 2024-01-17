@@ -25,8 +25,9 @@ Further, if serving the site locally is required, the following must also be met
 ----
 > cd isogr-snapshooter
 > direnv allow # <- Run this (one-off only) if not already allowed
-> scrape   # wait until site is scraped
-> serve    # head to http://localhost:8000
+> scrape        https://mysite  # wait until site is scraped
+> deploy-patch  ../
+> serve                         # head to http://localhost:8000
 ----
 
 === With `nix` but without `nix-direnv` installed
@@ -35,8 +36,9 @@ Further, if serving the site locally is required, the following must also be met
 ----
 > cd isogr-snapshooter
 > nix develop
-> scrape   # wait until site is scraped
-> serve    # head to http://localhost:8000
+> scrape        https://mysite  # wait until site is scraped
+> deploy-patch  ../
+> serve                         # head to http://localhost:8000
 ----
 
 === All prerequisites installed but `nix`
@@ -44,6 +46,7 @@ Further, if serving the site locally is required, the following must also be met
 [source,console]
 ----
 > cd isogr-snapshooter
-> scripts/scrape   # wait until site is scraped
-> scripts/serve    # head to http://localhost:8000
+> scripts/scrape        https://mysite  # wait until site is scraped
+> scripts/deploy-patch  ../
+> scripts/serve                         # head to http://localhost:8000
 ----
