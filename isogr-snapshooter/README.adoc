@@ -1,0 +1,49 @@
+= ISOGR Snapshooter
+
+== Prerequisites
+
+* https://nixos.org/[Nix^] (with https://nixos.wiki/wiki/Flakes[flake^] and https://github.com/nix-community/nix-direnv[`nix-direnv`^] support)
+
+If Nix is not installed, then the following prerequisites must be met:
+
+* https://www.gnu.org/software/bash/[`bash 4+`^]
+* https://github.com/sharkdp/fd[`fd`^]
+* https://www.gnu.org/software/sed/[`gnused`^]
+* https://github.com/jqlang/jq[`jq`^]
+* https://github.com/BurntSushi/ripgrep[`ripgrep`^]
+* https://www.gnu.org/software/wget/[`wget`^]
+
+Further, if serving the site locally is required, the following must also be met:
+
+* https://www.python.org/[Python 3^]
+
+== Usage
+
+=== With `nix` and `nix-direnv` installed
+
+[source,console]
+----
+> cd isogr-snapshooter
+> direnv allow # <- Run this (one-off only) if not already allowed
+> scrape   # wait until site is scraped
+> serve    # head to http://localhost:8000
+----
+
+=== With `nix` but without `nix-direnv` installed
+
+[source,console]
+----
+> cd isogr-snapshooter
+> nix develop
+> scrape   # wait until site is scraped
+> serve    # head to http://localhost:8000
+----
+
+=== All prerequisites installed but `nix`
+
+[source,console]
+----
+> cd isogr-snapshooter
+> scripts/scrape   # wait until site is scraped
+> scripts/serve    # head to http://localhost:8000
+----
