@@ -24,7 +24,7 @@ patchJSONBasePaths() {
 		log "Fixing[patchJSONBasePaths] ${file}"
 		sed \
 			-i \
-			-e 's@\("sajaxsource":\s*"\)/\(register\)@\1'"${base_path}"'\2@' \
+			-e 's@\("sAjaxSource":\s*"\)/\(register\)@\1'"${base_path}"'\2@' \
 			"${file}"
 	done < <(fd -t f . -e html "${scrape_dir}/register")
 }
