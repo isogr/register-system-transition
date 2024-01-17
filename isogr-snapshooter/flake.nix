@@ -25,15 +25,15 @@
       ];
       pkgs = import nixpkgs { inherit system overlays; };
       python = pkgs.python311.withPackages (pkgs: with pkgs; [
-        beautifulsoup4
-        mypy
-        pylsp-mypy
-        python-lsp-ruff
-        requests
-        ruff-lsp
-        types-beautifulsoup4
-        types-requests
-        typing-extensions
+        # beautifulsoup4
+        # mypy
+        # pylsp-mypy
+        # python-lsp-ruff
+        # requests
+        # ruff-lsp
+        # types-beautifulsoup4
+        # types-requests
+        # typing-extensions
       ]);
     in
     rec {
@@ -57,17 +57,14 @@
           }
         ];
         packages = with pkgs; [
-          asdf-vm
           bash
           curl
           fd
           fzf
           gnused
           jq
-          nodejs_18
           ripgrep
           wget
-          yq
         ] ++ [
           python
         ];
