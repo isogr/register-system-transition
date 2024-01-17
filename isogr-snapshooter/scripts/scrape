@@ -1,0 +1,334 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2155
+
+# See:
+# https://superuser.com/questions/1415717/how-to-download-an-entire-site-with-wget-including-its-images
+# https://www.gnu.org/software/wget/manual/html_node/Download-Options.html
+#
+
+log() {
+	echo "scraper: -> $*"
+} >&2
+
+warn() {
+	printf "scraper\e[1;33m[WARN]\e[m: -> %b\n" "$*"
+} >&2
+
+wgetit() {
+	local url="${1:?Missing URL}"; shift
+
+	wget \
+		--level 5 \
+		--exclude-directories robots.txt \
+		--no-clobber \
+		--page-requisites \
+		--adjust-extension \
+		--span-hosts \
+		--restrict-file-names=windows \
+		--domains "${DOMAIN:?Missing domain}" \
+		--limit-rate=300k \
+		--wait=5 \
+		--random-wait \
+		--no-parent \
+		"${url}" \
+		"$@"
+}
+
+remove404Css() {
+	local scrape_dir="${1:?Missing dir}"
+
+	# Remove broken oswald css
+	while IFS= read -r file
+	do
+		log "Fixing ${file}"
+		sed -i -e '/oswald/d' "${file}"
+	done < <(rg --no-ignore-vcs -l -i oswald "${scrape_dir}")
+}
+
+fixHtmlEntities() {
+	local scrape_dir="${1:?Missing dir}"
+
+	# Remove broken oswald css
+	while IFS= read -r file
+	do
+		log "Fixing ${file}"
+		sed -i -e 's/&#32;/ /g' "${file}"
+	done < <(rg --no-ignore-vcs -l -i '&#32;' "${scrape_dir}")
+}
+
+fixUrlReferences() {
+	local scrape_dir="${1:?Missing dir}"
+
+	# Remove broken oswald css
+	while IFS= read -r file
+	do
+		log "Fixing ${file}"
+		sed -i -e "s@${URL}@@g" "${file}"
+	done < <(rg --no-ignore-vcs -l -i "${URL:?Missing URL}" "${scrape_dir}")
+}
+
+# Turns out there's only one endpoint for all item classes.
+# We'll use this one source.
+gatherAjaxSource() {
+	local scrape_dir="${1:?Missing dir}"
+	export AJAX_SOURCE=$(
+		rg \
+			--no-ignore-vcs \
+			--no-filename \
+			--no-heading \
+			--no-line-number \
+			-i '"sajaxsource":' "${scrape_dir}" | \
+			uniq | \
+			sed -e 's/.*"\(.*\)".*/\1/' | \
+			head -n 1
+	)
+	export FULL_AJAX_SOURCE="${URL:?Missing URL}/${AJAX_SOURCE}"
+}
+
+removeUselessMenuItems() {
+	local scrape_dir="${1:?Missing dir}"
+
+	while IFS= read -r file
+	do
+		sed -i \
+			-e '131,167d' \
+			"${file}"
+	done < <(fd -t f . -e html "${scrape_dir}/register")
+
+	while IFS= read -r file
+	do
+		sed -i \
+			-e '131,167d' \
+			"${file}"
+	done < <(fd -t f . -e html -d 1 "${scrape_dir}/")
+
+	while IFS= read -r file
+	do
+		sed -i \
+			-e '132,168d' \
+			"${file}"
+	done < <(fd -t f . -e html "${scrape_dir}/item")
+}
+
+gatherRegistryItems() {
+	local scrape_dir="${1:?Missing dir}"
+
+	local file item_class
+	local item_classes=()
+
+	while IFS= read -r file
+	do
+		item_class="${file##*/}"
+		item_class="${item_class%.*}"
+		log "Got ${item_class}"
+		item_classes+=("${item_class}")
+	done < <(fd -t f . "${scrape_dir}"/register/geodetic/)
+
+	for item_class in "${item_classes[@]}"
+	do
+		log processing item class "${item_class}"
+		gatherRegistryItemsIndexByItemClass "${scrape_dir}" "${item_class}"
+		replaceHtmlForItemClass "${scrape_dir}" "${item_class}"
+		gatherRegistryItemsByItemClass "${scrape_dir}" "${item_class}"
+	done
+}
+
+fixPagination() {
+	local scrape_dir="${1:?Missing dir}"
+
+
+	while IFS= read -r file
+	do
+		log "Fixing[fixPagination] ${file}"
+		sed -i \
+			-e "s/pageSize\s*=.*;/pageSize = ${NEW_PAGE_SIZE};/g" \
+			-e 's/Showing _START_ to _END_ of _TOTAL_ items/Showing all _TOTAL_ items/g' \
+			-e 's/Show _MENU_ items per page/Showing all items for the current item class/g' \
+			-e '/PaginationType/a\
+			"bPaginate": false,\
+ 			"bFilter": false,
+' \
+			"${file}"
+	done < <(fd -t f . -e html "${scrape_dir}"/register)
+}
+
+disableSorting() {
+	local scrape_dir="${1:?Missing dir}"
+
+	while IFS= read -r file
+	do
+		log "Fixing[disableSorting] ${file}"
+		sed -i \
+			-e 's/"bSortable": true/"bSortable": false/g' \
+			-e 's/"bSearchable": true/"bSortable": false/g' \
+			"${file}"
+	done < <(fd -t f . -e html "${scrape_dir}"/register)
+}
+
+addHtmlExtensionForAllItemClassLinks() {
+	local scrape_dir="${1:?Missing dir}"
+
+	while IFS= read -r file
+	do
+		log "Fixing[addHtmlExtensionForAllItemClassLinks] ${file}"
+		sed -i -e 's@\(/register/[^"]\+\)@\1.html@' "${file}"
+	done < <(fd -t f . -e html "${scrape_dir}"/item)
+}
+
+addHtmlExtensionForAllItemLinks() {
+	local scrape_dir="${1:?Missing dir}"
+
+	while IFS= read -r file
+	do
+		log "Fixing[addHtmlExtensionForAllItemLinks] ${file}"
+		sed \
+			-i \
+			-e 's@\(/item/[0-9a-f-]\+\)\(["'"'"']\)@\1.html\2@' \
+			-e "s@location.href = '/item/' + uuid;@location.href = '/item/' + uuid + '.html';@g" \
+			"${file}"
+	done < <(fd -t f . -e html "${scrape_dir}")
+}
+
+canonicalizePDFWKTGMLFilesAndLinks() {
+	local scrape_dir="${1:?Missing dir}"
+
+	while IFS= read -r item_related_file
+	do
+		log "Fixing[canonicalizePDFWKTGMLFilesAndLinks: gml/wkt/pdf] ${item_related_file}"
+		local file_extension
+		local new_item_related_file
+
+		file_extension="${item_related_file##*/}"
+		file_extension="${file_extension%%.html}"
+
+		new_item_related_file="${item_related_file%/*}"
+		new_item_related_file="${new_item_related_file}.${file_extension}"
+		log "Renaming file ${item_related_file} to ${new_item_related_file}"
+		mv "${item_related_file}" "${new_item_related_file}"
+	done < <(fd -t f 'gml|wkt|pdf' "${scrape_dir}")
+
+	while IFS= read -r file
+	do
+		log "Fixing[canonicalizePDFWKTGMLFilesAndLinks: Fix links] ${file}"
+		sed \
+			-i \
+			-e 's@\(/item/[0-9a-f-]\+\)/\([gmlwktpdf]\+\)\(["'"'"']\)@\1.\2\3@g' "${file}" #| \
+			# grep '/item/.*\.\(pdf\|gml\|wkt\)' || echo no
+
+
+		if [[ "${file}" != */???.html ]]
+		then
+			local dir="${file%.html}"
+			rmdir "${dir}"
+		fi
+	done < <(fd -t f . -e html "${scrape_dir}")
+}
+
+smart_wgetit() {
+	local url="${1:?Missing url}"; shift
+	local scrape_dest="${1}"
+	if [[ -e "${scrape_dest}" ]]
+	then
+		log "${scrape_dest} already exists.  Skipping ${url}."
+		return
+	fi
+	wgetit "${url}"
+}
+
+
+gatherRegistryItemsByItemClass() {
+	local scrape_dir="${1:?Missing dir}"
+	local item_class="${2:?Missing item class}"
+	local local_uuid_source="${scrape_dir}/${AJAX_SOURCE%containedItems*}containedItems-${item_class}"
+	local item_source
+
+	while IFS= read -r uuid
+	do
+		item_source="${URL}/item/${uuid}"
+		log gonna get them items from "${item_source}"
+		smart_wgetit "${item_source}" "${scrape_dir}/${item_source#"${URL}/"}.html"
+		smart_wgetit "${item_source}/pdf" "${scrape_dir}/${item_source#"${URL}/"}/pdf"
+		if [[ "${item_class}" == *"CRS" ]]
+		then
+			smart_wgetit "${item_source}/wkt" "${scrape_dir}/${item_source#"${URL}/"}/wkt"
+			smart_wgetit "${item_source}/gml" "${scrape_dir}/${item_source#"${URL}/"}/gml"
+		fi
+	done < <(jq -r '.aaData | .[] | .uuid' < "${local_uuid_source}")
+}
+
+gatherRegistryItemsIndexByItemClass() {
+	local scrape_dir="${1:?Missing dir}"
+	# local item_class=EngineeringCRS
+	local item_class="${2:?Missing item class}"
+
+	local local_new_ajax_source="${scrape_dir}/${AJAX_SOURCE}-${item_class}"
+
+	mkdir -p "${local_new_ajax_source%/*}"
+
+	wgetit \
+		--recursive \
+		-O "${local_new_ajax_source}" \
+		"${FULL_AJAX_SOURCE}?sEcho=1&iColumns=5&sColumns=&iDisplayStart=0&iDisplayLength=${NEW_PAGE_SIZE}&mDataProp_0=itemIdentifier&mDataProp_1=name&mDataProp_2=itemClassName&mDataProp_3=status&mDataProp_4=&sSearch=&bRegex=false&sSearch_0=&bRegex_0=false&bSearchable_0=true&sSearch_1=&bRegex_1=false&bSearchable_1=true&sSearch_2=&bRegex_2=false&bSearchable_2=true&sSearch_3=&bRegex_3=false&bSearchable_3=true&sSearch_4=&bRegex_4=false&bSearchable_4=true&iSortCol_0=0&sSortDir_0=asc&iSortingCols=1&bSortable_0=true&bSortable_1=true&bSortable_2=false&bSortable_3=true&bSortable_4=true&itemClassFilter=${item_class}&statusFilter=valid%2Csuperseded%2Cretired%2Cinvalid&_=1704972445499"
+}
+
+replaceHtmlForItemClass() {
+	local scrape_dir="${1:?Missing dir}"
+	local item_class="${2:?Missing item class}"
+	local new_ajax_source="${AJAX_SOURCE}-${item_class}"
+
+	local file=$(fd -t f --glob "${item_class}.html" "${scrape_dir}")
+
+	if [[ -z "${file}" ]]
+	then
+		return
+	fi
+
+	# log would do: sed -i -e "s@${AJAX_SOURCE}@${new_ajax_source}@g" "${file}"
+	sed -i -e "s@${AJAX_SOURCE}@${new_ajax_source}@g" "${file}"
+}
+
+# Additional resources not scraped by wget, due to them only being loaded by
+# Javascript
+scrapePatch() {
+	wgetit --recursive --convert-links "https://${DOMAIN:?Missing DOMAIN}/resources/js/themes/proton/style.css"
+
+	local scrape_dir="./${DOMAIN:?Missing DOMAIN}"
+
+	fixHtmlEntities "${scrape_dir}"
+	fixUrlReferences "${scrape_dir}"
+
+	gatherAjaxSource "${scrape_dir}"
+	gatherRegistryItems "${scrape_dir}"
+
+	canonicalizePDFWKTGMLFilesAndLinks "${scrape_dir}"
+	addHtmlExtensionForAllItemLinks "${scrape_dir}"
+	addHtmlExtensionForAllItemClassLinks "${scrape_dir}"
+	disableSorting "${scrape_dir}"
+	fixPagination "${scrape_dir}"
+	removeUselessMenuItems "${scrape_dir}"
+	remove404Css "${scrape_dir}"
+}
+
+main() {
+	export DEFAULT_URL=https://geodetic.isotc211.org
+
+	# Extract domain for use in wget, to make it only scrape resources within
+	# that domain.
+	local URL="${1:-"${DEFAULT_URL}"}"
+	export URL
+	local DOMAIN="${URL#http*://}"
+	DOMAIN="${DOMAIN%%/*}"
+	export DOMAIN
+
+	export NEW_PAGE_SIZE="${NEW_PAGE_SIZE:-1000}"
+
+	if [[ $# -gt 0 ]]
+	then
+		wgetit --recursive --convert-links "$URL"
+	fi
+
+	scrapePatch
+}
+
+
+main "$@"
