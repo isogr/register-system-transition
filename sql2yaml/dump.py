@@ -356,6 +356,95 @@ def get_coord_sys_by_uuid(uuid):
                     }
 
 
+def get_baseCRS_by_uuid(uuid):
+    cur.execute(
+        """
+        SELECT
+            name,
+            itemclass_uuid
+        FROM
+            engineeringcrs
+        WHERE
+            uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    _row = cur.fetchone()
+
+    if _row:
+        return {
+            "itemID": uuid,
+            "classID": name_classes[get_class_by_uuid(_row[1])]
+        }
+
+    else:
+        cur.execute(
+            """
+            SELECT
+                name,
+                itemclass_uuid
+            FROM
+                geodeticcrs
+            WHERE
+                uuid = %(uuid)s
+        """,
+            {"uuid": uuid},
+        )
+
+        _row = cur.fetchone()
+
+        if _row:
+            return {
+                "itemID": uuid,
+                "classID": name_classes[get_class_by_uuid(_row[1])]
+            }
+
+        else:
+            cur.execute(
+                """
+                SELECT
+                    name,
+                    itemclass_uuid
+                FROM
+                    projectedcrs
+                WHERE
+                    uuid = %(uuid)s
+            """,
+                {"uuid": uuid},
+            )
+
+            _row = cur.fetchone()
+
+            if _row:
+                return {
+                    "itemID": uuid,
+                    "classID": name_classes[get_class_by_uuid(_row[1])]
+                }
+
+            else:
+                cur.execute(
+                    """
+                    SELECT
+                        name,
+                        itemclass_uuid
+                    FROM
+                        verticalcrs
+                    WHERE
+                        uuid = %(uuid)s
+                """,
+                    {"uuid": uuid},
+                )
+
+                _row = cur.fetchone()
+
+                if _row:
+                    return {
+                        "itemID": uuid,
+                        "classID": name_classes[get_class_by_uuid(_row[1])]
+                    }
+
+
 def get_op_method_by_uuid(uuid):
     cur.execute(
         """
@@ -755,7 +844,7 @@ def save_yaml(uuid, dname, data):
     file_path = "%s/%s" % (config.output_dir, dname)
     pathlib.Path(file_path).mkdir(parents=True, exist_ok=True)
     file = open("%s/%s.yaml" % (file_path, uuid), "w")
-    file.write(dump(data))
+    file.write(dump(data, allow_unicode=True))
     file.close()
 
 
@@ -827,7 +916,9 @@ def crs_projected_dump(uuid=None):
                 "coordinateSystem": get_coord_sys_by_uuid(
                     row[_["coordinatesystem_uuid"]]
                 ),
-                "baseCRS": row[_["basecrs_uuid"]],
+                "baseCRS": get_baseCRS_by_uuid(
+                    row[_["basecrs_uuid"]]
+                ),
                 "informationSources": get_citations_by_item(row[_["uuid"]])
             }
         )
@@ -1800,7 +1891,9 @@ def crs_geodetic_dump(uuid=None):
                 "coordinateSystem": get_coord_sys_by_uuid(
                     row[_["coordinatesystem_uuid"]]
                 ),
-                "baseCRS": row[_["basecrs_uuid"]],
+                "baseCRS": get_baseCRS_by_uuid(
+                    row[_["basecrs_uuid"]]
+                ),
                 "informationSources": get_citations_by_item(row[_["uuid"]])
             }
         )
@@ -1871,7 +1964,10 @@ def crs_vertical_dump(uuid=None):
                 "coordinateSystem": get_coord_sys_by_uuid(
                     row[_["coordinatesystem_uuid"]]
                 ),
-                "baseCRS": row[_["basecrs_uuid"]],
+                "baseCRS": get_baseCRS_by_uuid(
+                    row[_["basecrs_uuid"]]
+                ),
+                    # get_base_crs_by_uuid(row[_["basecrs_uuid"]]),
                 "informationSources": get_citations_by_item(row[_["uuid"]])
             }
         )
@@ -1946,11 +2042,9 @@ def proposals_dump():
                     continue
                 group_proposals_uuid.add(row[_["parent_uuid"]])
                 items_uuid_list = get_proposals_uuid_by_parent(row[_["parent_uuid"]])
-                print(f"Group {row[_['parent_uuid']]}")
             else:
                 # 2) Single proposal
                 items_uuid_list = [row[_["uuid"]]]
-                print(f"Single Proposal {items_uuid_list}")
             proposal_items = {}
             disposition = ""
 
