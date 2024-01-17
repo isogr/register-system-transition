@@ -911,7 +911,7 @@ def crs_projected_dump(uuid=None):
                 "aliases": get_aliases(row[_["uuid"]]),
                 "remarks": row[_["remarks"]],
                 "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
-                "operation": row[_["operation_uuid"]],
+                "operation": get_operation_by_uuid(row[_["operation_uuid"]]),
                 "datum": row[_["datum_uuid"]],
                 "coordinateSystem": get_coord_sys_by_uuid(
                     row[_["coordinatesystem_uuid"]]
@@ -1836,6 +1836,51 @@ def transformations_dump(uuid=None):
         save_items(items, "coordinate-ops--transformation")
 
 
+def get_operation_by_uuid(uuid):
+    cur.execute(
+        """
+        SELECT
+            name,
+            itemclass_uuid
+        FROM
+            transformationitem
+        WHERE
+            uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    _row = cur.fetchone()
+
+    if _row:
+        return {
+            "itemID": uuid,
+            "classID": name_classes[get_class_by_uuid(_row[1])]
+        }
+
+    else:
+        cur.execute(
+            """
+            SELECT
+                name,
+                itemclass_uuid
+            FROM
+                conversionitem
+            WHERE
+                uuid = %(uuid)s
+        """,
+            {"uuid": uuid},
+        )
+
+        _row = cur.fetchone()
+
+        if _row:
+            return {
+                "itemID": uuid,
+                "classID": name_classes[get_class_by_uuid(_row[1])]
+            }
+
+
 def crs_geodetic_dump(uuid=None):
     query = """
         SELECT
@@ -1886,7 +1931,7 @@ def crs_geodetic_dump(uuid=None):
                 "remarks": row[_["remarks"]],
                 "description": row[_["description"]],
                 "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
-                "operation": row[_["operation_uuid"]],
+                "operation": get_operation_by_uuid(row[_["operation_uuid"]]),
                 "datum": row[_["datum_uuid"]],
                 "coordinateSystem": get_coord_sys_by_uuid(
                     row[_["coordinatesystem_uuid"]]
@@ -1959,7 +2004,7 @@ def crs_vertical_dump(uuid=None):
                 "remarks": row[_["remarks"]],
                 "description": row[_["description"]],
                 "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
-                "operation": row[_["operation_uuid"]],
+                "operation": get_operation_by_uuid(row[_["operation_uuid"]]),
                 "datum": row[_["datum_uuid"]],
                 "coordinateSystem": get_coord_sys_by_uuid(
                     row[_["coordinatesystem_uuid"]]
