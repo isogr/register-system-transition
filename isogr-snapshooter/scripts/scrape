@@ -6,6 +6,9 @@
 # https://www.gnu.org/software/wget/manual/html_node/Download-Options.html
 #
 
+DEFAULT_WAIT_SECONDS=5
+DEFAULT_LIMIT_RATE=300k
+
 log() {
 	echo "scraper: -> $*"
 } >&2
@@ -26,8 +29,8 @@ wgetit() {
 		--span-hosts \
 		--restrict-file-names=windows \
 		--domains "${DOMAIN:?Missing domain}" \
-		--limit-rate=300k \
-		--wait=5 \
+		--limit-rate="${LIMIT_RATE:-${DEFAULT_LIMIT_RATE}}" \
+		--wait="${WAIT_SECONDS:-${DEFAULT_WAIT_SECONDS}}" \
 		--random-wait \
 		--no-parent \
 		"${url}" \
@@ -321,6 +324,9 @@ main() {
 	export DOMAIN
 
 	export NEW_PAGE_SIZE="${NEW_PAGE_SIZE:-1000}"
+
+	log "WAIT_SECONDS=${WAIT_SECONDS}"
+	log "LIMIT_RATE=${LIMIT_RATE}"
 
 	if [[ $# -gt 0 ]]
 	then
