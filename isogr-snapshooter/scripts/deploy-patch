@@ -11,13 +11,21 @@ warn() {
 
 
 patch() {
-	patchJSONBasePaths "$@"
-	patchItemPageLinks "$@"
+	local scrape_dir="${1:?Missing scrape dir}"
+
+	patchJSONBasePaths "${scrape_dir}/register" ../
+	patchJSONBasePaths "${scrape_dir}/register/geodetic" ../../
+	patchJSONBasePaths "${scrape_dir}/item" ../
+
+	patchPageLinksBasePaths "${scrape_dir}/register" ../
+	patchPageLinksBasePaths "${scrape_dir}/register/geodetic" ../../
+	patchPageLinksBasePaths "${scrape_dir}/item" ../
 }
 
 patchJSONBasePaths() {
+	local target_dir="${1:?Missing target dir}"; shift
 	local base_path="${1:?Missing base path}"; shift
-	local scrape_dir="${1:?Missing scrape dir}"
+	local depth="${1:-1}"
 
 	while IFS= read -r file
 	do
@@ -26,51 +34,47 @@ patchJSONBasePaths() {
 			-i \
 			-e 's@\("sAjaxSource":\s*"\)/\(register\)@\1'"${base_path}"'\2@' \
 			"${file}"
-	done < <(fd -t f . -e html "${scrape_dir}/register")
+	done < <(fd -t f . -e html -d "${depth}" "${target_dir}")
 }
 
-patchItemPageLinks() {
+patchPageLinksBasePaths() {
+	local target_dir="${1:?Missing target dir}"; shift
 	local base_path="${1:?Missing base path}"; shift
-	local scrape_dir="${1:?Missing scrape dir}"
+	local depth="${1:-1}"
 
 	while IFS= read -r file
 	do
-		log "Fixing[patchItemPageLinks] ${file}"
+		log "Fixing[patchPageLinksBasePaths] ${file}"
 		sed \
 			-i \
 			-e 's@\(href="\)/@\1'"${base_path}"'@g' \
 			-e 's@\(src="\)/@\1'"${base_path}"'@g' \
 			"${file}"
-	done < <(fd -t f . -e html "${scrape_dir}/item")
+	done < <(fd -t f . -e html -d "${depth}" "${target_dir}")
 }
 
 main() {
 	export SCRAPE_ORIGIN_URL=https://geodetic.isotc211.org
-	export DEFAULT_BASE_PATH=/
+	local domain="${SCRAPE_ORIGIN_URL#http*://}"
+	domain="${domain%%/*}"
+	local DEFAULT_SCRAPE_DIR="./${domain:?Missing domain}"
 
-	if [[ $# -gt 0 ]]
+	if [[ $# -gt 1 ]]
 	then
-		local base_path="${1:-"${DEFAULT_BASE_PATH}"}"; shift
-		local url="${1:-"${SCRAPE_ORIGIN_URL}"}"
-		local domain="${url#http*://}"
-		domain="${domain%%/*}"
-		local scrape_dir="./${domain:?Missing domain}"
-
-		patch "$base_path" "$scrape_dir"
-	else
 		show_usage
 		exit 1
+	else
+		local scrape_dir="${1:-"${DEFAULT_SCRAPE_DIR}"}"
+		patch "$scrape_dir"
 	fi
 }
 
 show_usage() {
 	cat <<EOF
-deploy-patch BASE_PATH [SCRAPE_DIR]
+deploy-patch [SCRAPE_DIR]
 
 EXAMPLES
-  > deploy-patch /                  # result === snapshot
-  > deploy-patch /github_repo_name  # most likely what you want
-  > deploy-patch ../                # ... this one, too
+  > deploy-patch
 EOF
 } >&2
 
