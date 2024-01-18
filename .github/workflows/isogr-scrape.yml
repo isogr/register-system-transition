@@ -1,0 +1,96 @@
+name: Scrape ISOGR
+
+on:
+  schedule:
+    - cron: '1 2 * * *'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+    inputs:
+      wait_seconds:
+        description: 'Wait the specified number of seconds between the retrievals.'
+        type: number
+        required: false
+        default: 5
+      limit_rate:
+        description: 'Limit the download speed to amount bytes per second.'
+        type: string
+        required: false
+        default: '300k'
+
+  workflow_call:
+    inputs:
+      wait_seconds:
+        description: 'Wait the specified number of seconds between the retrievals.'
+        type: number
+        required: false
+        default: 5
+      limit_rate:
+        description: 'Limit the download speed to amount bytes per second.'
+        type: string
+        required: false
+        default: '300k'
+
+env:
+  DEFAULT_WAIT_SECONDS: 5
+  DEFAULT_LIMIT_RATE: 300k
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v22
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Scrape
+        run: |
+          cd isogr-snapshooter
+          mv geodetic.isotc211.org{,-old}
+          nix develop -c scrape https://geodetic.isotc211.org
+          nix develop -c deploy-patch
+        env:
+          WAIT_SECONDS: ${{ startsWith(github.event_name, 'workflow_') && inputs.wait_seconds || env.DEFAULT_WAIT_SECONDS }}
+          LIMIT_RATE: ${{ startsWith(github.event_name, 'workflow_') && inputs.limit_rate || env.DEFAULT_LIMIT_RATE }}
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          # Name of the artifact to upload.
+          # Optional. Default is 'artifact'
+          name: isogr-snapshot
+          path: './isogr-snapshooter/geodetic.isotc211.org/'
+
+          # The desired behavior if no files are found using the provided path.
+          # Available Options:
+          #   warn: Output a warning but do not fail the action
+          #   error: Fail the action with an error message
+          #   ignore: Do not output any warnings or errors, the action does not fail
+          # Optional. Default is 'warn'
+          if-no-files-found: error
+
+          # Duration after which artifact will expire in days. 0 means using default retention.
+          # Minimum 1 day.
+          # Maximum 90 days unless changed from the repository settings page.
+          # Optional. Defaults to repository settings.
+          # retention-days:
+
+          # The level of compression for Zlib to be applied to the artifact archive.
+          # The value can range from 0 to 9.
+          # For large files that are not easily compressed, a value of 0 is recommended for significantly faster uploads.
+          # Optional. Default is '6'
+          # compression-level:
+      - name: Update snapshot
+        run: echo TODO

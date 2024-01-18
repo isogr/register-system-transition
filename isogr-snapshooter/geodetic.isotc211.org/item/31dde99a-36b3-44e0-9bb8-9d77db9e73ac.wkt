@@ -1,1 +1,0 @@
-GEODCRS["IGS00 - XYZ",DATUM["IGS00",ELLIPSOID["GRS 1980",6378137.0,298.257222101]],CS[Cartesian,3],AXIS["Geocentric X (X)",other,ORDER[1]],AXIS["Geocentric Y (Y)",other,ORDER[2]],AXIS["Geocentric Z (Z)",other,ORDER[3]],LENGTHUNIT["metre",1.0]],ID["ISO",289],REMARK["Replaces IGS97 - XYZ. Replaced by IGb00 - XYZ. Used by IGS products within the period 2001-12-02 thru 2004-01-10."]

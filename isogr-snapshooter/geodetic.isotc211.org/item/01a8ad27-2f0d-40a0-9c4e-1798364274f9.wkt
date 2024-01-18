@@ -1,1 +1,0 @@
-GEODCRS["ITRF2005 - XYZ",DATUM["International Terrestrial Reference Frame 2005",ELLIPSOID["GRS 1980",6378137.0,298.257222101]],CS[Cartesian,3],AXIS["Geocentric X (X)",other,ORDER[1]],AXIS["Geocentric Y (Y)",other,ORDER[2]],AXIS["Geocentric Z (Z)",other,ORDER[3]],LENGTHUNIT["metre",1.0]],ID["ISO",269],REMARK["Replaces ITRF2000 - XYZ. Replaced by ITRF2008 - XYZ."]

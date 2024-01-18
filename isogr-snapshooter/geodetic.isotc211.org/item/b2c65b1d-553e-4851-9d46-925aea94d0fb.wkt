@@ -1,1 +1,0 @@
-GEODCRS["Korean 1985 - LatLon",DATUM["Korean 1985 Datum",ELLIPSOID["Bessel 1841",6377397.155,299.1528128]],CS[ellipsoidal,2],AXIS["Geodetic latitude (Lat)",north,ORDER[1]],AXIS["Geodetic longitude (Lon)",east,ORDER[2]],ANGLEUNIT["degree (supplier to define representation)",0.017453292522222223]],ID["ISO",1011]

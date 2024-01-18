@@ -3,7 +3,7 @@
 <html>
 <head>
   <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script type="text/javascript" async="async" src="www.googletagmanager.com/gtag/js?id=UA-138578173-3"></script>
+  <script type="text/javascript" async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-138578173-3"></script>
   <script>
       window.dataLayer = window.dataLayer || [];
 
@@ -33,7 +33,7 @@
   <script type="text/javascript" src="../../resources/js/datatables.js"></script>
   <script type="text/javascript" src="../../resources/js/registry.js"></script>
   <script type="text/javascript" src="../../resources/js/select2.js"></script>
-  <!-- 		<script type="text/javascript" src="bespire.atlassian.net/s/5aabcb68bc266b63d9c98db2e18c606b-T/en_USbdmabc/6327/13/1.4.11/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?collectorId=3eddc320"></script> -->
+  <!-- 		<script type="text/javascript" src="https://bespire.atlassian.net/s/5aabcb68bc266b63d9c98db2e18c606b-T/en_USbdmabc/6327/13/1.4.11/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?collectorId=3eddc320"></script> -->
   <link rel="stylesheet" href="../../resources/css/bootstrap.min.css" />
   <link rel="stylesheet" href="../../resources/css/bootstrap-theme.min.css" />
   <link rel="stylesheet" href="../../resources/css/bootstrap-datetimepicker.min.css" />
@@ -44,6 +44,7 @@
   <link rel="stylesheet" href="../../resources/css/select2-bootstrap.css" />
   <link rel="stylesheet" href="../../resources/css/select2-bootstrap-t0m.css" />
   <link rel="stylesheet" href="../../resources/css/registry.css" />
+  <link rel="stylesheet" type="text/css" href="/static/fonts/oswald.css" />
   <style type="text/css">
     body {
       padding-top: 110px;
@@ -119,14 +120,51 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse navbar-ex1-collapse" style="margin-top: 40px">
       <ul class="nav navbar-nav navbar-right">
-
+        
         <li class="dropdown">
           <a href="EngineeringCRS.html#" class="dropdown-toggle" data-toggle="dropdown"><span>Documentation</span> <span class="caret"></span></a>
           <ul class="dropdown-menu" style="padding: 15px; min-width: 250px;">
             <li>
-              <a href="iso-tc211.github.io/iso-geodetic-register-docs/" target="_blank">User Guide</a>
+              <a href="https://iso-tc211.github.io/iso-geodetic-register-docs/" target="_blank">User Guide</a>
             </li>
           </ul>
+        </li>
+        
+        <li class="dropdown">
+          <a href="EngineeringCRS.html#" class="dropdown-toggle" data-toggle="dropdown"><span>Login</span>
+            <span class="caret"></span></a>
+          <ul class="dropdown-menu" style="padding: 15px; min-width: 250px;">
+            <li>
+              <div class="row">
+                <div class="col-md-12">
+                  <form class="form login-form" role="form" method="post" accept-charset="UTF-8" id="login-nav" action="/login">
+                    <!-- Don't add <fieldset> or login fields may be disabled when viewing a register item (see JS in item.html) -->
+                    <div class="form-group">
+                      <label class="sr-only" for="inputEmail">E-mail address</label>
+                      <!-- 												<input type="email" class="form-control" id="inputEmail" th:placeholder="#{navbar.login.label.email}" required="required"></input> -->
+                      <input type="text" class="form-control" name="username" id="inputEmail" required="required" placeholder="E-mail address" />
+                    </div>
+                    <div class="form-group">
+                      <label class="sr-only" for="inputPassword">Password</label>
+                      <input type="password" class="form-control" name="password" id="inputPassword" required="required" placeholder="Password" />
+                    </div>
+                    <div class="form-group">
+                      <button type="submit" class="btn btn-success btn-block">Login</button>
+                      <button type="button" class="btn btn-primary btn-block" onclick="location.href = &#39;/signup&#39;">Register</button>
+                      <button type="button" class="btn btn-default btn-block" onclick="location.href = &#39;/forgot-password&#39;">Forgot
+                        password
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </li>
+
+        <li class="dropdown">
+          <a class="dropdown-toggle" href="../../feedback.html">
+            <span>Feedback</span><span></span></a>
         </li>
       </ul>
       <!-- 				<div class="navbar-form navbar-right"> -->
@@ -154,7 +192,7 @@
     <!-- /.navbar-collapse -->
   </nav>
 </div>
-
+  
 	<div class="container-fluid">
 		<div class="row-fluid">
 			<div class="col-md-3">
@@ -165,7 +203,7 @@
         <div id="demo1" class="demo" style="height: 100%;">
           <ul>
             <li id="nav_start"><a class="jstest" href="../../index.html">Welcome</a></li>
-
+            
             <li class="jstree-open" id="registergeodetic">
               <a href="../geodetic.html" title="ISO Geodetic Register">ISO Geodetic Register</a>
               <ul>
@@ -173,37 +211,37 @@
                   <a id="registergeodeticcrs" href="crs.html">Coordinate Reference
                     Systems</a>
                   <ul>
-
+                    
                     <li id="registergeodeticCompoundCRS">
                       <a href="CompoundCRS.html" title="Compound CRS">Compound CRS</a>
                     </li>
-
-
-
-
-
+                    
+                    
+                    
+                    
+                    
                     <li id="registergeodeticEngineeringCRS">
                       <a href="EngineeringCRS.html" title="Engineering CRS">Engineering CRS</a>
                     </li>
-
+                    
                     <li id="registergeodeticGeodeticCRS">
                       <a href="GeodeticCRS.html" title="Geodetic CRS">Geodetic CRS</a>
                     </li>
-
-
-
-
+                    
+                    
+                    
+                    
                     <li id="registergeodeticProjectedCRS">
                       <a href="ProjectedCRS.html" title="Projected CRS">Projected CRS</a>
                     </li>
-
-
-
+                    
+                    
+                    
                     <li id="registergeodeticVerticalCRS">
                       <a href="VerticalCRS.html" title="Vertical CRS">Vertical CRS</a>
                     </li>
-
-
+                    
+                    
                   </ul>
                 </li>
                 <li>
@@ -212,61 +250,61 @@
                     <li id="registergeodeticCartesianCS">
                       <a href="CartesianCS.html" title="Cartesian Coordinate System">Cartesian Coordinate System</a>
                     </li>
-
-
-
-
-
+                    
+                    
+                    
+                    
+                    
                     <li id="registergeodeticEllipsoidalCS">
                       <a href="EllipsoidalCS.html" title="Ellipsoidal Coordinate System">Ellipsoidal Coordinate System</a>
                     </li>
-
-
-
-
-
-
-
-
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
                     <li id="registergeodeticSphericalCS">
                       <a href="SphericalCS.html" title="Spherical Coordinate System">Spherical Coordinate System</a>
                     </li>
-
-
-
+                    
+                    
+                    
                     <li id="registergeodeticVerticalCS">
                       <a href="VerticalCS.html" title="Vertical Coordinate System">Vertical Coordinate System</a>
                     </li>
-
+                    
                   </ul>
                 </li>
                 <li>
                   <a id="registergeodeticdatums" href="datums.html">Datums</a>
                   <ul>
-
-
-
-
-
-
-
-
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
                     <li id="registergeodeticEngineeringDatum">
                       <a href="EngineeringDatum.html" title="Engineering Datum">Engineering Datum</a>
                     </li>
-
+                    
                     <li id="registergeodeticGeodeticDatum">
                       <a href="GeodeticDatum.html" title="Geodetic Datum">Geodetic Datum</a>
                     </li>
-
-
-
-
-
-
-
-
-
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
                     <li id="registergeodeticVerticalDatum">
                       <a href="VerticalDatum.html" title="Vertical Datum">Vertical Datum</a>
                     </li>
@@ -276,53 +314,53 @@
                   <a id="registergeodeticoperations" href="operations.html">Coordinate
                     Operations</a>
                   <ul>
-
-
+                    
+                    
                     <li id="registergeodeticConcatenatedOperation">
                       <a href="ConcatenatedOperation.html" title="Concatenated Operation">Concatenated Operation</a>
                     </li>
                     <li id="registergeodeticConversion">
                       <a href="Conversion.html" title="Conversion">Conversion</a>
                     </li>
-
-
-
-
-
-
-
-
-
-
-
-
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
                     <li id="registergeodeticTransformation">
                       <a href="Transformation.html" title="Transformation">Transformation</a>
                     </li>
-
-
-
-
+                    
+                    
+                    
+                    
                   </ul>
                 </li>
                 <li>
                   <a id="registergeodeticothers" href="others.html">Other</a>
                   <ul>
-
-
-
-
+                    
+                    
+                    
+                    
                     <li id="registergeodeticCoordinateSystemAxis">
                       <a href="CoordinateSystemAxis.html" title="Coordinate System Axis">Coordinate System Axis</a>
                     </li>
                     <li id="registergeodeticEllipsoid">
                       <a href="Ellipsoid.html" title="Ellipsoid">Ellipsoid</a>
                     </li>
-
-
-
-
-
+                    
+                    
+                    
+                    
+                    
                     <li id="registergeodeticOperationMethod">
                       <a href="OperationMethod.html" title="Coordinate Operation Method">Coordinate Operation Method</a>
                     </li>
@@ -332,22 +370,22 @@
                     <li id="registergeodeticPrimeMeridian">
                       <a href="PrimeMeridian.html" title="Prime Meridian">Prime Meridian</a>
                     </li>
-
-
-
+                    
+                    
+                    
                     <li id="registergeodeticUnitOfMeasure">
                       <a href="UnitOfMeasure.html" title="Unit of Measurement">Unit of Measurement</a>
                     </li>
-
-
-
+                    
+                    
+                    
                   </ul>
                 </li>
               </ul>
             </li>
-
-
-
+            
+            
+            
             <!-- 							<li id="adminproposals" sec:authorize="hasRole('ROLE_ADMIN')"><a th:href="@{__${basePath}__/admin/proposals}" th:text="#{navbar.proposalManagement}">Vorschlagsverwaltung</a></li> -->
           </ul>
         </div>
@@ -438,34 +476,34 @@
 </div>
 			</div>
 			<div class="col-md-9" role="main">
-
-
-
-
+			  	
+			  	
+				
+				
 				<h3>Engineering CRS</h3>
-
+				
 <!-- 				<div th:replace="home :: demo"/> -->
 
+				
 
+				
 
-
-
-
+				
 
 				<ul class="nav nav-tabs">
 					<li><a href="EngineeringCRS.html#overview" data-toggle="tab">Overview</a></li>
 					<li class="active"> <!-- th:classappend="(${viewMode} == 'contents') ? 'active'"--><a href="EngineeringCRS.html#contents" data-toggle="tab">Contents</a></li>
 <!-- 					<li sec:authorize="isAuthenticated()" th:classappend="(${viewMode} == 'proposals') ? 'active'"><a href="#proposals" data-toggle="tab" th:text="#{tabs.proposals}">Vorgeschlagene Inhalte</a></li> -->
 				</ul>
-
+				
 				<div class="tab-content">
 					<div id="overview" class="tab-pane in">
 						<p>Overview</p>
 					</div>
-
+					
 					<div id="contents" class="tab-pane in active">
-
-						<div style="padding: 10px">
+						
+						<div style="padding: 10px">				
 							<table id="contentsTable" class="datatable table table-striped">
 								<thead>
 									<tr>
@@ -483,12 +521,12 @@
 			</div>
 		</div>
 	</div>
-
+	
 	<div>
   <footer class="footer">
 			<span class="powered-by pull-right">
 					<span class="powered-by-text">Powered by</span>
-					<a href="open.ribose.com" class="powered-by-logo">
+					<a href="https://open.ribose.com" class="powered-by-logo">
 						<img class="img-responsive" alt="Ribose" src="../../resources/images/brands/ribose/logo-ribose.svg" />
 					</a>
 			</span>
@@ -513,7 +551,7 @@
 	var clarifyButton = function(item) {
 		return itemActionButton('clarify', item.uuid, 'primary', 'Clarify');
 	}
-
+	
 	var supersedeButton = function(item) {
 		return itemActionButton('supersede', item.uuid, 'warning', 'Supersede');
 	};
@@ -555,7 +593,7 @@
 	var dissolveGroupButton = function(item) {
 		return '<a href="EngineeringCRS.html#dissolvegrouppopup-' + item.proposalUuid + '" id="dissolvegroup-' + item.proposalUuid + '" data-toggle="modal" class="btn btn-default btn-xs action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">Dissolve group</a>';
 	}
-
+	
 	var discussionButton = function(item) {
 		return '<button type="button" id="details_' + item.proposalUuid + '" class="btn btn-primary btn-xs button-discussion action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">Discussion</button>';
 	}
@@ -591,7 +629,7 @@
 	var submitButton = function(item) {
 		return '<a href="EngineeringCRS.html#submitpopup-' + item.proposalUuid + '" id="submit-' + item.proposalUuid + '" data-toggle="modal" class="btn btn-success btn-xs action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">Submit proposal</a>';
 	};
-
+	
 	var withdrawButton = function(item) {
 		return '<a href="EngineeringCRS.html#withdrawpopup-' + item.proposalUuid + '" id="withdraw-' + item.proposalUuid + '" data-toggle="modal" class="btn btn-warning btn-xs action-' + item.proposalUuid + '" data-uuid="' + item.proposalUuid + '">Withdraw</a>';
 	};
@@ -613,15 +651,15 @@
 	}
 
 	var reviewButton = function(item) {
-		return '<button type="button" id="review-' + item.proposalUuid + '" class="btn btn-primary btn-xs button-reviewproposal" data-uuid="' + item.proposalUuid + '">Review</button>';
+		return '<button type="button" id="review-' + item.proposalUuid + '" class="btn btn-primary btn-xs button-reviewproposal" data-uuid="' + item.proposalUuid + '">Review</button>';	
 	};
 
 	var decideButton = function(item) {
-		return '<button type="button" id="decide-' + item.proposalUuid + '" class="btn btn-primary btn-xs button-decideproposal" data-uuid="' + item.proposalUuid + '">Decide</button>';
+		return '<button type="button" id="decide-' + item.proposalUuid + '" class="btn btn-primary btn-xs button-decideproposal" data-uuid="' + item.proposalUuid + '">Decide</button>';	
 	};
-
+	
 	var addToGroupPopup = function(item) {
-		var result =
+		var result = 
 			'<div class="modal fade" id="addtogrouppopup-' + item.proposalUuid + '" role="dialog">' +
 				'<div class="modal-dialog">' +
 					'<div class="modal-content">' +
@@ -638,14 +676,14 @@
 					'</div>' +
 				'</div>' +
 			'</div>';
-
+		
 		return result;
 	};
 
 	var removeFromGroupPopup = function(item) {
 		var proposalUuid = item.proposalUuid;
-
-		var result =
+		
+		var result = 
 			'<div class="modal fade" id="removefromgrouppopup-' + item.proposalUuid + '" role="dialog">' +
 				'<div class="modal-dialog">' +
 					'<div class="modal-content">' +
@@ -662,7 +700,7 @@
 					'</div>' +
 				'</div>' +
 			'</div>';
-
+		
 		result = result.replace('\{0\}', item.title);
 
 		return result;
@@ -671,12 +709,12 @@
 	var groupSelect = function(item) {
 		var result =
 			'<input type="hidden" class="select-group" id="groupselect-' + item.proposalUuid + '" style="width: 100%"/>';
-
+			
 		return result;
 	};
-
+	
 	var dissolveGroupPopup = function(item) {
-		var result =
+		var result = 
 			'<div class="modal fade" id="dissolvegrouppopup-' + item.proposalUuid + '" role="dialog">' +
 				'<div class="modal-dialog">' +
 					'<div class="modal-content">' +
@@ -693,14 +731,14 @@
 					'</div>' +
 				'</div>' +
 			'</div>';
-
+		
 		result = result.replace('\{0\}', item.name);
-
+		
 		return result;
 	};
-
+	
 	var itemPopup = function(itemUuid, itemTitle, action, headerText, bodyHtml, okText, okType) {
-		var result =
+		var result = 
 			'<div class="modal fade" id="' + action + 'popup-' + itemUuid + '" role="dialog">' +
 				'<div class="modal-dialog">' +
 					'<div class="modal-content">' +
@@ -717,14 +755,14 @@
 					'</div>' +
 				'</div>' +
 			'</div>';
-
+		
 		result = result.replace('\{0\}', itemTitle);
-
-		return result;
+		
+		return result;		
 	};
-
+	
 	var submitPopup = function(item) {
-		var result =
+		var result = 
 			'<div class="modal fade" id="submitpopup-' + item.proposalUuid + '" role="dialog">' +
 				'<div class="modal-dialog">' +
 					'<div class="modal-content">' +
@@ -741,14 +779,14 @@
 					'</div>' +
 				'</div>' +
 			'</div>';
-
+		
 		result = result.replace('\{0\}', item.title);
-
+		
 		return result;
 	};
-
+	
 	var withdrawPopup = function(item) {
-		var result =
+		var result = 
 			'<div class="modal fade" id="withdrawpopup-' + item.proposalUuid + '" role="dialog">' +
 				'<div class="modal-dialog">' +
 					'<div class="modal-content">' +
@@ -765,14 +803,14 @@
 					'</div>' +
 				'</div>' +
 			'</div>';
-
+		
 		result = result.replace('\{0\}', item.name);
-
+		
 		return result;
 	};
 
 	var deletePopup = function(item) {
-		var result =
+		var result = 
 			'<div class="modal fade" id="deletepopup-' + item.proposalUuid + '" role="dialog">' +
 				'<div class="modal-dialog">' +
 					'<div class="modal-content">' +
@@ -789,14 +827,14 @@
 					'</div>' +
 				'</div>' +
 			'</div>';
-
+		
 		result = result.replace('\{0\}', item.title);
-
+		
 		return result;
 	};
 
 	var startDiscussionPopup = function(item) {
-		var result =
+		var result = 
 			'<div class="modal fade" id="startdiscussionpopup-' + item.proposalUuid + '" role="dialog">' +
 				'<div class="modal-dialog">' +
 					'<div class="modal-content">' +
@@ -813,14 +851,14 @@
 					'</div>' +
 				'</div>' +
 			'</div>';
-
+		
 		result = result.replace('\{0\}', item.title);
-
+		
 		return result;
 	};
 
 	var endDiscussionPopup = function(item) {
-		var result =
+		var result = 
 			'<div class="modal fade" id="enddiscussionpopup-' + item.proposalUuid + '" role="dialog">' +
 				'<div class="modal-dialog">' +
 					'<div class="modal-content">' +
@@ -837,14 +875,14 @@
 					'</div>' +
 				'</div>' +
 			'</div>';
-
+		
 		result = result.replace('\{0\}', item.title);
-
+		
 		return result;
 	};
 
 	var startBallotPopup = function(item) {
-		var result =
+		var result = 
 			'<div class="modal fade" id="startballotpopup-' + item.proposalUuid + '" role="dialog">' +
 				'<div class="modal-dialog">' +
 					'<div class="modal-content">' +
@@ -861,14 +899,14 @@
 					'</div>' +
 				'</div>' +
 			'</div>';
-
+		
 		result = result.replace('\{0\}', item.title);
-
+		
 		return result;
 	};
 
 	var endBallotPopup = function(item) {
-		var result =
+		var result = 
 			'<div class="modal fade" id="endballotpopup-' + item.proposalUuid + '" role="dialog">' +
 				'<div class="modal-dialog">' +
 					'<div class="modal-content">' +
@@ -885,14 +923,14 @@
 					'</div>' +
 				'</div>' +
 			'</div>';
-
+		
 		result = result.replace('\{0\}', item.title);
-
+		
 		return result;
 	};
 
 	var endAppealPopup = function(item) {
-		var result =
+		var result = 
 			'<div class="modal fade" id="endappealpopup-' + item.proposalUuid + '" role="dialog">' +
 				'<div class="modal-dialog">' +
 					'<div class="modal-content">' +
@@ -909,14 +947,14 @@
 					'</div>' +
 				'</div>' +
 			'</div>';
-
+		
 		result = result.replace('\{0\}', item.title);
-
+		
 		return result;
 	};
 
 	var acceptAppealPopup = function(item) {
-		var result =
+		var result = 
 			'<div class="modal fade" id="acceptappealpopup-' + item.proposalUuid + '" role="dialog">' +
 				'<div class="modal-dialog">' +
 					'<div class="modal-content">' +
@@ -933,14 +971,14 @@
 					'</div>' +
 				'</div>' +
 			'</div>';
-
+		
 		result = result.replace('\{0\}', item.title);
-
+		
 		return result;
 	};
 
 	var rejectAppealPopup = function(item) {
-		var result =
+		var result = 
 			'<div class="modal fade" id="rejectappealpopup-' + item.proposalUuid + '" role="dialog">' +
 				'<div class="modal-dialog">' +
 					'<div class="modal-content">' +
@@ -957,36 +995,36 @@
 					'</div>' +
 				'</div>' +
 			'</div>';
-
+		
 		result = result.replace('\{0\}', item.title);
-
+		
 		return result;
 	};
 
 	var showLoader = function(uuid, idx) {
 		$('#proposalrow-' + uuid + ' td:nth-child(' + idx + ')').html('<img style="margin-left: 20px" src="../../resources/images/loader.gif"/>');
 	}
-
+	
 	var showReload = function(uuid, idx) {
-		$('#proposalrow-' + uuid + ' td:nth-child(' + idx + ')').text('datatable.pleaseReload');
+		$('#proposalrow-' + uuid + ' td:nth-child(' + idx + ')').text('datatable.pleaseReload');		
 	}
-
+	
 	var dropdownMenu = function(uuid, actions) {
 		var result = '<div class="btn-group">' +
 		         '<button id="actions-' + uuid + '" type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">' +
 				   '<span>Action</span> <span class="caret"></span>' +
 				 '</button>' +
 				 '<ul class="dropdown-menu" role="menu">';
-
+	
 		$.each(actions, function(i, val) {
-			result += '<li><div style="margin-left: 10px; margin-top: 5px">' + val + '</div></li>';
+			result += '<li><div style="margin-left: 10px; margin-top: 5px">' + val + '</div></li>';	
 		});
-
+				 
 		result += '</ul></div>';
-
+		
 		return result;
 	};
-
+	
 	var initGroupSelect = function(proposalUuid) {
 		$('#groupselect-' + proposalUuid).select2({
 			width: 'resolve',
@@ -1002,22 +1040,22 @@
 					};
 				},
 				results: function (data) {
-					return {
-						results : $.map(data, function (item) {
-							return {
-								text: item[1],
-								id: item[0]
-							}
-						})
+					return { 
+						results : $.map(data, function (item) { 
+							return { 
+								text: item[1], 
+								id: item[0] 
+							} 
+						}) 
 					};
 				},
 			},
 		});
-
+		
 		$('#groupselect-' + proposalUuid).change(function() {
 			$('#addtogroup-' + proposalUuid).removeAttr('disabled');
 		});
-
+	
 		$('#addtogroup-' + proposalUuid).click(function() {
 			var groupUuid = $('#groupselect-' + proposalUuid).val();
 			var data = { 'addedProposalUuid' : proposalUuid };
@@ -1029,7 +1067,7 @@
 					showError(errorThrown, '[[@{__${basePath}__}]]');
 				}
 			});
-		});
+		});	
 	};
 
 	var showNotesButton = function(item) {
@@ -1068,7 +1106,7 @@
 </script>
 <script type="text/javascript">
 /*<![CDATA[ */
-
+            
 	var datatable2Rest = function(sSource, aoData, fnCallback) {
 	    //extract name/value pairs into a simpler map for use later
 	    var paramMap = {};
@@ -1077,7 +1115,7 @@
 	    }
 
 	    //page calculations
-	    var pageSize = 1000;
+	    var pageSize = paramMap.iDisplayLength;
 	    var start = paramMap.iDisplayStart;
 	    var pageNum = start / pageSize; // pageNum is 0 based
 
@@ -1130,19 +1168,19 @@
 							'<div class="form-group">' +
 							  '<label class="form-label" for="justification">Please provide a justification for the retirement:</label>' +
 							  '<div class="controls">' +
-							    '<textarea id="justification" name="justification" rows="4" cols="80" class="form-control" required="true" type="text"></textarea>' +
+							    '<textarea id="justification" name="justification" rows="4" cols="80" class="form-control" required="true" type="text"></textarea>' +  
 							  '</div>' +
 							'</div>' +
 							'<div class="form-group">' +
 							  '<label class="form-label" for="registerManagerNotes">Notes for the register manager:</label>' +
 							  '<div class="controls">' +
-							    '<textarea id="registerManagerNotes" name="registerManagerNotes" rows="2" cols="80" class="form-control" required="true" type="text"></textarea>' +
+							    '<textarea id="registerManagerNotes" name="registerManagerNotes" rows="2" cols="80" class="form-control" required="true" type="text"></textarea>' +  
 							  '</div>' +
 							'</div>' +
 							'<div class="form-group">' +
 							  '<label class="form-label" for="controlBodyNotes">Notes for the control body:</label>' +
 							  '<div class="controls">' +
-							    '<textarea id="controlBodyNotes" name="controlBodyNotes" rows="2" cols="80" class="form-control" required="true" type="text"></textarea>' +
+							    '<textarea id="controlBodyNotes" name="controlBodyNotes" rows="2" cols="80" class="form-control" required="true" type="text"></textarea>' +  
 							  '</div>' +
 							'</div>' +
 						  '</div>' +
@@ -1171,19 +1209,19 @@
 							'<div class="form-group">' +
 							  '<label class="form-label" for="justification">Please provide a justification for the invalidation:</label>' +
 							  '<div class="controls">' +
-							    '<textarea id="justification" name="justification" rows="4" cols="80" class="form-control" required="true" type="text"></textarea>' +
+							    '<textarea id="justification" name="justification" rows="4" cols="80" class="form-control" required="true" type="text"></textarea>' +  
 							  '</div>' +
 							'</div>' +
 							'<div class="form-group">' +
 							  '<label class="form-label" for="registerManagerNotes">Notes for the register manager:</label>' +
 							  '<div class="controls">' +
-							    '<textarea id="registerManagerNotes" name="registerManagerNotes" rows="2" cols="80" class="form-control" required="true" type="text"></textarea>' +
+							    '<textarea id="registerManagerNotes" name="registerManagerNotes" rows="2" cols="80" class="form-control" required="true" type="text"></textarea>' +  
 							  '</div>' +
 							'</div>' +
 							'<div class="form-group">' +
 							  '<label class="form-label" for="controlBodyNotes">Notes for the control body:</label>' +
 							  '<div class="controls">' +
-							    '<textarea id="controlBodyNotes" name="controlBodyNotes" rows="2" cols="80" class="form-control" required="true" type="text"></textarea>' +
+							    '<textarea id="controlBodyNotes" name="controlBodyNotes" rows="2" cols="80" class="form-control" required="true" type="text"></textarea>' +  
 							  '</div>' +
 							'</div>' +
 						  '</div>' +
@@ -1200,47 +1238,47 @@
 
 	$('#contentsTable').on('click', '.button-details', function(e) {
 		var uuid = $(this).data('uuid');
-		location.href = '../../item/' + uuid + '.html';
+		location.href = '/item/' + uuid;
 	});
 
 	$('#contentsTable').on('click', '.button-clarify', function(e) {
 		var uuid = $(this).data('uuid');
-		location.href = '../../item/' + uuid + '/clarify';
+		location.href = '/item/' + uuid + '/clarify';
 	});
 
 	$('#contentsTable').on('click', '.button-supersede', function(e) {
 		var uuid = $(this).data('uuid');
-		location.href = '../../item/' + uuid + '/supersede';
+		location.href = '/item/' + uuid + '/supersede';
 	});
 
 	$('#contentsTable').on('click', '.button-retire', function(e) {
 		var uuid = $(this).data('uuid');
-		location.href = '../../item/' + uuid + '/retire';
+		location.href = '/item/' + uuid + '/retire';
 	});
 
 	$('#contentsTable').on('click', '.button-invalidate', function(e) {
 		var uuid = $(this).data('uuid');
-		location.href = '../../item/' + uuid + '/invalidate';
+		location.href = '/item/' + uuid + '/invalidate';
 	});
 
 	$(document).ready(function() {
 		var table;
-
+		
 		table = $('#contentsTable').dataTable({
-			"sAjaxSource": "../../register/11c2a251-e7eb-4daf-bcd1-8823e737d93d/containedItems-EngineeringCRS",
+			"sAjaxSource": "/register/11c2a251-e7eb-4daf-bcd1-8823e737d93d/containedItems",
 			"bProcessing": true,
 			"bServerSide": true,
 			"bStateSave": true,
 			"fnServerParams": function (aoData) {
 				if (false) {
 		            aoData.push({
-			            	name: "itemClass",
+			            	name: "itemClass", 
 			            	value: "7be258b1-ffcd-4493-aad4-58f913d08825"
 		            });
 				}
 				if (true) {
 		            aoData.push({
-			            	name: "itemClassFilter",
+			            	name: "itemClassFilter", 
 			            	value: "EngineeringCRS"
 		            });
 				}
@@ -1251,15 +1289,13 @@
 	        },
 // 			"fnServerData" : datatable2Rest,
 			"sPaginationType": "bs_normal",
-			"bPaginate": false,
- 			"bFilter": false,
 // 			"bFilter": false,
 			"oLanguage": {
 				  "sEmptyTable": "No items found",
-				  "sInfo": "Showing all _TOTAL_ items",
+				  "sInfo": "Showing _START_ to _END_ of _TOTAL_ items",
 				  "sInfoEmpty": "No items",
 				  "sInfoFiltered": "(filtered from _MAX_ total items)",
-				  "sLengthMenu": "Showing all items for the current item class",
+				  "sLengthMenu": "Show _MENU_ items per page",
 				  "sLoadingRecords": "Loading...",
 				  "sProcessing": "<img style='margin-left: 20px' src='../../resources/images/loader.gif'/>",
 				  "sZeroRecords": "No items found",
@@ -1272,27 +1308,27 @@
 				},
 			"fnDrawCallback": function( oSettings ) {
 // 				alert( 'DataTables has redrawn the table' );
-			},
+			},				
 			"aaSorting": [[ 0, "asc" ]],
 			"aoColumns": [
-				{
+				{ 
 					"mDataProp": "itemIdentifier",
 					"sWidth": "8%"
 				},
-				{
+				{ 
 					"mDataProp": "name",
 					"sWidth": "50%",
-					"bSortable": false
+					"bSearchable": true
 				},
-				{
+				{ 	
 					"mDataProp": "itemClassName",
 					"sWidth": "15%",
 				 	"bSortable": false
 				},
-				{
+				{ 
 					"mDataProp": "status",
 					"sWidth": "10%",
-					"bSortable": false
+					"bSortable": true
 				},
 			],
 			"aoColumnDefs": [
@@ -1300,21 +1336,21 @@
 				  "mData": null,
 				  "mRender": function (data, type, full) {
 					  var actions = detailsButton(full.uuid);
-
+					  
 					  if (false && full.status === 'valid') {
-						  var dropdownActions = [];
+						  var dropdownActions = []; 
 						  dropdownActions.push(clarifyButton(full));
 						  dropdownActions.push(supersedeButton(full));
 						  dropdownActions.push(retireButton(full));
 						  dropdownActions.push(invalidateButton(full));
-
+						  
 						  actions += dropdownMenu(full.itemUuid, dropdownActions);
 						  actions += retirePopup(full);
 						  actions += invalidatePopup(full);
 					  }
-
+					  
 					  return actions;
-
+																		
 // 						<div class="btn-group" sec:authorize="@registrySecurity.hasEntityRelatedRole('ROLE_SUBMITTER_', #vars.register)">
 // 							<button type="button" th:if="${item.isValid()}" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
 // 								<span th:text="#{button.action}">Aktion</span> <span class="caret"></span>
@@ -1325,10 +1361,10 @@
 // 									<div style="margin-left: 10px; margin-top: 5px">
 // 										<button td:id="'retire_' + ${item.uuid}" class="btn btn-xs btn-danger" th:href="'#confirmretirement-' + ${item.uuid}" data-toggle="modal" th:text="#{button.retirement}">Aufgeben</button>
 // 									</div>
-
+									
 // 								</li>
 // 							</ul>
-
+									
 // 							<div class="modal fade" th:id="'confirmretirement-' + ${item.uuid}" role="dialog">
 // 								<div class="modal-dialog">
 // 									<div class="modal-content">
@@ -1340,14 +1376,14 @@
 // 												<p th:text="#{popup.retire.justification}">
 // 													Bitte geben Sie eine Begründung für die Aufgabe des Eintrags an.
 // 												</p>
-
+												
 // 												Text input
 // 												<div class="form-group">
 // 													<div class="controls">
-// 														<textarea id="justification" name="justification" rows="3" cols="40" class="form-control" required="true" type="text" />
+// 														<textarea id="justification" name="justification" rows="3" cols="40" class="form-control" required="true" type="text" /> 
 // 													</div>
 // 												</div>
-
+												
 // 											</div>
 // 											<div class="modal-footer">
 // 												<button id="confirmretirement" type="submit" class="btn btn-warning" th:text="#{button.confirm}">Bestätgigen</button>
@@ -1360,7 +1396,7 @@
 
 // 						</div>
 
-
+					  
 				  }
 				}
 			]
@@ -1371,19 +1407,17 @@
 // 				null,
 // 				{"bSortable" : false}
 // 			]
-		});
+		});	
 
 		table = $('#proposalsTable').dataTable({
 			"sPaginationType": "bs_normal",
-			"bPaginate": false,
- 			"bFilter": false,
 			"bStateSave": true,
 			"oLanguage": {
 				  "sEmptyTable": "No items found",
-				  "sInfo": "Showing all _TOTAL_ items",
+				  "sInfo": "Showing _START_ to _END_ of _TOTAL_ items",
 				  "sInfoEmpty": "No items",
 				  "sInfoFiltered": "(filtered from _MAX_ total items)",
-				  "sLengthMenu": "Showing all items for the current item class",
+				  "sLengthMenu": "Show _MENU_ items per page",
 				  "sLoadingRecords": "Loading...",
 				  "sProcessing": "<img src='../../resources/images/loader.gif'/>",
 				  "sZeroRecords": "No items found",
@@ -1403,7 +1437,7 @@
 				null,
 				{"bSortable" : false}
 			]
-		});
+		});	
 
 		$('.datatable').each(function(){
 			var datatable = $(this);
@@ -1415,18 +1449,18 @@
 			var length_sel = datatable.closest('.dataTables_wrapper').find('div[id$=_length] select');
 			length_sel.addClass('form-control input-sm');
 		});
-
+		
 		$('#file').change(function() {
 			$('#submitUpload').removeAttr('disabled');
 		});
-
+		
 		$('#submitUpload').click(function() {
-			$('body').addClass('loading');
+			$('body').addClass('loading');				
 			$('#uploadForm').submit();
 		});
 	});
-
-
+	
+	
 /* ]]> */
 </script>
 

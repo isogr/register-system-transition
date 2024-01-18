@@ -3,7 +3,7 @@
 <html>
 	<head>
   <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script type="text/javascript" async="async" src="www.googletagmanager.com/gtag/js?id=UA-138578173-3"></script>
+  <script type="text/javascript" async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-138578173-3"></script>
   <script>
       window.dataLayer = window.dataLayer || [];
 
@@ -33,7 +33,7 @@
   <script type="text/javascript" src="resources/js/datatables.js"></script>
   <script type="text/javascript" src="resources/js/registry.js"></script>
   <script type="text/javascript" src="resources/js/select2.js"></script>
-  <!-- 		<script type="text/javascript" src="bespire.atlassian.net/s/5aabcb68bc266b63d9c98db2e18c606b-T/en_USbdmabc/6327/13/1.4.11/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?collectorId=3eddc320"></script> -->
+  <!-- 		<script type="text/javascript" src="https://bespire.atlassian.net/s/5aabcb68bc266b63d9c98db2e18c606b-T/en_USbdmabc/6327/13/1.4.11/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?collectorId=3eddc320"></script> -->
   <link rel="stylesheet" href="resources/css/bootstrap.min.css" />
   <link rel="stylesheet" href="resources/css/bootstrap-theme.min.css" />
   <link rel="stylesheet" href="resources/css/bootstrap-datetimepicker.min.css" />
@@ -44,6 +44,7 @@
   <link rel="stylesheet" href="resources/css/select2-bootstrap.css" />
   <link rel="stylesheet" href="resources/css/select2-bootstrap-t0m.css" />
   <link rel="stylesheet" href="resources/css/registry.css" />
+  <link rel="stylesheet" type="text/css" href="/static/fonts/oswald.css" />
   <style type="text/css">
     body {
       padding-top: 110px;
@@ -124,9 +125,46 @@
           <a href="index.html#" class="dropdown-toggle" data-toggle="dropdown"><span>Documentation</span> <span class="caret"></span></a>
           <ul class="dropdown-menu" style="padding: 15px; min-width: 250px;">
             <li>
-              <a href="iso-tc211.github.io/iso-geodetic-register-docs/" target="_blank">User Guide</a>
+              <a href="https://iso-tc211.github.io/iso-geodetic-register-docs/" target="_blank">User Guide</a>
             </li>
           </ul>
+        </li>
+        
+        <li class="dropdown">
+          <a href="index.html#" class="dropdown-toggle" data-toggle="dropdown"><span>Login</span>
+            <span class="caret"></span></a>
+          <ul class="dropdown-menu" style="padding: 15px; min-width: 250px;">
+            <li>
+              <div class="row">
+                <div class="col-md-12">
+                  <form class="form login-form" role="form" method="post" accept-charset="UTF-8" id="login-nav" action="/login">
+                    <!-- Don't add <fieldset> or login fields may be disabled when viewing a register item (see JS in item.html) -->
+                    <div class="form-group">
+                      <label class="sr-only" for="inputEmail">E-mail address</label>
+                      <!-- 												<input type="email" class="form-control" id="inputEmail" th:placeholder="#{navbar.login.label.email}" required="required"></input> -->
+                      <input type="text" class="form-control" name="username" id="inputEmail" required="required" placeholder="E-mail address" />
+                    </div>
+                    <div class="form-group">
+                      <label class="sr-only" for="inputPassword">Password</label>
+                      <input type="password" class="form-control" name="password" id="inputPassword" required="required" placeholder="Password" />
+                    </div>
+                    <div class="form-group">
+                      <button type="submit" class="btn btn-success btn-block">Login</button>
+                      <button type="button" class="btn btn-primary btn-block" onclick="location.href = &#39;/signup&#39;">Register</button>
+                      <button type="button" class="btn btn-default btn-block" onclick="location.href = &#39;/forgot-password&#39;">Forgot
+                        password
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </li>
+
+        <li class="dropdown">
+          <a class="dropdown-toggle" href="feedback.html">
+            <span>Feedback</span><span></span></a>
         </li>
       </ul>
       <!-- 				<div class="navbar-form navbar-right"> -->
@@ -461,13 +499,13 @@
 					</p>
 					<p>
 						This Registry is provided under the auspices of
-						<a href="committee.iso.org/home/tc211" target="_blank" title="ISO Technical Committee 211">ISO Technical Committee 211</a>
+						<a href="https://committee.iso.org/home/tc211" target="_blank" title="ISO Technical Committee 211">ISO Technical Committee 211</a>
 						on geographic information/geomatics and conforms to the following ISO standards:
 					</p>
 					<ul>
-						<li><a href="committee.iso.org/home/tc211" target="_blank" title="ISO 19111:2007">ISO 19111:2007</a> (Spatial referencing by coordinates)</li>
-						<li><a href="www.iso.org/standard/67252.html" target="_blank" title="ISO 19127:2019">ISO 19127:2019</a> (Geodetic register)</li>
-						<li><a href="www.iso.org/standard/54721.html" target="_blank" title="ISO 19135-1:2015">ISO 19135-1:2015</a> (Procedures for item registration -- Part 1: Fundamentals)</li>
+						<li><a href="https://committee.iso.org/home/tc211" target="_blank" title="ISO 19111:2007">ISO 19111:2007</a> (Spatial referencing by coordinates)</li>
+						<li><a href="https://www.iso.org/standard/67252.html" target="_blank" title="ISO 19127:2019">ISO 19127:2019</a> (Geodetic register)</li>
+						<li><a href="https://www.iso.org/standard/54721.html" target="_blank" title="ISO 19135-1:2015">ISO 19135-1:2015</a> (Procedures for item registration -- Part 1: Fundamentals)</li>
 					</ul>
 					<p>
 						Work is also underway to upgrade the Registry to conform to the recently revised ISO 19111:2019 standard, which includes support for dynamic datums and geoid-based datums.
@@ -475,7 +513,7 @@
 
 					<p>
 						<b>July 2022</b>: ISO/TC 211, OGC and IOGP have jointly published the
-						"<a href="committee.iso.org/files/live/sites/tc211/files/Resources/GuideToCRSRegistries3.pdf">Guide to Coordinate Reference System (CRS) Resources</a>".
+						"<a href="https://committee.iso.org/files/live/sites/tc211/files/Resources/GuideToCRSRegistries3.pdf">Guide to Coordinate Reference System (CRS) Resources</a>".
 						The guide describes basic information and the intended purposes of the three authoritative
 						CRS registers: EPSG, ISO Geodetic and OGC CRS registries, for the user community.
 					</p>
@@ -495,7 +533,7 @@
 					<p>
 						Ribose was appointed as Registration Authority of the ISO Geodetic Register by ISO in 2019 in accordance to ISO/TMB resolution 4/2019 and ISO/TC 211 Resolution 912.
 						As Registration Authority, Ribose is responsible for providing registration services for the ISO Geodetic Register following the
-						<a href="www.iso.org/standard/67252.html" target="_blank" title="ISO 19127">ISO 19127</a> International Standard.
+						<a href="https://www.iso.org/standard/67252.html" target="_blank" title="ISO 19127">ISO 19127</a> International Standard.
 					</p>
 
 
@@ -537,7 +575,7 @@
   <footer class="footer">
 			<span class="powered-by pull-right">
 					<span class="powered-by-text">Powered by</span>
-					<a href="open.ribose.com" class="powered-by-logo">
+					<a href="https://open.ribose.com" class="powered-by-logo">
 						<img class="img-responsive" alt="Ribose" src="resources/images/brands/ribose/logo-ribose.svg" />
 					</a>
 			</span>

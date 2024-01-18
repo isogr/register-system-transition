@@ -1,1 +1,0 @@
-GEODCRS["ETRF91 - LatLon",DATUM["European Terrestrial Reference Frame 1991",ELLIPSOID["GRS 1980",6378137.0,298.257222101]],CS[ellipsoidal,2],AXIS["Geodetic latitude (Lat)",north,ORDER[1]],AXIS["Geodetic longitude (Lon)",east,ORDER[2]],ANGLEUNIT["degree (supplier to define representation)",0.017453292522222223]],ID["ISO",343]
