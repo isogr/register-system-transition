@@ -15,7 +15,7 @@ patch() {
 
 	patchJSONBasePaths "${scrape_dir}/register" ../
 	patchJSONBasePaths "${scrape_dir}/register/geodetic" ../../
-	patchJSONBasePaths "${scrape_dir}/item" ../
+	# patchJSONBasePaths "${scrape_dir}/item" ../
 
 	patchPageLinksBasePaths "${scrape_dir}/register" ../
 	patchPageLinksBasePaths "${scrape_dir}/register/geodetic" ../../
@@ -49,6 +49,7 @@ patchPageLinksBasePaths() {
 			-i \
 			-e 's@\(href="\)/@\1'"${base_path}"'@g' \
 			-e 's@\(src="\)/@\1'"${base_path}"'@g' \
+			-e "s@location.href = '/@location.href = '${base_path}@g" \
 			"${file}"
 	done < <(fd -t f . -e html -d "${depth}" "${target_dir}")
 }
