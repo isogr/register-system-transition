@@ -2,7 +2,7 @@
 # shellcheck disable=SC2155
 #
 
-set -euo pipefail
+# set -euo pipefail
 
 # See:
 # https://superuser.com/questions/1415717/how-to-download-an-entire-site-with-wget-including-its-images
