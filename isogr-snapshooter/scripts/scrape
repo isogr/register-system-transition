@@ -337,8 +337,8 @@ main() {
 
 	export NEW_PAGE_SIZE="${NEW_PAGE_SIZE:-1000}"
 
-	log "WAIT_SECONDS=${WAIT_SECONDS}"
-	log "LIMIT_RATE=${LIMIT_RATE}"
+	log "WAIT_SECONDS=${WAIT_SECONDS:-}"
+	log "LIMIT_RATE=${LIMIT_RATE:-}"
 
 	if [[ $# -gt 0 ]]
 	then
