@@ -11,12 +11,12 @@ on:
         description: 'Wait the specified number of seconds between the retrievals.'
         type: number
         required: false
-        default: 5
+        default: 1
       limit_rate:
         description: 'Limit the download speed to amount bytes per second.'
         type: string
         required: false
-        default: '300k'
+        default: '500k'
 
   workflow_call:
     inputs:
@@ -24,16 +24,16 @@ on:
         description: 'Wait the specified number of seconds between the retrievals.'
         type: number
         required: false
-        default: 5
+        default: 1
       limit_rate:
         description: 'Limit the download speed to amount bytes per second.'
         type: string
         required: false
-        default: '300k'
+        default: '500k'
 
 env:
-  DEFAULT_WAIT_SECONDS: 5
-  DEFAULT_LIMIT_RATE: 300k
+  DEFAULT_WAIT_SECONDS: 1
+  DEFAULT_LIMIT_RATE: 500k
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
