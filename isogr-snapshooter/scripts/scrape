@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2155
+#
+
+set -euo pipefail
 
 # See:
 # https://superuser.com/questions/1415717/how-to-download-an-entire-site-with-wget-including-its-images
@@ -312,6 +315,15 @@ scrapePatch() {
 	remove404Css "${scrape_dir}"
 }
 
+sanityCheck() {
+	if ! curl -sSL "${1:?Missing URL}" | command grep -iq "${2:?Missing pattern}"
+	then
+		log "URL \`${1:?Missing URL}' does not contain pattern \`${2:?Missing pattern}'."
+		log "Aborting."
+		exit 1
+	fi
+}
+
 main() {
 	export DEFAULT_URL=https://geodetic.isotc211.org
 
@@ -330,6 +342,7 @@ main() {
 
 	if [[ $# -gt 0 ]]
 	then
+		sanityCheck "${URL}" ribose
 		wgetit --recursive --convert-links "$URL"
 	fi
 
