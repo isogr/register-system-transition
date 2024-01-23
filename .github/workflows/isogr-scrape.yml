@@ -35,10 +35,7 @@ env:
   DEFAULT_WAIT_SECONDS: 1
   DEFAULT_LIMIT_RATE: 500k
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  pages: write
-  id-token: write
   contents: write
   pull-requests: write
 
