@@ -93,27 +93,18 @@ gatherAjaxSource() {
 
 removeUselessMenuItems() {
 	local scrape_dir="${1:?Missing dir}"
+	local del_start
+	local del_delta=31
 
 	while IFS= read -r file
 	do
-		sed -i \
-			-e '131,167d' \
-			"${file}"
-	done < <(fd -t f . -e html "${scrape_dir}/register")
+		del_start=$(sed -n '/Login/ { =; q }' "${file}")
+		del_start=$((del_start - 1))
 
-	while IFS= read -r file
-	do
 		sed -i \
-			-e '131,167d' \
+			-e "${del_start},+${del_delta}d" \
 			"${file}"
-	done < <(fd -t f . -e html -d 1 "${scrape_dir}/")
-
-	while IFS= read -r file
-	do
-		sed -i \
-			-e '132,168d' \
-			"${file}"
-	done < <(fd -t f . -e html "${scrape_dir}/item")
+	done < <(fd -t f . -e html "${scrape_dir}/")
 }
 
 gatherRegistryItems() {
