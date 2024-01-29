@@ -44,7 +44,6 @@
   <link rel="stylesheet" href="../../resources/css/select2-bootstrap.css" />
   <link rel="stylesheet" href="../../resources/css/select2-bootstrap-t0m.css" />
   <link rel="stylesheet" href="../../resources/css/registry.css" />
-  <link rel="stylesheet" type="text/css" href="/static/fonts/oswald.css" />
   <style type="text/css">
     body {
       padding-top: 110px;
@@ -130,38 +129,6 @@
           </ul>
         </li>
         
-        <li class="dropdown">
-          <a href="VerticalDatum.html#" class="dropdown-toggle" data-toggle="dropdown"><span>Login</span>
-            <span class="caret"></span></a>
-          <ul class="dropdown-menu" style="padding: 15px; min-width: 250px;">
-            <li>
-              <div class="row">
-                <div class="col-md-12">
-                  <form class="form login-form" role="form" method="post" accept-charset="UTF-8" id="login-nav" action="/login">
-                    <!-- Don't add <fieldset> or login fields may be disabled when viewing a register item (see JS in item.html) -->
-                    <div class="form-group">
-                      <label class="sr-only" for="inputEmail">E-mail address</label>
-                      <!-- 												<input type="email" class="form-control" id="inputEmail" th:placeholder="#{navbar.login.label.email}" required="required"></input> -->
-                      <input type="text" class="form-control" name="username" id="inputEmail" required="required" placeholder="E-mail address" />
-                    </div>
-                    <div class="form-group">
-                      <label class="sr-only" for="inputPassword">Password</label>
-                      <input type="password" class="form-control" name="password" id="inputPassword" required="required" placeholder="Password" />
-                    </div>
-                    <div class="form-group">
-                      <button type="submit" class="btn btn-success btn-block">Login</button>
-                      <button type="button" class="btn btn-primary btn-block" onclick="location.href = &#39;/signup&#39;">Register</button>
-                      <button type="button" class="btn btn-default btn-block" onclick="location.href = &#39;/forgot-password&#39;">Forgot
-                        password
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </li>
-          </ul>
-        </li>
-
         <li class="dropdown">
           <a class="dropdown-toggle" href="../../feedback.html">
             <span>Feedback</span><span></span></a>
@@ -1115,7 +1082,7 @@
 	    }
 
 	    //page calculations
-	    var pageSize = paramMap.iDisplayLength;
+	    var pageSize = 1000;
 	    var start = paramMap.iDisplayStart;
 	    var pageNum = start / pageSize; // pageNum is 0 based
 
@@ -1238,34 +1205,34 @@
 
 	$('#contentsTable').on('click', '.button-details', function(e) {
 		var uuid = $(this).data('uuid');
-		location.href = '/item/' + uuid;
+		location.href = '../../item/' + uuid + '.html';
 	});
 
 	$('#contentsTable').on('click', '.button-clarify', function(e) {
 		var uuid = $(this).data('uuid');
-		location.href = '/item/' + uuid + '/clarify';
+		location.href = '../../item/' + uuid + '/clarify';
 	});
 
 	$('#contentsTable').on('click', '.button-supersede', function(e) {
 		var uuid = $(this).data('uuid');
-		location.href = '/item/' + uuid + '/supersede';
+		location.href = '../../item/' + uuid + '/supersede';
 	});
 
 	$('#contentsTable').on('click', '.button-retire', function(e) {
 		var uuid = $(this).data('uuid');
-		location.href = '/item/' + uuid + '/retire';
+		location.href = '../../item/' + uuid + '/retire';
 	});
 
 	$('#contentsTable').on('click', '.button-invalidate', function(e) {
 		var uuid = $(this).data('uuid');
-		location.href = '/item/' + uuid + '/invalidate';
+		location.href = '../../item/' + uuid + '/invalidate';
 	});
 
 	$(document).ready(function() {
 		var table;
 		
 		table = $('#contentsTable').dataTable({
-			"sAjaxSource": "/register/11c2a251-e7eb-4daf-bcd1-8823e737d93d/containedItems",
+			"sAjaxSource": "../../register/11c2a251-e7eb-4daf-bcd1-8823e737d93d/containedItems-VerticalDatum",
 			"bProcessing": true,
 			"bServerSide": true,
 			"bStateSave": true,
@@ -1289,13 +1256,15 @@
 	        },
 // 			"fnServerData" : datatable2Rest,
 			"sPaginationType": "bs_normal",
+			"bPaginate": false,
+ 			"bFilter": false,
 // 			"bFilter": false,
 			"oLanguage": {
 				  "sEmptyTable": "No items found",
-				  "sInfo": "Showing _START_ to _END_ of _TOTAL_ items",
+				  "sInfo": "Showing all _TOTAL_ items",
 				  "sInfoEmpty": "No items",
 				  "sInfoFiltered": "(filtered from _MAX_ total items)",
-				  "sLengthMenu": "Show _MENU_ items per page",
+				  "sLengthMenu": "Showing all items for the current item class",
 				  "sLoadingRecords": "Loading...",
 				  "sProcessing": "<img style='margin-left: 20px' src='../../resources/images/loader.gif'/>",
 				  "sZeroRecords": "No items found",
@@ -1318,7 +1287,7 @@
 				{ 
 					"mDataProp": "name",
 					"sWidth": "50%",
-					"bSearchable": true
+					"bSortable": false
 				},
 				{ 	
 					"mDataProp": "itemClassName",
@@ -1328,7 +1297,7 @@
 				{ 
 					"mDataProp": "status",
 					"sWidth": "10%",
-					"bSortable": true
+					"bSortable": false
 				},
 			],
 			"aoColumnDefs": [
@@ -1411,13 +1380,15 @@
 
 		table = $('#proposalsTable').dataTable({
 			"sPaginationType": "bs_normal",
+			"bPaginate": false,
+ 			"bFilter": false,
 			"bStateSave": true,
 			"oLanguage": {
 				  "sEmptyTable": "No items found",
-				  "sInfo": "Showing _START_ to _END_ of _TOTAL_ items",
+				  "sInfo": "Showing all _TOTAL_ items",
 				  "sInfoEmpty": "No items",
 				  "sInfoFiltered": "(filtered from _MAX_ total items)",
-				  "sLengthMenu": "Show _MENU_ items per page",
+				  "sLengthMenu": "Showing all items for the current item class",
 				  "sLoadingRecords": "Loading...",
 				  "sProcessing": "<img src='../../resources/images/loader.gif'/>",
 				  "sZeroRecords": "No items found",
