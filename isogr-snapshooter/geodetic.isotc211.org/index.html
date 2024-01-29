@@ -44,7 +44,6 @@
   <link rel="stylesheet" href="resources/css/select2-bootstrap.css" />
   <link rel="stylesheet" href="resources/css/select2-bootstrap-t0m.css" />
   <link rel="stylesheet" href="resources/css/registry.css" />
-  <link rel="stylesheet" type="text/css" href="/static/fonts/oswald.css" />
   <style type="text/css">
     body {
       padding-top: 110px;
@@ -130,38 +129,6 @@
           </ul>
         </li>
         
-        <li class="dropdown">
-          <a href="index.html#" class="dropdown-toggle" data-toggle="dropdown"><span>Login</span>
-            <span class="caret"></span></a>
-          <ul class="dropdown-menu" style="padding: 15px; min-width: 250px;">
-            <li>
-              <div class="row">
-                <div class="col-md-12">
-                  <form class="form login-form" role="form" method="post" accept-charset="UTF-8" id="login-nav" action="/login">
-                    <!-- Don't add <fieldset> or login fields may be disabled when viewing a register item (see JS in item.html) -->
-                    <div class="form-group">
-                      <label class="sr-only" for="inputEmail">E-mail address</label>
-                      <!-- 												<input type="email" class="form-control" id="inputEmail" th:placeholder="#{navbar.login.label.email}" required="required"></input> -->
-                      <input type="text" class="form-control" name="username" id="inputEmail" required="required" placeholder="E-mail address" />
-                    </div>
-                    <div class="form-group">
-                      <label class="sr-only" for="inputPassword">Password</label>
-                      <input type="password" class="form-control" name="password" id="inputPassword" required="required" placeholder="Password" />
-                    </div>
-                    <div class="form-group">
-                      <button type="submit" class="btn btn-success btn-block">Login</button>
-                      <button type="button" class="btn btn-primary btn-block" onclick="location.href = &#39;/signup&#39;">Register</button>
-                      <button type="button" class="btn btn-default btn-block" onclick="location.href = &#39;/forgot-password&#39;">Forgot
-                        password
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </li>
-          </ul>
-        </li>
-
         <li class="dropdown">
           <a class="dropdown-toggle" href="feedback.html">
             <span>Feedback</span><span></span></a>

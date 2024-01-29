@@ -1,0 +1,1 @@
+GEODCRS["NZGD1949 - LatLon",DATUM["New Zealand Geodetic Datum 1949",ELLIPSOID["International 1924",6378388.0,297.0]],CS[ellipsoidal,2],AXIS["Geodetic latitude (Lat)",north,ORDER[1]],AXIS["Geodetic longitude (Lon)",east,ORDER[2]],ANGLEUNIT["degree (supplier to define representation)",0.017453292522222223]],ID["ISO",443]

@@ -1,0 +1,1 @@
+VERTCRS["NGVD29 - NOHt",VDATUM["National Geodetic Vertical Datum of 1929"],CS[vertical,1],AXIS["Gravity-related height (H)",up],LENGTHUNIT["US survey foot",0.30480060960121924]],ID["ISO",214],REMARK["Replaced by NAVD88 height (ft US) (CRS code 6360)."]

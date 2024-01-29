@@ -1,0 +1,1 @@
+GEODCRS["WGS 84 (G873) - XYZ",DATUM["World Geodetic System 1984 (G873)",ELLIPSOID["WGS 84",6378137.0,298.2572236]],CS[Cartesian,3],AXIS["Geocentric X (X)",other,ORDER[1]],AXIS["Geocentric Y (Y)",other,ORDER[2]],AXIS["Geocentric Z (Z)",other,ORDER[3]],LENGTHUNIT["metre",1.0]],ID["ISO",325],REMARK["Replaces WGS 84 (G730) - XYZ. Replaced by WGS 84 (G1150) - XYZ."]
