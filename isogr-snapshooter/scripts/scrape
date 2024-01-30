@@ -121,7 +121,8 @@ addScrapeTimes() {
 \n    function s(i) { return (new Date(i * 1000).toISOString()).split(/\\\\.\\\\d*/).join(''); }\
 \n    var scrapeStart = s(${SCRAPE_START});\
 \n    var scrapeEnd = s(${SCRAPE_END});\
-\n    var scrapeText = 'Page scraped from <span>' + scrapeStart + '</span> to <span>' + scrapeEnd + '</span>.';\
+\n    var scrapeText = '<a href=\"${SCRAPER_REPO}\" target=\"_blank\">Page scraped</a> from <span>' + scrapeStart + '</span> to <span>' + scrapeEnd + '</span>';\
+\n    scrapeText += ' by <a href=\"${SCRAPER_REPO}\" target=\"_blank\">isogr-snapshooter</a>.';\
 \n    document.querySelector('footer p.text-muted').innerHTML += '<span>(' + scrapeText + ')</span>';\
 \n  </script>"
 
@@ -377,6 +378,8 @@ main() {
 
 	SCRAPE_START=${SCRAPE_START:-}
 	SCRAPE_END=${SCRAPE_END:-}
+
+	SCRAPER_REPO=https://github.com/isogr/register-system-transition/tree/main/isogr-snapshooter
 
 	if [[ $# -gt 0 ]]
 	then
