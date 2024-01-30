@@ -120,6 +120,26 @@ removeUselessMenuItems() {
 	done < <(fd -t f . -e html "${scrape_dir}/")
 }
 
+fixCssPageBottom() {
+	local scrape_dir="${1:?Missing dir}"
+
+	local append_this="\\
+\\
+.container-fluid {\
+\n    margin-bottom: 30px;\
+\n}"
+
+	while IFS= read -r file
+	do
+		sed -i \
+			-e "\${\
+a\
+${append_this}
+}" \
+			"${file}"
+	done < <(fd -t f registry.css -e css "${scrape_dir}/")
+}
+
 addScrapeTimes() {
 	local scrape_dir="${1:?Missing dir}"
 
@@ -397,6 +417,7 @@ scrapePatch() {
 	removeUselessMenuItems "${scrape_dir}"
 	remove404Css "${scrape_dir}"
 	changePageTitle "${scrape_dir}"
+	fixCssPageBottom "${scrape_dir}"
 	addScrapeTimes "${scrape_dir}"
 
 	patchJSONBasePaths "${scrape_dir}/register" ../
