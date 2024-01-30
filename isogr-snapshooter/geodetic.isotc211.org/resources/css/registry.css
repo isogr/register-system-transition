@@ -54,3 +54,7 @@ body.loading .loading-modal {
     display: block;
 }
  
+
+.container-fluid {
+    margin-bottom: 30px;
+}
