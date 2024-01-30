@@ -164,10 +164,13 @@ gatherRegistryItems() {
 		item_classes+=("${item_class}")
 	done < <(fd -t f . "${scrape_dir}"/register/geodetic/)
 
+	# scrape all 'containedItems' for the main index
+	gatherRegistryItemsIndexByOptionalItemClass "${scrape_dir}" ""
+
 	for item_class in "${item_classes[@]}"
 	do
 		log processing item class "${item_class}"
-		gatherRegistryItemsIndexByItemClass "${scrape_dir}" "${item_class}"
+		gatherRegistryItemsIndexByOptionalItemClass "${scrape_dir}" "${item_class}"
 		replaceHtmlForItemClass "${scrape_dir}" "${item_class}"
 		gatherRegistryItemsByItemClass "${scrape_dir}" "${item_class}"
 	done
@@ -296,19 +299,20 @@ gatherRegistryItemsByItemClass() {
 	done < <(jq -r '.aaData | .[] | .uuid' < "${local_uuid_source}")
 }
 
-gatherRegistryItemsIndexByItemClass() {
+# Empty 'item_class' means no filtering by item class, i.e. download all items
+gatherRegistryItemsIndexByOptionalItemClass() {
 	local scrape_dir="${1:?Missing dir}"
 	# local item_class=EngineeringCRS
-	local item_class="${2:?Missing item class}"
+	local item_class="${2:-}"
 
-	local local_new_ajax_source="${scrape_dir}/${AJAX_SOURCE}-${item_class}"
+	local local_new_ajax_source="${scrape_dir}/${AJAX_SOURCE}${item_class:+-${item_class}}"
 
 	mkdir -p "${local_new_ajax_source%/*}"
 
 	wgetit \
 		--recursive \
 		-O "${local_new_ajax_source}" \
-		"${FULL_AJAX_SOURCE}?sEcho=1&iColumns=5&sColumns=&iDisplayStart=0&iDisplayLength=${NEW_PAGE_SIZE}&mDataProp_0=itemIdentifier&mDataProp_1=name&mDataProp_2=itemClassName&mDataProp_3=status&mDataProp_4=&sSearch=&bRegex=false&sSearch_0=&bRegex_0=false&bSearchable_0=true&sSearch_1=&bRegex_1=false&bSearchable_1=true&sSearch_2=&bRegex_2=false&bSearchable_2=true&sSearch_3=&bRegex_3=false&bSearchable_3=true&sSearch_4=&bRegex_4=false&bSearchable_4=true&iSortCol_0=0&sSortDir_0=asc&iSortingCols=1&bSortable_0=true&bSortable_1=true&bSortable_2=false&bSortable_3=true&bSortable_4=true&itemClassFilter=${item_class}&statusFilter=valid%2Csuperseded%2Cretired%2Cinvalid&_=1704972445499"
+		"${FULL_AJAX_SOURCE}?sEcho=1&iColumns=5&sColumns=&iDisplayStart=0&iDisplayLength=${NEW_PAGE_SIZE}&mDataProp_0=itemIdentifier&mDataProp_1=name&mDataProp_2=itemClassName&mDataProp_3=status&mDataProp_4=&sSearch=&bRegex=false&sSearch_0=&bRegex_0=false&bSearchable_0=true&sSearch_1=&bRegex_1=false&bSearchable_1=true&sSearch_2=&bRegex_2=false&bSearchable_2=true&sSearch_3=&bRegex_3=false&bSearchable_3=true&sSearch_4=&bRegex_4=false&bSearchable_4=true&iSortCol_0=0&sSortDir_0=asc&iSortingCols=1&bSortable_0=true&bSortable_1=true&bSortable_2=false&bSortable_3=true&bSortable_4=true${item_class:+"&itemClassFilter=${item_class}"}&statusFilter=valid%2Csuperseded%2Cretired%2Cinvalid&_=1704972445499"
 }
 
 replaceHtmlForItemClass() {
@@ -411,7 +415,7 @@ main() {
 	DOMAIN="${DOMAIN%%/*}"
 	export DOMAIN
 
-	export NEW_PAGE_SIZE="${NEW_PAGE_SIZE:-1000}"
+	export NEW_PAGE_SIZE="${NEW_PAGE_SIZE:-2000}"
 
 	log "WAIT_SECONDS=${WAIT_SECONDS:-}"
 	log "LIMIT_RATE=${LIMIT_RATE:-}"
