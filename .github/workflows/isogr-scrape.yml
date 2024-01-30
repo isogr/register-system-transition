@@ -58,8 +58,7 @@ jobs:
         run: |
           cd isogr-snapshooter
           mv geodetic.isotc211.org{,-old}
-          nix develop -c scrape https://geodetic.isotc211.org && \
-            nix develop -c deploy-patch
+          nix develop -c scrape https://geodetic.isotc211.org
         env:
           WAIT_SECONDS: ${{ startsWith(github.event_name, 'workflow_') && inputs.wait_seconds || env.DEFAULT_WAIT_SECONDS }}
           LIMIT_RATE: ${{ startsWith(github.event_name, 'workflow_') && inputs.limit_rate || env.DEFAULT_LIMIT_RATE }}

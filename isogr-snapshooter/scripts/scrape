@@ -327,6 +327,38 @@ replaceHtmlForItemClass() {
 	sed -i -e "s@${AJAX_SOURCE}@${new_ajax_source}@g" "${file}"
 }
 
+patchJSONBasePaths() {
+	local target_dir="${1:?Missing target dir}"; shift
+	local base_path="${1:?Missing base path}"; shift
+	local depth="${1:-1}"
+
+	while IFS= read -r file
+	do
+		log "Fixing[patchJSONBasePaths] ${file}"
+		sed \
+			-i \
+			-e 's@\("sAjaxSource":\s*"\)/\(register\)@\1'"${base_path}"'\2@' \
+			"${file}"
+	done < <(fd -t f . -e html -d "${depth}" "${target_dir}")
+}
+
+patchPageLinksBasePaths() {
+	local target_dir="${1:?Missing target dir}"; shift
+	local base_path="${1:?Missing base path}"; shift
+	local depth="${1:-1}"
+
+	while IFS= read -r file
+	do
+		log "Fixing[patchPageLinksBasePaths] ${file}"
+		sed \
+			-i \
+			-e 's@\(href="\)/@\1'"${base_path}"'@g' \
+			-e 's@\(src="\)/@\1'"${base_path}"'@g' \
+			-e "s@location.href = '/@location.href = '${base_path}@g" \
+			"${file}"
+	done < <(fd -t f . -e html -d "${depth}" "${target_dir}")
+}
+
 # Additional resources not scraped by wget, due to them only being loaded by
 # Javascript
 scrapePatch() {
@@ -349,6 +381,14 @@ scrapePatch() {
 	remove404Css "${scrape_dir}"
 	changePageTitle "${scrape_dir}"
 	addScrapeTimes "${scrape_dir}"
+
+	patchJSONBasePaths "${scrape_dir}/register" ../
+	patchJSONBasePaths "${scrape_dir}/register/geodetic" ../../
+	# patchJSONBasePaths "${scrape_dir}/item" ../
+
+	patchPageLinksBasePaths "${scrape_dir}/register" ../
+	patchPageLinksBasePaths "${scrape_dir}/register/geodetic" ../../
+	patchPageLinksBasePaths "${scrape_dir}/item" ../
 }
 
 sanityCheck() {

@@ -48,7 +48,6 @@ Further, if serving the site locally is required, the following must also be met
 > cd isogr-snapshooter
 > direnv allow # <- Run this (one-off only) if not already allowed
 > scrape        https://mysite  # wait until site is scraped
-> deploy-patch
 > serve                         # head to http://localhost:8000
 ----
 
@@ -59,7 +58,6 @@ Further, if serving the site locally is required, the following must also be met
 > cd isogr-snapshooter
 > nix develop
 > scrape        https://mysite  # wait until site is scraped
-> deploy-patch
 > serve                         # head to http://localhost:8000
 ----
 
@@ -69,6 +67,5 @@ Further, if serving the site locally is required, the following must also be met
 ----
 > cd isogr-snapshooter
 > scripts/scrape        https://mysite  # wait until site is scraped
-> scripts/deploy-patch
 > scripts/serve                         # head to http://localhost:8000
 ----
