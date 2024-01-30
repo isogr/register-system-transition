@@ -23,6 +23,13 @@ warn() {
 wgetit() {
 	local url="${1:?Missing URL}"; shift
 
+	if [[ -z "${SCRAPE_START}" ]]
+	then
+		SCRAPE_START=$(date -u '+%s')
+	fi
+
+	local rv
+
 	wget \
 		--level 5 \
 		--exclude-directories robots.txt \
@@ -38,6 +45,12 @@ wgetit() {
 		--no-parent \
 		"${url}" \
 		"$@"
+
+	rv=$?
+
+	SCRAPE_END=$(date -u '+%s')
+
+	return "${rv}"
 }
 
 remove404Css() {
@@ -428,12 +441,12 @@ main() {
 	if [[ $# -gt 0 ]]
 	then
 		sanityCheck "${URL}" ribose
-		SCRAPE_START=$(date -u '+%s')
 		wgetit --recursive --convert-links "$URL"
-		SCRAPE_END=$(date -u '+%s')
+		scrapePatch
 	fi
 
-	scrapePatch
+	local scrape_dir="./${DOMAIN:?Missing DOMAIN}"
+	"$@" "${scrape_dir}"
 }
 
 
