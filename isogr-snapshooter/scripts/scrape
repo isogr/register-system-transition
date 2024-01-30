@@ -150,6 +150,8 @@ addScrapeTimes() {
 		return
 	fi
 
+	SCRAPER_REPO=https://github.com/isogr/register-system-transition/tree/main/isogr-snapshooter
+
 	local append_this="\  <script type=\"text/javascript\">\
 \n    function s(i) { return (new Date(i * 1000).toISOString()).split(/\\\\.\\\\d*/).join(''); }\
 \n    var scrapeStart = s(${SCRAPE_START});\
@@ -441,25 +443,33 @@ sanityCheck() {
 main() {
 	export DEFAULT_URL=https://geodetic.isotc211.org
 
+	# If first parameter looks like a URL, then use it like a URL.
+	# Otherwise, treat it like a function name from this file, and call it.
+	local URL="${DEFAULT_URL}"
+
+	if [[ "${1}" == http*://* ]]
+	then
+		URL="${1}"
+	fi
+	export URL
+
 	# Extract domain for use in wget, to make it only scrape resources within
 	# that domain.
-	local URL="${1:-"${DEFAULT_URL}"}"
-	export URL
 	local DOMAIN="${URL#http*://}"
 	DOMAIN="${DOMAIN%%/*}"
 	export DOMAIN
 
 	export NEW_PAGE_SIZE="${NEW_PAGE_SIZE:-2000}"
 
+	# debug...
 	log "WAIT_SECONDS=${WAIT_SECONDS:-}"
 	log "LIMIT_RATE=${LIMIT_RATE:-}"
 
+	# Initialize scrape timing variables
 	SCRAPE_START=${SCRAPE_START:-}
 	SCRAPE_END=${SCRAPE_END:-}
 
-	SCRAPER_REPO=https://github.com/isogr/register-system-transition/tree/main/isogr-snapshooter
-
-	if [[ $# -gt 0 ]]
+	if [[ $# -gt 0 && "${1}" == http*://* ]]
 	then
 		sanityCheck "${URL}" ribose
 		wgetit --recursive --convert-links "$URL"
@@ -467,6 +477,7 @@ main() {
 	fi
 
 	local scrape_dir="./${DOMAIN:?Missing DOMAIN}"
+	log "Running: $* ${scrape_dir}"
 	"$@" "${scrape_dir}"
 }
 
