@@ -5,15 +5,12 @@ on:
   # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
-    paths-ignore:
-      - '**'
-      - '!isogr-snapshot/geodetic.isotc211.org/**'
-      - '.github/workflows/*.yml'
-      - '!.github/workflows/isogr-snapshot.yml'
+    paths:
+      - 'isogr-snapshot/geodetic.isotc211.org/**'
+      - '.github/workflows/isogr-snapshot.yml'
   pull_request:
-    paths-ignore:
-      - '**'
-      - '!isogr-snapshot/geodetic.isotc211.org/**'
+    paths:
+      - 'isogr-snapshot/geodetic.isotc211.org/**'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
