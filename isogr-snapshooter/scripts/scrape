@@ -107,6 +107,19 @@ removeUselessMenuItems() {
 	done < <(fd -t f . -e html "${scrape_dir}/")
 }
 
+changePageTitle() {
+	local scrape_dir="${1:?Missing dir}"
+	local append_this=" (read-only)"
+
+	while IFS= read -r file
+	do
+		sed -i \
+			-e "s@\(<title>.*\)</title>@\1${append_this}</title>@" \
+			-e "s@\(class=\"test navbar-brand\" href=\".*\">Geodetic Registry\)\(</a>\)@\1${append_this}\2@" \
+			"${file}"
+	done < <(fd -t f . -e html "${scrape_dir}/")
+}
+
 gatherRegistryItems() {
 	local scrape_dir="${1:?Missing dir}"
 
@@ -304,6 +317,7 @@ scrapePatch() {
 	fixPagination "${scrape_dir}"
 	removeUselessMenuItems "${scrape_dir}"
 	remove404Css "${scrape_dir}"
+	changePageTitle "${scrape_dir}"
 }
 
 sanityCheck() {
