@@ -15,8 +15,12 @@ endif::[]
 
 == Introduction
 
-This folder consists of scripts to scrape the https://geodetic.isotc211.org[Java-based ISOGR website^],
-as well as CI jobs to deploy daily snapshots of the website to https://geodetic-static.isotc211.org[^].
+This folder consists of:
+
+* https://github.com/isogr/register-system-transition/tree/main/isogr-snapshooter/scripts[scripts^] to scrape the https://geodetic.isotc211.org[Java-based ISOGR website^],
+* the https://github.com/isogr/register-system-transition/tree/main/isogr-snapshooter/geodetic.isotc211.org[latest snapshot of the website^] itself,
+* a daily CI job to scrape the website,
+* as well as https://github.com/isogr/register-system-transition/actions/workflows/isogr-snapshot.yml[a (manually trigger-able) CI job^] to deploy the snapshot to https://geodetic-static.isotc211.org[^].
 
 == Prerequisites
 
