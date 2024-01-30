@@ -154,7 +154,7 @@ addScrapeTimes() {
 \n    function s(i) { return (new Date(i * 1000).toISOString()).split(/\\\\.\\\\d*/).join(''); }\
 \n    var scrapeStart = s(${SCRAPE_START});\
 \n    var scrapeEnd = s(${SCRAPE_END});\
-\n    var scrapeText = '<a href=\"${SCRAPER_REPO}\" target=\"_blank\">Page scraped</a> from <span>' + scrapeStart + '</span> to <span>' + scrapeEnd + '</span>';\
+\n    var scrapeText = '<a href=\"${SCRAPER_REPO}\" target=\"_blank\">Page scraped</a> from <span title=\"${SCRAPE_START}\">' + scrapeStart + '</span> to <span title=\"${SCRAPE_END}\">' + scrapeEnd + '</span>';\
 \n    scrapeText += ' by <a href=\"${SCRAPER_REPO}\" target=\"_blank\">isogr-snapshooter</a>.';\
 \n    document.querySelector('footer p.text-muted').innerHTML += '<span>(' + scrapeText + ')</span>';\
 \n  </script>"
