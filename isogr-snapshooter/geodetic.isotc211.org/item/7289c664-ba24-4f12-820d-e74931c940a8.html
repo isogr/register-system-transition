@@ -1562,6 +1562,14 @@
       <span><span>-2c0f2a3</span></span>
     </p>
   </footer>
+  <script type="text/javascript">
+    function s(i) { return (new Date(i * 1000).toISOString()).split(/\.\d*/).join(''); }
+    var scrapeStart = s(1706603439);
+    var scrapeEnd = s(1706603546);
+    var scrapeText = '<a href="https://github.com/isogr/register-system-transition/tree/main/isogr-snapshooter" target="_blank">Page scraped</a> from <span>' + scrapeStart + '</span> to <span>' + scrapeEnd + '</span>';
+    scrapeText += ' by <a href="https://github.com/isogr/register-system-transition/tree/main/isogr-snapshooter" target="_blank">isogr-snapshooter</a>.';
+    document.querySelector('footer p.text-muted').innerHTML += '<span>(' + scrapeText + ')</span>';
+  </script>
 
   <div class="loading-modal" style="background: rgba( 255, 255, 255, .8 ) url(/resources/images/loader-lg.gif) 50% 50% no-repeat;"></div>
 </div>
