@@ -107,6 +107,35 @@ removeUselessMenuItems() {
 	done < <(fd -t f . -e html "${scrape_dir}/")
 }
 
+addScrapeTimes() {
+	local scrape_dir="${1:?Missing dir}"
+
+	# Only add timing texts if available.
+	if [[ -z "$SCRAPE_START" || -z "$SCRAPE_END" ]]
+	then
+		log "Skipping timing text addition"
+		return
+	fi
+
+	local append_this="\  <script type=\"text/javascript\">\
+\n    function s(i) { return (new Date(i * 1000).toISOString()).split(/\\\\.\\\\d*/).join(''); }\
+\n    var scrapeStart = s(${SCRAPE_START});\
+\n    var scrapeEnd = s(${SCRAPE_END});\
+\n    var scrapeText = 'Page scraped from <span>' + scrapeStart + '</span> to <span>' + scrapeEnd + '</span>.';\
+\n    document.querySelector('footer p.text-muted').innerHTML += '<span>(' + scrapeText + ')</span>';\
+\n  </script>"
+
+	while IFS= read -r file
+	do
+		sed -i \
+			-e "\@^\s*</footer>@{\
+a\
+${append_this}
+}" \
+			"${file}"
+	done < <(fd -t f . -e html "${scrape_dir}/")
+}
+
 changePageTitle() {
 	local scrape_dir="${1:?Missing dir}"
 	local append_this=" (read-only)"
@@ -318,6 +347,7 @@ scrapePatch() {
 	removeUselessMenuItems "${scrape_dir}"
 	remove404Css "${scrape_dir}"
 	changePageTitle "${scrape_dir}"
+	addScrapeTimes "${scrape_dir}"
 }
 
 sanityCheck() {
@@ -345,10 +375,15 @@ main() {
 	log "WAIT_SECONDS=${WAIT_SECONDS:-}"
 	log "LIMIT_RATE=${LIMIT_RATE:-}"
 
+	SCRAPE_START=${SCRAPE_START:-}
+	SCRAPE_END=${SCRAPE_END:-}
+
 	if [[ $# -gt 0 ]]
 	then
 		sanityCheck "${URL}" ribose
+		SCRAPE_START=$(date -u '+%s')
 		wgetit --recursive --convert-links "$URL"
+		SCRAPE_END=$(date -u '+%s')
 	fi
 
 	scrapePatch
