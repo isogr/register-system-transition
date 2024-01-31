@@ -474,11 +474,11 @@ main() {
 		sanityCheck "${URL}" ribose
 		wgetit --recursive --convert-links "$URL"
 		scrapePatch
+	else
+		local scrape_dir="./${DOMAIN:?Missing DOMAIN}"
+		log "Running: $* ${scrape_dir}"
+		"$@" "${scrape_dir}"
 	fi
-
-	local scrape_dir="./${DOMAIN:?Missing DOMAIN}"
-	log "Running: $* ${scrape_dir}"
-	"$@" "${scrape_dir}"
 }
 
 
