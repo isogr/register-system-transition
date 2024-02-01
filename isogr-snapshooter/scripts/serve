@@ -3,7 +3,7 @@
 main() {
   local port="${1:-${HTTP_SERVE_PORT:-8000}}"
   local dir="${2:-${HTTP_SERVE_DIR:-${SCRAPE_DIR:-${DEFAULT_DOMAIN:-"./geodetic.isotc211.org"}}}}"
-	python -m http.server --directory "${dir}" "${port}"
+	darkhttpd "${dir}" --port "${port}"
 }
 
 main "$@"
