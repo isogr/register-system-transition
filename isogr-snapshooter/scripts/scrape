@@ -245,6 +245,8 @@ disableSorting() {
 		sed -i \
 			-e 's/"bSortable": true/"bSortable": false/g' \
 			-e 's/"bSearchable": true/"bSortable": false/g' \
+			-e '/"mDataProp": "itemIdentifier"/a\
+					"bSortable": false,' \
 			"${file}"
 	done < <(fd -t f . -e html "${scrape_dir}"/register)
 }
