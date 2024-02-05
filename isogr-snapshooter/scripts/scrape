@@ -152,6 +152,8 @@ addScrapeTimes() {
 
 	local new_js_path="${scrape_dir}/resources/js/scrape.js"
 
+	SCRAPER_REPO=https://github.com/isogr/register-system-transition/tree/main/isogr-snapshooter
+
 	cat > "${new_js_path}" <<-EOF
 	function s(i) { return (new Date(i * 1000).toISOString()).split(/\.\d*/).join(''); }
 	var scrapeStart = s(${SCRAPE_START});
@@ -162,8 +164,6 @@ addScrapeTimes() {
 	scrapeText += '</span>';
 	document.querySelector('footer p.text-muted').innerHTML += '<span>(' + scrapeText + ')</span>';
 	EOF
-
-	SCRAPER_REPO=https://github.com/isogr/register-system-transition/tree/main/isogr-snapshooter
 
 	local append_this="\  <script id=\"scrape-timing-script\" type=\"text/javascript\" src=\"/resources/js/scrape.js\"></script>"
 
