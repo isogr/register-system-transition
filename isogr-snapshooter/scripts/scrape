@@ -210,6 +210,35 @@ ${append_this}
 	done < <(fd -t f . -e html "${scrape_dir}/")
 }
 
+neutralizePdfRetrievalTime() {
+	local scrape_dir="${1:?Missing dir}"
+
+	while IFS= read -r input_file
+	do
+		log "Uncompressing PDF $input_file"
+		local uncompressed_pdf="${input_file%.*}.uncompressed-pdf"
+		local neutralized_pdf="${input_file%.*}.neutralized-pdf"
+		pdftk "${input_file}" output "${uncompressed_pdf}" uncompress
+
+		# Input format: Retrieved: 2024-02-02T02:29:50
+		sed \
+			-E \
+			-e "s/Retrieved:\s*[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}/Retrieved: 1970-01-01T00:00:00/g" \
+			"${uncompressed_pdf}" > "${neutralized_pdf}"
+
+		log "Repairing PDF $neutralized_pdf"
+
+		# NOTE: Using qpdf instead of pdftk because it compresses much better.
+		# Resulting PDF from qpdf matches more closely in size to the original than
+		# pdftk.
+		# #pdftk "${neutralized_pdf}" output "${input_file}"
+		qpdf --linearize "${neutralized_pdf}" "${input_file}"
+	done < <(fd -t f . -e pdf "${scrape_dir}/")
+
+	log "Removing all intermediate PDF files"
+	fd -t f '(uncompressed|neutralized)-pdf' "${scrape_dir}/" -x rm
+}
+
 changePageTitle() {
 	local scrape_dir="${1:?Missing dir}"
 	local append_this=" (read-only)"
@@ -462,6 +491,7 @@ scrapePatch() {
 	fixCssPageBottom "${scrape_dir}"
 	addScrapeTimes "${scrape_dir}"
 	addItemNumberRedirects "${scrape_dir}"
+	neutralizePdfRetrievalTime "${scrape_dir}"
 
 	patchJSONBasePaths "${scrape_dir}/register" ../
 	patchJSONBasePaths "${scrape_dir}/register/geodetic" ../../

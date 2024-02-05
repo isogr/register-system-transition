@@ -54,6 +54,7 @@
           gnused
           jq
           pdftk
+          qpdf
           ripgrep
           wget
         ];
