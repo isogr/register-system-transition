@@ -140,6 +140,38 @@ ${append_this}
 	done < <(fd -t f registry.css -e css "${scrape_dir}/")
 }
 
+addItemNumberRedirects() {
+	local scrape_dir="${1:?Missing dir}"
+
+	mkdir -p "${scrape_dir}/register/geodetic/items"
+	while IFS= read -r line
+	do
+		local item_number=$(<<< "${line}" jq -r '.itemId')
+		local uuid=$(<<< "${line}" jq -r '.uuid')
+		local new_html_path="${scrape_dir}/register/geodetic/items/${item_number}.html"
+		local new_html_path_2="${new_html_path%.*}/index.html"
+		local new_html_path_2_dir="${new_html_path_2%/*}"
+		local redirect_url="/item/${uuid}.html"
+
+		cat > "${new_html_path}" <<-EOF
+		<!DOCTYPE html>
+		<html><head>
+		<meta http-equiv="refresh" content="0; url="${redirect_url}">
+		</head></html>
+		EOF
+
+		mkdir -p "${new_html_path_2_dir}"
+
+		cat > "${new_html_path_2}" <<-EOF
+		<!DOCTYPE html>
+		<html><head>
+		<meta http-equiv="refresh" content="0; url=${redirect_url}">
+		</head></html>
+		EOF
+
+	done < <(< "$(fd -t f --glob containedItems "${scrape_dir}/")" jq --compact-output -r '.aaData[] | { "uuid": .uuid, "itemId": .itemIdentifier }')
+}
+
 addScrapeTimes() {
 	local scrape_dir="${1:?Missing dir}"
 
@@ -429,6 +461,7 @@ scrapePatch() {
 	changePageTitle "${scrape_dir}"
 	fixCssPageBottom "${scrape_dir}"
 	addScrapeTimes "${scrape_dir}"
+	addItemNumberRedirects "${scrape_dir}"
 
 	patchJSONBasePaths "${scrape_dir}/register" ../
 	patchJSONBasePaths "${scrape_dir}/register/geodetic" ../../
