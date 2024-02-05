@@ -53,6 +53,7 @@
           fzf
           gnused
           jq
+          pdftk
           ripgrep
           wget
         ];
