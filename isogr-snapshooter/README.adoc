@@ -33,11 +33,12 @@ If Nix is not installed, then the following prerequisites must be met:
 * https://www.gnu.org/software/sed/[`gnused`^]
 * https://github.com/jqlang/jq[`jq`^]
 * https://github.com/BurntSushi/ripgrep[`ripgrep`^]
-* https://www.gnu.org/software/wget/[`wget`^]
+* https://github.com/qpdf/qpdf[`qpdf`^]
+* https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/[`pdftk (CLI)`^]
 
 Further, if serving the site locally is required, the following must also be met:
 
-* https://www.python.org/[Python 3^]
+* https://github.com/emikulic/darkhttpd[darkhttpd^]
 
 == Usage
 
