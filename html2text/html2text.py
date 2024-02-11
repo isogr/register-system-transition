@@ -73,9 +73,9 @@ def extract_text_from_html(url):
 
 
 if __name__ == "__main__":
-    if len(argv) == 1:
+    if len(sys.argv) == 1:
         raise Exception("A URL needs to be provided")
-    url = argv[1]
+    url = sys.argv[1]
 
     extract_text_from_html(url)
 
