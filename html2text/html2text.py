@@ -53,11 +53,7 @@ strings_to_exclude = [
 ]
 
 
-def extract_text_from_html(argv):
-
-    if len(argv) == 1:
-        raise Exception("A URL needs to be provided")
-    url = argv[1]
+def extract_text_from_html(url):
 
     html = urlopen(url).read()
     soup = BeautifulSoup(html, features="html.parser")
@@ -77,4 +73,9 @@ def extract_text_from_html(argv):
 
 
 if __name__ == "__main__":
-    extract_text_from_html(sys.argv)
+    if len(argv) == 1:
+        raise Exception("A URL needs to be provided")
+    url = argv[1]
+
+    extract_text_from_html(url)
+
