@@ -1,4 +1,5 @@
 import sys
+import unicodedata
 
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
@@ -70,12 +71,10 @@ def extract_text_from_html(argv):
     # break into lines removing leading and trailing spaces
     lines = (line.strip() for line in text.splitlines())
     # remove blank lines and unwanted strings
-    chunks = [chunk for chunk in lines if chunk and (chunk not in strings_to_exclude)]
+    chunks = [unicodedata.normalize("NFKD", chunk) for chunk in lines if chunk and (chunk not in strings_to_exclude)]
     
     print(chunks)
 
 
 if __name__ == "__main__":
     extract_text_from_html(sys.argv)
-
-
