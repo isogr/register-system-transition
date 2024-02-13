@@ -2126,8 +2126,8 @@ def proposals_dump():
                 if item_type == "amendment":
                     proposal_items[item_filename]["amendmentType"] = proposal_type["amendmentType"]
                     if proposal_type["amendmentType"] == "supersession":
-                        if supersedingitems_uuid := get_supersedingitems_uuid(row[_["uuid"]]):
-                            proposal_items[item_filename]["supersedingItemIDs"] = supersedingitems_uuid
+                        if supersedingitems_uuid := get_supersedingitems_uuid(row[_["parent_uuid"]]):
+                            proposal_items[item_filename]["supersedingItemIDs"] = [supersedingitems_uuid]
                         else:
                             proposal_items[item_filename]["supersedingItemIDs"] = []
 
