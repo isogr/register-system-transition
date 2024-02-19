@@ -172,6 +172,18 @@ addItemNumberRedirects() {
 	done < <(< "$(fd -t f --glob containedItems "${scrape_dir}/")" jq --compact-output -r '.aaData[] | { "uuid": .uuid, "itemId": .itemIdentifier }')
 }
 
+# Sort keys in JSON files to avoid git noises
+sortJsonKeys() {
+	local scrape_dir="${1:?Missing dir}"
+
+	while IFS= read -r file
+	do
+		log "Fixing[sortJsonKeys] ${file}"
+		jq --sort-keys --compact-output < "${file}" > "${file}.sorted"
+		mv "${file}.sorted" "${file}"
+	done < <(fd -t f --glob 'containedItems*' "${scrape_dir}/")
+}
+
 addScrapeTimes() {
 	local scrape_dir="${1:?Missing dir}"
 
@@ -492,6 +504,7 @@ scrapePatch() {
 	addScrapeTimes "${scrape_dir}"
 	addItemNumberRedirects "${scrape_dir}"
 	neutralizePdfRetrievalTime "${scrape_dir}"
+	sortJsonKeys "${scrape_dir}"
 
 	patchJSONBasePaths "${scrape_dir}/register" ../
 	patchJSONBasePaths "${scrape_dir}/register/geodetic" ../../
