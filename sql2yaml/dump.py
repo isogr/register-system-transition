@@ -1806,8 +1806,25 @@ def transformations_dump(uuid=None):
     items = []
 
     for row in cur.fetchall():
-        items.append(
-            {
+
+        supersedingitem_uuid = None
+        supersedingitem_classID = None
+
+        item_uuids = get_proposals_management_uuids(row[_["uuid"]])
+        for item_uuid in item_uuids:
+            sp = get_simple_proposal_by_management_uuid(item_uuid)
+
+            proposal = get_proposal_by_simple_proposal_uuid(sp['uuid'])
+
+            proposal_type = get_proposal_type(sp["proposalmanagementinformation_uuid"])
+            item_type = proposal_type["type"]
+
+            if item_type == "amendment":
+                if proposal_type["amendmentType"] == "supersession":
+                    supersedingitem_uuid = get_supersedingitems_uuid(proposal["parent_uuid"])
+                    supersedingitem_classID = sp['']  # TODO
+
+        data = {
                 "uuid": row[_["uuid"]],
                 "dateAccepted": row[_["dateaccepted"]],
                 "status": row[_["status"]].lower(),
@@ -1826,7 +1843,14 @@ def transformations_dump(uuid=None):
                 "informationSources": get_citations_by_item(row[_["uuid"]]),
                 "aliases": get_aliases(row[_["uuid"]]),
             }
-        )
+
+        if supersedingitem_uuid:
+            data["supersededBy"] = {
+                "supersedingitem_uuid": supersedingitem_uuid,
+                "supersedingitem_classID": supersedingitem_classID
+            }
+
+        items.append(data)
 
     if uuid:
         if items:
@@ -2447,6 +2471,28 @@ def get_proposals_management(uuid):
     return items[0]
 
 
+def get_proposals_management_uuids(item_uuid):
+    cur.execute(
+        """
+        SELECT
+            uuid
+        FROM
+            re_proposalmanagementinformation
+        WHERE
+            item_uuid = %(item_uuid)s
+    """,
+        {"item_uuid": item_uuid},
+    )
+
+    items = []
+    _ = get_cols_dict()
+
+    for row in cur.fetchall():
+        items.append(row[_["uuid"]])
+
+    return items
+
+
 def get_proposals_organization(uuid):
     cur.execute(
         """
@@ -2560,6 +2606,67 @@ def get_simple_proposal(uuid):
     else:
         return None
 
+
+def get_simple_proposal_by_management_uuid(uuid):
+    cur.execute(
+        """
+        SELECT
+            uuid,
+            proposalmanagementinformation_uuid
+        FROM
+            simpleproposal
+        WHERE
+            proposalmanagementinformation_uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    items = []
+    _ = get_cols_dict()
+
+    for row in cur.fetchall():
+        items.append(
+            {
+                "uuid": row[_["uuid"]],
+                "proposalmanagementinformation_uuid": row[_["proposalmanagementinformation_uuid"]],
+            }
+        )
+
+    # uuid is PK
+    if items:
+        return items[0]
+    else:
+        return None
+
+
+def get_proposal_by_simple_proposal_uuid(uuid):
+    cur.execute(
+        """
+        SELECT
+            parent_uuid
+        FROM
+            proposal
+        WHERE
+            uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    items = []
+    _ = get_cols_dict()
+
+    for row in cur.fetchall():
+        items.append(
+            {
+                "parent_uuid": row[_["parent_uuid"]]
+            }
+        )
+
+    # uuid is PK
+    if items:
+        return items[0]
+    else:
+        return None
 
 if __name__ == "__main__":
 
