@@ -1771,6 +1771,25 @@ def units_dump(uuid=None):
         save_items(items, "unit-of-measurement")
 
 
+def get_transformation_item_status_by_uuid(uuid):
+    cur.execute(
+        """
+        SELECT
+            status
+        FROM
+            transformationitem
+        WHERE
+            uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    _row = cur.fetchone()
+
+    if _row:
+        return _row[0]
+
+
 def transformations_dump(uuid=None):
     query = """
 
@@ -1820,9 +1839,13 @@ def transformations_dump(uuid=None):
             item_type = proposal_type["type"]
 
             if item_type == "amendment":
+
                 if proposal_type["amendmentType"] == "supersession":
                     supersedingitem_uuid = get_supersedingitems_uuid(proposal["parent_uuid"])
-                    supersedingitem_classID = sp['']  # TODO
+                    class_slug = name_classes[sp["itemclassname"]]
+                    status = get_transformation_item_status_by_uuid(supersedingitem_uuid)
+                    if status == "VALID":
+                        supersedingitem_classID = list(item_classes.keys())[list(item_classes.values()).index(class_slug)]
 
         data = {
                 "uuid": row[_["uuid"]],
@@ -1844,7 +1867,7 @@ def transformations_dump(uuid=None):
                 "aliases": get_aliases(row[_["uuid"]]),
             }
 
-        if supersedingitem_uuid:
+        if supersedingitem_uuid and status == "VALID":
             data["supersededBy"] = {
                 "supersedingitem_uuid": supersedingitem_uuid,
                 "supersedingitem_classID": supersedingitem_classID
@@ -2612,7 +2635,9 @@ def get_simple_proposal_by_management_uuid(uuid):
         """
         SELECT
             uuid,
-            proposalmanagementinformation_uuid
+            proposalmanagementinformation_uuid,
+            itemclassname
+            
         FROM
             simpleproposal
         WHERE
@@ -2629,6 +2654,7 @@ def get_simple_proposal_by_management_uuid(uuid):
             {
                 "uuid": row[_["uuid"]],
                 "proposalmanagementinformation_uuid": row[_["proposalmanagementinformation_uuid"]],
+                "itemclassname": row[_["itemclassname"]]
             }
         )
 
