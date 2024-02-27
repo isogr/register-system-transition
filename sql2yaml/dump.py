@@ -2136,30 +2136,60 @@ def proposals_dump():
             role = responsible_parties.pop('role')
 
             data = {
-                    "submittingStakeholderGitServerUsername": "984851E6-82C6-4CE6-AB58-EF09D3FE412B",
-                    "controlBodyDecisionEvent": mgnt_info['controlbody_decision_event'],
-                    "controlBodyNotes": mgnt_info['controlbody_notes'],
-                    "justification": mgnt_info['justification'],
-                    "state": disposition,
-                    "sponsor": {
-                        "gitServerUsername": "",
-                        "name": "",
-                        "role": role,
-                        "parties": [responsible_parties]
-                    },
+                "submittingStakeholderGitServerUsername": "984851E6-82C6-4CE6-AB58-EF09D3FE412B",
+                "controlBodyDecisionEvent": mgnt_info['controlbody_decision_event'],
+                "controlBodyNotes": mgnt_info['controlbody_notes'],
+                "registerManagerNotes": mgnt_info['register_manager_notes'],
+                "justification": mgnt_info['justification'],
+                "state": disposition,
+                "sponsor": {
+                    "gitServerUsername": "",
+                    "name": mgnt_info['responsible_party'][0]['name'],
+                    "role": role,
+                    "parties": [responsible_parties]
+                },
 
-                    "timeProposed": mgnt_info['datedisposed'],
+                # "timeProposed": mgnt_info['dateproposed'],
+                # "timeDisposed": mgnt_info['datedisposed'],
 
-                    "items": proposal_items,
+                "items": proposal_items,
 
-                    "id": row[_["uuid"]],
-                    "title": row[_["title"]],
-                    "isConcluded": row[_["isconcluded"]],
-                    "notes": get_proposals_notes(row[_["uuid"]]),
+                "id": row[_["uuid"]],
+                "title": row[_["title"]],
+                "isConcluded": row[_["isconcluded"]],
+                "notes": get_proposals_notes(row[_["uuid"]]),
             }
 
-            if mgnt_info['dateproposed']:
-                data['timeDisposed'] = mgnt_info['dateproposed']
+            data["pastTransitions"] = []
+            if dateproposed:=mgnt_info['dateproposed']:
+                data["pastTransitions"].append({
+                    "label": "Propose",
+                    "timestamp": dateproposed,
+                    "fromState": "draft",
+                    "toState": "proposed",
+                    "stakeholder": {
+                        "name": mgnt_info['responsible_party'][0]['name'],
+                        "role": role
+                    },
+                    "input": {
+                        "justification": mgnt_info['justification']
+                    }
+                })
+
+            if datedisposed:=mgnt_info['datedisposed']:
+                data["pastTransitions"].append({
+                    "label": "Accept",
+                    "timestamp": datedisposed,
+                    "fromState": "pending-control-body-review",
+                    "toState": "accepted",
+                    "stakeholder": {
+                        "name": mgnt_info['responsible_party'][0]['name'],
+                        "role": role
+                    },
+                    "input": {
+                        "controlBodyNotes": mgnt_info['controlbody_notes']
+                    }
+                })
 
             proposals.append(data)
         # else:
