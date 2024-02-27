@@ -156,7 +156,7 @@ addItemNumberRedirects() {
 		cat > "${new_html_path}" <<-EOF
 		<!DOCTYPE html>
 		<html><head>
-		<meta http-equiv="refresh" content="0; url="${redirect_url}">
+		<meta http-equiv="refresh" content="0; url=${redirect_url}">
 		</head></html>
 		EOF
 
