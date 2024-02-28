@@ -1844,8 +1844,8 @@ def transformations_dump(uuid=None):
                     supersedingitem_uuid = get_supersedingitems_uuid(proposal["parent_uuid"])
                     class_slug = name_classes[sp["itemclassname"]]
                     status = get_transformation_item_status_by_uuid(supersedingitem_uuid)
-                    if status == "VALID":
-                        supersedingitem_classID = list(item_classes.keys())[list(item_classes.values()).index(class_slug)]
+                    # if status == "VALID":
+                    supersedingitem_classID = list(item_classes.keys())[list(item_classes.values()).index(class_slug)]
 
         data = {
                 "uuid": row[_["uuid"]],
