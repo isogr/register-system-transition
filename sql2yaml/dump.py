@@ -6,6 +6,7 @@ import argparse
 
 import json
 import glob
+from copy import deepcopy
 
 import javaobj
 from yaml import dump
@@ -2135,6 +2136,9 @@ def proposals_dump():
             responsible_parties = transform_responsible_parties(mgnt_info['responsible_party'])
             role = responsible_parties.pop('role')
 
+            dateproposed = mgnt_info['dateproposed']
+            datedisposed = mgnt_info['datedisposed']
+
             data = {
                 "submittingStakeholderGitServerUsername": "984851E6-82C6-4CE6-AB58-EF09D3FE412B",
                 "controlBodyDecisionEvent": mgnt_info['controlbody_decision_event'],
@@ -2142,15 +2146,15 @@ def proposals_dump():
                 "registerManagerNotes": mgnt_info['register_manager_notes'],
                 "justification": mgnt_info['justification'],
                 "state": disposition,
-                "sponsor": {
-                    "gitServerUsername": "",
-                    "name": mgnt_info['responsible_party'][0]['name'],
-                    "role": role,
-                    "parties": [responsible_parties]
-                },
+                # "sponsor": {
+                #     "gitServerUsername": "",
+                #     "name": mgnt_info['responsible_party'][0]['name'],
+                #     "role": role,
+                #     "parties": [responsible_parties]
+                # },
 
-                # "timeProposed": mgnt_info['dateproposed'],
-                # "timeDisposed": mgnt_info['datedisposed'],
+                "timeProposed": dateproposed,
+                "timeDisposed": datedisposed,
 
                 "items": proposal_items,
 
@@ -2161,12 +2165,12 @@ def proposals_dump():
             }
 
             data["pastTransitions"] = []
-            if dateproposed:=mgnt_info['dateproposed']:
+            if dateproposed:
                 data["pastTransitions"].append({
                     "label": "Propose",
-                    "timestamp": dateproposed,
-                    "fromState": "draft",
-                    "toState": "proposed",
+                    "timestamp": str(dateproposed),
+                    # "fromState": "draft",
+                    # "toState": "proposed",
                     "stakeholder": {
                         "name": mgnt_info['responsible_party'][0]['name'],
                         "role": role
@@ -2176,12 +2180,12 @@ def proposals_dump():
                     }
                 })
 
-            if datedisposed:=mgnt_info['datedisposed']:
+            if datedisposed:
                 data["pastTransitions"].append({
                     "label": "Accept",
-                    "timestamp": datedisposed,
-                    "fromState": "pending-control-body-review",
-                    "toState": "accepted",
+                    "timestamp": str(datedisposed),
+                    # "fromState": "pending-control-body-review",
+                    # "toState": "accepted",
                     "stakeholder": {
                         "name": mgnt_info['responsible_party'][0]['name'],
                         "role": role
