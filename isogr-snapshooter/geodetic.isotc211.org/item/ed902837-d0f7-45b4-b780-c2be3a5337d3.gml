@@ -90,7 +90,7 @@
         </gmd:EX_Extent>
       </gml:domainOfValidity>
       <gml:scope>Spatial Referencing and GPS satellite navigation</gml:scope>
-      <gml:anchorDefinition>Defined through coordinates of 19 GPS tracking stations adjusted to a subset of IGb08 stations at epoch 2005.0 using observatiions made in May 2013. The IGb08 station coordinates are considered to be equivalent to ITRF2008.</gml:anchorDefinition>
+      <gml:anchorDefinition>Defined through coordinates of 19 GPS tracking stations adjusted to a subset of IGb08 stations at epoch 2005.0 using observations made in May 2013. The IGb08 station coordinates are considered to be equivalent to ITRF2008.</gml:anchorDefinition>
       <gml:realizationEpoch>2013-10-16</gml:realizationEpoch>
       <gml:primeMeridian>
         <gml:PrimeMeridian gml:id="iso-primemeridian-25">
