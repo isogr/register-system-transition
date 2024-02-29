@@ -1,1 +1,0 @@
-GEODCRS["NAD27 - LatLon",DATUM["North American Datum of 1927",ELLIPSOID["Clarke 1866",6378206.4,6356583.8]],CS[ellipsoidal,2],AXIS["Geodetic latitude (Lat)",north,ORDER[1]],AXIS["Geodetic longitude (Lon)",east,ORDER[2]],ANGLEUNIT["degree (supplier to define representation)",0.017453292522222223]],ID["ISO",246]

@@ -1,1 +1,0 @@
-GEODCRS["SIRGAS-CON DGF07P01 - XYZ",DATUM["SIRGAS Continuously Operating Network DGF07P01",ELLIPSOID["GRS 1980",6378137.0,298.257222101]],CS[Cartesian,3],AXIS["Geocentric X (X)",other,ORDER[1]],AXIS["Geocentric Y (Y)",other,ORDER[2]],AXIS["Geocentric Z (Z)",other,ORDER[3]],LENGTHUNIT["metre",1.0]],ID["ISO",324]

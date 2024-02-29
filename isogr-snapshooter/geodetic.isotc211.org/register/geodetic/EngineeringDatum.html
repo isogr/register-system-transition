@@ -19,7 +19,7 @@
 
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta http-equiv="Cache-control" content="no-cache" />
-  <title>Engineering Datum - ISO Geodetic Registry (ISOGR) (read-only)</title>
+  <title>Engineering Datum - ISO Geodetic Registry (ISOGR) (read-only) (read-only)</title>
   <script type="text/javascript" src="../../resources/js/jquery.js"></script>
   <script type="text/javascript" src="../../resources/js/jqueryui.js"></script>
   <script type="text/javascript" src="../../resources/js/jquery.cookie.js"></script>
@@ -505,6 +505,7 @@
       <span><span>-2c0f2a3</span></span>
     </p>
   </footer>
+  <script id="scrape-timing-script" type="text/javascript" src="../../resources/js/scrape.js"></script>
   <script id="scrape-timing-script" type="text/javascript" src="../../resources/js/scrape.js"></script>
 
   <div class="loading-modal" style="background: rgba( 255, 255, 255, .8 ) url(../../resources/images/loader-lg.gif) 50% 50% no-repeat;"></div>
@@ -1233,7 +1234,7 @@
 		var table;
 		
 		table = $('#contentsTable').dataTable({
-			"sAjaxSource": "../../register/11c2a251-e7eb-4daf-bcd1-8823e737d93d/containedItems-EngineeringDatum",
+			"sAjaxSource": "../../register/11c2a251-e7eb-4daf-bcd1-8823e737d93d/containedItems-EngineeringDatum-EngineeringDatum",
 			"bProcessing": true,
 			"bServerSide": true,
 			"bStateSave": true,
@@ -1257,6 +1258,8 @@
 	        },
 // 			"fnServerData" : datatable2Rest,
 			"sPaginationType": "bs_normal",
+			"bPaginate": false,
+ 			"bFilter": false,
 			"bPaginate": false,
  			"bFilter": false,
 // 			"bFilter": false,
@@ -1283,6 +1286,7 @@
 			"aoColumns": [
 				{ 
 					"mDataProp": "itemIdentifier",
+					"bSortable": false,
 					"bSortable": false,
 					"sWidth": "8%"
 				},
@@ -1382,6 +1386,8 @@
 
 		table = $('#proposalsTable').dataTable({
 			"sPaginationType": "bs_normal",
+			"bPaginate": false,
+ 			"bFilter": false,
 			"bPaginate": false,
  			"bFilter": false,
 			"bStateSave": true,

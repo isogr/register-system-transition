@@ -1,1 +1,0 @@
-GEODCRS["CGCS 2000 - XYZ",DATUM["China Geodetic Coordinate System 2000",ELLIPSOID["CGCS 2000",6378137.0,298.257222101]],CS[Cartesian,3],AXIS["Geocentric X (X)",other,ORDER[1]],AXIS["Geocentric Y (Y)",other,ORDER[2]],AXIS["Geocentric Z (Z)",other,ORDER[3]],LENGTHUNIT["metre",1.0]],ID["ISO",732],REMARK["Adopted July 2008 by China. Replaces Xian 1980 horizontal datum."]

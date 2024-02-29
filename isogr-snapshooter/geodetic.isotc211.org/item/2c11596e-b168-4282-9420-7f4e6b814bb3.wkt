@@ -1,1 +1,0 @@
-VERTCRS["EVRF2000 - NHt",VDATUM["European Vertical Reference Frame 2000"],CS[vertical,1],AXIS["Gravity-related height (H)",up],LENGTHUNIT["metre",1.0]],ID["ISO",238],REMARK["Uses Normal heights referenced to the GRS80 ellipsoid. Replaced by EVRF2007 - NHt."]
