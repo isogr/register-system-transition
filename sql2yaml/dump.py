@@ -1052,7 +1052,6 @@ def get_conversion_params(uuid):
 
     items = []
 
-
     for row in cur.fetchall():
         item = {
             "value": convert_binary_into_human_readable_string(row[3].hex()),
@@ -1069,9 +1068,11 @@ def get_conversion_params(uuid):
 
 
 def convert_binary_into_human_readable_string(binary_value):
-    binary_data = bytes.fromhex(binary_value)
-    deserialized_object = javaobj.loads(binary_data)
-    return deserialized_object.value
+    if binary_value:
+        binary_data = bytes.fromhex(binary_value)
+        deserialized_object = javaobj.loads(binary_data)
+        return deserialized_object.value
+    return None
 
 
 def cs_spherical_dump():
@@ -1722,8 +1723,6 @@ def cs_axis_dump(uuid=None):
     for row in cur.fetchall():
         # min_value = str(psycopg2.Binary(row[_["minimumvalue"]]))
         # max_value = str(psycopg2.Binary(row[_["maximumvalue"]]))
-        max_value = None
-        min_value = None
 
         supersedingitem = get_supersededitem(row, _)
 
@@ -1737,8 +1736,9 @@ def cs_axis_dump(uuid=None):
             "abbreviation": row[_["coord_axis_abbreviation"]],
             "orientation": row[_["coord_axis_orientation"]],
             "unitOfMeasurement": row[_["axisunit_uuid"]],
-            "minValue": min_value,
-            "maxValue": max_value,
+            "minValue": convert_binary_into_human_readable_string(row[_["minimumvalue"]]),
+            "maxValue": convert_binary_into_human_readable_string(row[_["maximumvalue"]]),
+            "rangeMeaning": row[_["rangemeaning"]],
             "informationSources": get_citations_by_item(row[_["uuid"]]),
             "aliases": get_aliases(row[_["uuid"]]),
         }
