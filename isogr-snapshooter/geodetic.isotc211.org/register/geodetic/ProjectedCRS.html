@@ -3,7 +3,7 @@
 <html>
 <head>
   <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script type="text/javascript" async="async" src="www.googletagmanager.com/gtag/js?id=UA-138578173-3"></script>
+  <script type="text/javascript" async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-138578173-3"></script>
   <script>
       window.dataLayer = window.dataLayer || [];
 
@@ -19,7 +19,7 @@
 
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta http-equiv="Cache-control" content="no-cache" />
-  <title>Projected CRS - ISO Geodetic Registry (ISOGR)</title>
+  <title>Projected CRS - ISO Geodetic Registry (ISOGR) (read-only)</title>
   <script type="text/javascript" src="../../resources/js/jquery.js"></script>
   <script type="text/javascript" src="../../resources/js/jqueryui.js"></script>
   <script type="text/javascript" src="../../resources/js/jquery.cookie.js"></script>
@@ -33,7 +33,7 @@
   <script type="text/javascript" src="../../resources/js/datatables.js"></script>
   <script type="text/javascript" src="../../resources/js/registry.js"></script>
   <script type="text/javascript" src="../../resources/js/select2.js"></script>
-  <!-- 		<script type="text/javascript" src="bespire.atlassian.net/s/5aabcb68bc266b63d9c98db2e18c606b-T/en_USbdmabc/6327/13/1.4.11/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?collectorId=3eddc320"></script> -->
+  <!-- 		<script type="text/javascript" src="https://bespire.atlassian.net/s/5aabcb68bc266b63d9c98db2e18c606b-T/en_USbdmabc/6327/13/1.4.11/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?collectorId=3eddc320"></script> -->
   <link rel="stylesheet" href="../../resources/css/bootstrap.min.css" />
   <link rel="stylesheet" href="../../resources/css/bootstrap-theme.min.css" />
   <link rel="stylesheet" href="../../resources/css/bootstrap-datetimepicker.min.css" />
@@ -113,7 +113,7 @@
       </button>
       <!-- 				<h1><span>Home</span></h1> -->
       <img alt="ISO" id="logo" class="img-responsive pull-left" style="padding-top: 10px; padding-left: 10px" src="../../resources/images/iso.png" />
-      <a style="padding-top:15px" class="test navbar-brand" href="../../index.html">Geodetic Registry</a>
+      <a style="padding-top:15px" class="test navbar-brand" href="../../index.html">Geodetic Registry (read-only)</a>
     </div>
 
     <!-- Collect the nav links, forms, and other content for toggling -->
@@ -124,9 +124,14 @@
           <a href="ProjectedCRS.html#" class="dropdown-toggle" data-toggle="dropdown"><span>Documentation</span> <span class="caret"></span></a>
           <ul class="dropdown-menu" style="padding: 15px; min-width: 250px;">
             <li>
-              <a href="iso-tc211.github.io/iso-geodetic-register-docs/" target="_blank">User Guide</a>
+              <a href="https://iso-tc211.github.io/iso-geodetic-register-docs/" target="_blank">User Guide</a>
             </li>
           </ul>
+        </li>
+        
+        <li class="dropdown">
+          <a class="dropdown-toggle" href="../../feedback.html">
+            <span>Feedback</span><span></span></a>
         </li>
       </ul>
       <!-- 				<div class="navbar-form navbar-right"> -->
@@ -488,18 +493,19 @@
   <footer class="footer">
 			<span class="powered-by pull-right">
 					<span class="powered-by-text">Powered by</span>
-					<a href="open.ribose.com" class="powered-by-logo">
+					<a href="https://open.ribose.com" class="powered-by-logo">
 						<img class="img-responsive" alt="Ribose" src="../../resources/images/brands/ribose/logo-ribose.svg" />
 					</a>
 			</span>
 
     <p class="text-muted">
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Last
-      updated:&nbsp;<span>2023-10-02T11:41Z</span>
+      updated:&nbsp;<span>2024-02-27T05:15Z</span>
       <!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;E-Mail: <a href="mailto:registry@isotc211.org">registry@isotc211.org</a>-->
       <span><span>-2c0f2a3</span></span>
     </p>
   </footer>
+  <script id="scrape-timing-script" type="text/javascript" src="../../resources/js/scrape.js"></script>
 
   <div class="loading-modal" style="background: rgba( 255, 255, 255, .8 ) url(../../resources/images/loader-lg.gif) 50% 50% no-repeat;"></div>
 </div>
@@ -1077,7 +1083,7 @@
 	    }
 
 	    //page calculations
-	    var pageSize = 1000;
+	    var pageSize = 2000;
 	    var start = paramMap.iDisplayStart;
 	    var pageNum = start / pageSize; // pageNum is 0 based
 
@@ -1200,34 +1206,34 @@
 
 	$('#contentsTable').on('click', '.button-details', function(e) {
 		var uuid = $(this).data('uuid');
-		location.href = '/item/' + uuid + '.html';
+		location.href = '../../item/' + uuid + '.html';
 	});
 
 	$('#contentsTable').on('click', '.button-clarify', function(e) {
 		var uuid = $(this).data('uuid');
-		location.href = '/item/' + uuid + '/clarify';
+		location.href = '../../item/' + uuid + '/clarify';
 	});
 
 	$('#contentsTable').on('click', '.button-supersede', function(e) {
 		var uuid = $(this).data('uuid');
-		location.href = '/item/' + uuid + '/supersede';
+		location.href = '../../item/' + uuid + '/supersede';
 	});
 
 	$('#contentsTable').on('click', '.button-retire', function(e) {
 		var uuid = $(this).data('uuid');
-		location.href = '/item/' + uuid + '/retire';
+		location.href = '../../item/' + uuid + '/retire';
 	});
 
 	$('#contentsTable').on('click', '.button-invalidate', function(e) {
 		var uuid = $(this).data('uuid');
-		location.href = '/item/' + uuid + '/invalidate';
+		location.href = '../../item/' + uuid + '/invalidate';
 	});
 
 	$(document).ready(function() {
 		var table;
 		
 		table = $('#contentsTable').dataTable({
-			"sAjaxSource": "../register/11c2a251-e7eb-4daf-bcd1-8823e737d93d/containedItems-ProjectedCRS",
+			"sAjaxSource": "../../register/11c2a251-e7eb-4daf-bcd1-8823e737d93d/containedItems-ProjectedCRS",
 			"bProcessing": true,
 			"bServerSide": true,
 			"bStateSave": true,
@@ -1277,6 +1283,7 @@
 			"aoColumns": [
 				{ 
 					"mDataProp": "itemIdentifier",
+					"bSortable": false,
 					"sWidth": "8%"
 				},
 				{ 

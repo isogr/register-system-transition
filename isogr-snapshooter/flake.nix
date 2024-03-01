@@ -24,17 +24,6 @@
         devshell
       ];
       pkgs = import nixpkgs { inherit system overlays; };
-      python = pkgs.python311.withPackages (pkgs: with pkgs; [
-        # beautifulsoup4
-        # mypy
-        # pylsp-mypy
-        # python-lsp-ruff
-        # requests
-        # ruff-lsp
-        # types-beautifulsoup4
-        # types-requests
-        # typing-extensions
-      ]);
     in
     rec {
 
@@ -55,24 +44,19 @@
             help = "Scrape the site's HTML, JSON, static assets, etc.";
             category = "Scraper";
           }
-          {
-            name = "deploy-patch";
-            command = "scripts/deploy-patch \"$@\"";
-            help = "Patch base paths for all links before deployment";
-            category = "Scraper";
-          }
         ];
         packages = with pkgs; [
           bash
           curl
+          darkhttpd
           fd
           fzf
           gnused
           jq
+          pdftk
+          qpdf
           ripgrep
           wget
-        ] ++ [
-          python
         ];
       };
     });

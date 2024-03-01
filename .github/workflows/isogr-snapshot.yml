@@ -5,9 +5,18 @@ on:
   # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
+    paths:
+      - 'isogr-snapshooter/geodetic.isotc211.org/**'
+      - '.github/workflows/isogr-snapshot.yml'
+  pull_request:
+    paths:
+      - 'isogr-snapshooter/geodetic.isotc211.org/**'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+
+  # Allows other workflows to call this one
+  workflow_call:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:

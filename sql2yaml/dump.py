@@ -6,6 +6,7 @@ import argparse
 
 import json
 import glob
+from copy import deepcopy
 
 import javaobj
 from yaml import dump
@@ -900,28 +901,32 @@ def crs_projected_dump(uuid=None):
     items = []
 
     for row in cur.fetchall():
-        items.append(
-            {
-                "uuid": row[_["uuid"]],
-                "dateAccepted": row[_["dateaccepted"]],
-                "status": row[_["status"]].lower(),
-                "name": row[_["name"]],
-                "identifier": int(row[_["identifier"]]),
-                "scope": row[_["crs_scope"]],
-                "aliases": get_aliases(row[_["uuid"]]),
-                "remarks": row[_["remarks"]],
-                "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
-                "operation": get_operation_by_uuid(row[_["operation_uuid"]]),
-                "datum": row[_["datum_uuid"]],
-                "coordinateSystem": get_coord_sys_by_uuid(
-                    row[_["coordinatesystem_uuid"]]
-                ),
-                "baseCRS": get_baseCRS_by_uuid(
-                    row[_["basecrs_uuid"]]
-                ),
-                "informationSources": get_citations_by_item(row[_["uuid"]])
-            }
-        )
+        supersedingitem = get_supersededitem(row, _)
+
+        data = {
+            "uuid": row[_["uuid"]],
+            "dateAccepted": row[_["dateaccepted"]],
+            "status": row[_["status"]].lower(),
+            "name": row[_["name"]],
+            "identifier": int(row[_["identifier"]]),
+            "scope": row[_["crs_scope"]],
+            "aliases": get_aliases(row[_["uuid"]]),
+            "remarks": row[_["remarks"]],
+            "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
+            "operation": get_operation_by_uuid(row[_["operation_uuid"]]),
+            "datum": row[_["datum_uuid"]],
+            "coordinateSystem": get_coord_sys_by_uuid(
+                row[_["coordinatesystem_uuid"]]
+            ),
+            "baseCRS": get_baseCRS_by_uuid(
+                row[_["basecrs_uuid"]]
+            ),
+            "informationSources": get_citations_by_item(row[_["uuid"]])
+        }
+
+        if supersedingitem:
+            data["supersededBy"] = supersedingitem
+        items.append(data)
 
     if uuid:
         if items:
@@ -983,28 +988,32 @@ def concat_conversion_dump(uuid=None):
     items = []
 
     for row in cur.fetchall():
-        items.append(
-            {
-                "uuid": row[_["uuid"]],
-                "dateAccepted": row[_["dateaccepted"]],
-                "dateAmended": row[_["dateamended"]],
-                "status": row[_["status"]].lower(),
-                "name": row[_["name"]],
-                "identifier": int(row[_["identifier"]]),
-                "aliases": get_aliases(row[_["uuid"]]),  #V
-                "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),  #V
-                "accuracy": get_conversion_accuracy(int(row[_["accuracy"]]) if row[_["accuracy"]] else None),
-                # "accuracy": get_coord_op_accuracy(row[_["uuid"]]),
-                "scope": get_coord_op_scope(row[_["uuid"]]),
-                "remarks": row[_["remarks"]],
-                "parameters": get_conversion_params(row[_["uuid"]]),
-                "definition": row[_["definition"]],
-                "sourcecrs_uuid": row[_["sourcecrs_uuid"]],
-                "targetcrs_uuid": row[_["targetcrs_uuid"]],
-                "method_uuid": row[_["method_uuid"]],
-                "informationSources": get_citations_by_item(row[_["uuid"]])
-            }
-        )
+        supersedingitem = get_supersededitem(row, _)
+
+        data = {
+            "uuid": row[_["uuid"]],
+            "dateAccepted": row[_["dateaccepted"]],
+            "dateAmended": row[_["dateamended"]],
+            "status": row[_["status"]].lower(),
+            "name": row[_["name"]],
+            "identifier": int(row[_["identifier"]]),
+            "aliases": get_aliases(row[_["uuid"]]),  #V
+            "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),  #V
+            "accuracy": get_conversion_accuracy(int(row[_["accuracy"]]) if row[_["accuracy"]] else None),
+            # "accuracy": get_coord_op_accuracy(row[_["uuid"]]),
+            "scope": get_coord_op_scope(row[_["uuid"]]),
+            "remarks": row[_["remarks"]],
+            "parameters": get_conversion_params(row[_["uuid"]]),
+            "definition": row[_["definition"]],
+            "sourcecrs_uuid": row[_["sourcecrs_uuid"]],
+            "targetcrs_uuid": row[_["targetcrs_uuid"]],
+            "method_uuid": row[_["method_uuid"]],
+            "informationSources": get_citations_by_item(row[_["uuid"]])
+        }
+
+        if supersedingitem:
+            data["supersededBy"] = supersedingitem
+        items.append(data)
 
     if uuid:
         if items:
@@ -1110,26 +1119,31 @@ def datums_geodetic_dump(uuid=None):
     items = []
 
     for row in cur.fetchall():
-        items.append(
-            {
-                "uuid": row[_["uuid"]],
-                "dateAccepted": row[_["dateaccepted"]],
-                "status": row[_["status"]].lower(),
-                "name": row[_["name"]],
-                "identifier": int(row[_["identifier"]]),
-                "aliases": get_aliases(row[_["uuid"]]),
-                "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
-                "remarks": row[_["remarks"]],
-                "releaseDate": row[_["realization_epoch"]],
-                "definition": row[_["definition"]],
-                "originDescription": row[_["origin_description"]],
-                "scope": row[_["datum_scope"]],
-                "ellipsoid": row[_["ellipsoid_uuid"]],
-                "primeMeridian": row[_["primemeridian_uuid"]],
-                "coordinateReferenceEpoch": row[_["coordinatereferenceepoch"]],
-                "informationSources": get_citations_by_item(row[_["uuid"]])
-            }
-        )
+
+        supersedingitem = get_supersededitem(row, _)
+
+        data = {
+            "uuid": row[_["uuid"]],
+            "dateAccepted": row[_["dateaccepted"]],
+            "status": row[_["status"]].lower(),
+            "name": row[_["name"]],
+            "identifier": int(row[_["identifier"]]),
+            "aliases": get_aliases(row[_["uuid"]]),
+            "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
+            "remarks": row[_["remarks"]],
+            "releaseDate": row[_["realization_epoch"]],
+            "definition": row[_["definition"]],
+            "originDescription": row[_["origin_description"]],
+            "scope": row[_["datum_scope"]],
+            "ellipsoid": row[_["ellipsoid_uuid"]],
+            "primeMeridian": row[_["primemeridian_uuid"]],
+            "coordinateReferenceEpoch": row[_["coordinatereferenceepoch"]],
+            "informationSources": get_citations_by_item(row[_["uuid"]])
+        }
+
+        if supersedingitem:
+            data["supersededBy"] = supersedingitem
+        items.append(data)
 
     if uuid:
         if items:
@@ -1180,24 +1194,29 @@ def datums_vertical_dump(uuid=None):
 
     for row in cur.fetchall():
         if int(row[_["identifier"]]) > 0:
-            items.append(
-                {
-                    "uuid": row[_["uuid"]],
-                    "dateAccepted": row[_["dateaccepted"]],
-                    "status": row[_["status"]].lower(),
-                    "name": row[_["name"]],
-                    "identifier": int(row[_["identifier"]]),
-                    "aliases": get_aliases(row[_["uuid"]]),
-                    "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
-                    "remarks": row[_["remarks"]],
-                    "releaseDate": row[_["realization_epoch"]],
-                    "definition": row[_["definition"]],
-                    "originDescription": row[_["origin_description"]],
-                    "scope": row[_["datum_scope"]],
-                    "coordinateReferenceEpoch": row[_["coordinatereferenceepoch"]],
-                    "informationSources": get_citations_by_item(row[_["uuid"]])
-                }
-            )
+
+            supersedingitem = get_supersededitem(row, _)
+
+            data = {
+                "uuid": row[_["uuid"]],
+                "dateAccepted": row[_["dateaccepted"]],
+                "status": row[_["status"]].lower(),
+                "name": row[_["name"]],
+                "identifier": int(row[_["identifier"]]),
+                "aliases": get_aliases(row[_["uuid"]]),
+                "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
+                "remarks": row[_["remarks"]],
+                "releaseDate": row[_["realization_epoch"]],
+                "definition": row[_["definition"]],
+                "originDescription": row[_["origin_description"]],
+                "scope": row[_["datum_scope"]],
+                "coordinateReferenceEpoch": row[_["coordinatereferenceepoch"]],
+                "informationSources": get_citations_by_item(row[_["uuid"]])
+            }
+
+            if supersedingitem:
+                data["supersededBy"] = supersedingitem
+            items.append(data)
 
     if uuid:
         if items:
@@ -1247,26 +1266,30 @@ def ellipsoid_dump(uuid=None):
     items = []
 
     for row in cur.fetchall():
-        items.append(
-            {
-                "uuid": row[_["uuid"]],
-                "dateAccepted": row[_["dateaccepted"]],
-                "status": row[_["status"]].lower(),
-                "name": row[_["name"]],
-                "identifier": int(row[_["identifier"]]),
-                "aliases": get_aliases(row[_["uuid"]]),
-                "description": row[_["description"]],
-                "remarks": row[_["remarks"]],
-                "isSphere": row[_["issphere"]],
-                "semiMajorAxis": row[_["semimajoraxis"]],
-                "semiMajorAxisUoM": row[_["semimajoraxisuom_uuid"]],
-                "semiMinorAxis": row[_["semiminoraxis"]],
-                "semiMinorAxisUoM": row[_["semiminoraxisuom_uuid"]],
-                "inverseFlattening": row[_["inverseflattening"]],
-                "inverseFlatteningUoM": row[_["inverseflatteninguom_uuid"]],
-                "informationSources": get_citations_by_item(row[_["uuid"]])
-            }
-        )
+
+        supersedingitem = get_supersededitem(row, _)
+
+        data = {
+            "uuid": row[_["uuid"]],
+            "dateAccepted": row[_["dateaccepted"]],
+            "status": row[_["status"]].lower(),
+            "name": row[_["name"]],
+            "identifier": int(row[_["identifier"]]),
+            "aliases": get_aliases(row[_["uuid"]]),
+            "description": row[_["description"]],
+            "remarks": row[_["remarks"]],
+            "isSphere": row[_["issphere"]],
+            "semiMajorAxis": row[_["semimajoraxis"]],
+            "semiMajorAxisUoM": row[_["semimajoraxisuom_uuid"]],
+            "semiMinorAxis": row[_["semiminoraxis"]],
+            "semiMinorAxisUoM": row[_["semiminoraxisuom_uuid"]],
+            "inverseFlattening": row[_["inverseflattening"]],
+            "inverseFlatteningUoM": row[_["inverseflatteninguom_uuid"]],
+            "informationSources": get_citations_by_item(row[_["uuid"]])
+        }
+        if supersedingitem:
+            data["supersededBy"] = supersedingitem
+        items.append(data)
 
     if uuid:
         if items:
@@ -1316,23 +1339,28 @@ def co_method_dump(uuid=None):
     items = []
 
     for row in cur.fetchall():
-        items.append(
-            {
-                "uuid": row[_["uuid"]],
-                "dateAccepted": row[_["dateaccepted"]],
-                "status": row[_["status"]].lower(),
-                "name": row[_["name"]],
-                "identifier": int(row[_["identifier"]]),
-                "aliases": get_aliases(row[_["uuid"]]),
-                "definition": row[_["definition"]],
-                "description": row[_["description"]],
-                "parameters": get_op_params_by_method_uuid(row[_["uuid"]]),
-                "remarks": row[_["remarks"]],
-                "formula": row[_["formula"]],
-                "formulaCitation": get_citation((row[_["formulacitation_uuid"]])),
-                "informationSources": get_citations_by_item(row[_["uuid"]])
-            }
-        )
+
+        supersedingitem = get_supersededitem(row, _)
+
+        data = {
+            "uuid": row[_["uuid"]],
+            "dateAccepted": row[_["dateaccepted"]],
+            "status": row[_["status"]].lower(),
+            "name": row[_["name"]],
+            "identifier": int(row[_["identifier"]]),
+            "aliases": get_aliases(row[_["uuid"]]),
+            "definition": row[_["definition"]],
+            "description": row[_["description"]],
+            "parameters": get_op_params_by_method_uuid(row[_["uuid"]]),
+            "remarks": row[_["remarks"]],
+            "formula": row[_["formula"]],
+            "formulaCitation": get_citation((row[_["formulacitation_uuid"]])),
+            "informationSources": get_citations_by_item(row[_["uuid"]])
+        }
+
+        if supersedingitem:
+            data["supersededBy"] = supersedingitem
+        items.append(data)
 
     if uuid:
         if items:
@@ -1381,20 +1409,24 @@ def co_parameter_dump(uuid=None):
         else:
             minimum_occurs = None
 
-        items.append(
-            {
-                "uuid": row[_["uuid"]],
-                "dateAccepted": row[_["dateaccepted"]],
-                "status": row[_["status"]].lower(),
-                "name": row[_["name"]],
-                "identifier": int(row[_["identifier"]]),
-                "aliases": get_aliases(row[_["uuid"]]),
-                "definition": row[_["definition"]],
-                "remarks": row[_["remarks"]],
-                "minimumOccurs": minimum_occurs,
-                "informationSources": get_citations_by_item(row[_["uuid"]])
-            }
-        )
+        supersedingitem = get_supersededitem(row, _)
+
+        data = {
+            "uuid": row[_["uuid"]],
+            "dateAccepted": row[_["dateaccepted"]],
+            "status": row[_["status"]].lower(),
+            "name": row[_["name"]],
+            "identifier": int(row[_["identifier"]]),
+            "aliases": get_aliases(row[_["uuid"]]),
+            "definition": row[_["definition"]],
+            "remarks": row[_["remarks"]],
+            "minimumOccurs": minimum_occurs,
+            "informationSources": get_citations_by_item(row[_["uuid"]])
+        }
+
+        if supersedingitem:
+            data["supersededBy"] = supersedingitem
+        items.append(data)
 
     if uuid:
         if items:
@@ -1439,20 +1471,24 @@ def prime_meridian_dump(uuid=None):
     items = []
 
     for row in cur.fetchall():
-        items.append(
-            {
-                "uuid": row[_["uuid"]],
-                "dateAccepted": row[_["dateaccepted"]],
-                "status": row[_["status"]].lower(),
-                "identifier": row[_["identifier"]],
-                "name": row[_["name"]],
-                "remarks": row[_["remarks"]],
-                "informationSources": get_citations_by_item(row[_["uuid"]]),
-                "aliases": get_aliases(row[_["uuid"]]),
-                "longitudeFromGreenwich": row[_["greenwichlongitude"]],
-                "longitudeFromGreenwichUoM": row[_["greenwichlongitudeuom_uuid"]]
-            }
-        )
+        supersedingitem = get_supersededitem(row, _)
+
+        data = {
+            "uuid": row[_["uuid"]],
+            "dateAccepted": row[_["dateaccepted"]],
+            "status": row[_["status"]].lower(),
+            "identifier": row[_["identifier"]],
+            "name": row[_["name"]],
+            "remarks": row[_["remarks"]],
+            "informationSources": get_citations_by_item(row[_["uuid"]]),
+            "aliases": get_aliases(row[_["uuid"]]),
+            "longitudeFromGreenwich": row[_["greenwichlongitude"]],
+            "longitudeFromGreenwichUoM": row[_["greenwichlongitudeuom_uuid"]]
+        }
+
+        if supersedingitem:
+            data["supersededBy"] = supersedingitem
+        items.append(data)
 
     if uuid:
         if items:
@@ -1488,21 +1524,25 @@ def cs_cartesian_dump(uuid=None):
     items = []
 
     for row in cur.fetchall():
-        items.append(
-            {
-                "uuid": row[_["uuid"]],
-                "dateAccepted": row[_["dateaccepted"]],
-                "status": row[_["status"]].lower(),
-                "identifier": row[_["identifier"]],
-                "coordinateSystemAxes": get_coordinate_sys_by_uuid(
-                    row[_["uuid"]]
-                ),
-                "name": row[_["name"]],
-                "remarks": row[_["remarks"]],
-                "informationSources": get_citations_by_item(row[_["uuid"]]),
-                "aliases": get_aliases(row[_["uuid"]]),
-            }
-        )
+        supersedingitem = get_supersededitem(row, _)
+
+        data = {
+            "uuid": row[_["uuid"]],
+            "dateAccepted": row[_["dateaccepted"]],
+            "status": row[_["status"]].lower(),
+            "identifier": row[_["identifier"]],
+            "coordinateSystemAxes": get_coordinate_sys_by_uuid(
+                row[_["uuid"]]
+            ),
+            "name": row[_["name"]],
+            "remarks": row[_["remarks"]],
+            "informationSources": get_citations_by_item(row[_["uuid"]]),
+            "aliases": get_aliases(row[_["uuid"]]),
+        }
+
+        if supersedingitem:
+            data["supersededBy"] = supersedingitem
+        items.append(data)
 
     if uuid:
         if items:
@@ -1538,21 +1578,25 @@ def cs_ellipsoidal_dump(single_uuid=None):
     items = []
 
     for row in cur.fetchall():
-        items.append(
-            {
-                "uuid": row[_["uuid"]],
-                "dateAccepted": row[_["dateaccepted"]],
-                "status": row[_["status"]].lower(),
-                "identifier": row[_["identifier"]],
-                "coordinateSystemAxes": get_coordinate_sys_by_uuid(
-                    row[_["uuid"]]
-                ),
-                "name": row[_["name"]],
-                "remarks": row[_["remarks"]],
-                "informationSources": get_citations_by_item(row[_["uuid"]]),
-                "aliases": get_aliases(row[_["uuid"]]),
-            }
-        )
+        supersedingitem = get_supersededitem(row, _)
+
+        data ={
+            "uuid": row[_["uuid"]],
+            "dateAccepted": row[_["dateaccepted"]],
+            "status": row[_["status"]].lower(),
+            "identifier": row[_["identifier"]],
+            "coordinateSystemAxes": get_coordinate_sys_by_uuid(
+                row[_["uuid"]]
+            ),
+            "name": row[_["name"]],
+            "remarks": row[_["remarks"]],
+            "informationSources": get_citations_by_item(row[_["uuid"]]),
+            "aliases": get_aliases(row[_["uuid"]]),
+        }
+        if supersedingitem:
+            data["supersededBy"] = supersedingitem
+        items.append(data)
+
 
     if single_uuid:
         if items:
@@ -1610,21 +1654,24 @@ def cs_vertical_dump(uuid=None):
     items = []
 
     for row in cur.fetchall():
-        items.append(
-            {
-                "uuid": row[_["uuid"]],
-                "dateAccepted": row[_["dateaccepted"]],
-                "status": row[_["status"]].lower(),
-                "identifier": row[_["identifier"]],
-                "coordinateSystemAxes": get_coordinate_sys_by_uuid(
-                    row[_["uuid"]]
-                ),
-                "name": row[_["name"]],
-                "remarks": row[_["remarks"]],
-                "informationSources": get_citations_by_item(row[_["uuid"]]),
-                "aliases": get_aliases(row[_["uuid"]]),
-            }
-        )
+        supersedingitem = get_supersededitem(row, _)
+        data = {
+            "uuid": row[_["uuid"]],
+            "dateAccepted": row[_["dateaccepted"]],
+            "status": row[_["status"]].lower(),
+            "identifier": row[_["identifier"]],
+            "coordinateSystemAxes": get_coordinate_sys_by_uuid(
+                row[_["uuid"]]
+            ),
+            "name": row[_["name"]],
+            "remarks": row[_["remarks"]],
+            "informationSources": get_citations_by_item(row[_["uuid"]]),
+            "aliases": get_aliases(row[_["uuid"]]),
+        }
+
+        if supersedingitem:
+            data["supersededBy"] = supersedingitem
+        items.append(data)
 
     if uuid:
         if items:
@@ -1677,24 +1724,28 @@ def cs_axis_dump(uuid=None):
         # min_value = str(psycopg2.Binary(row[_["minimumvalue"]]))
         # max_value = str(psycopg2.Binary(row[_["maximumvalue"]]))
 
-        items.append(
-            {
-                "uuid": row[_["uuid"]],
-                "dateAccepted": row[_["dateaccepted"]],
-                "status": row[_["status"]].lower(),
-                "name": row[_["name"]],
-                "remarks": row[_["remarks"]],
-                "identifier": int(row[_["identifier"]]),
-                "abbreviation": row[_["coord_axis_abbreviation"]],
-                "orientation": row[_["coord_axis_orientation"]],
-                "unitOfMeasurement": row[_["axisunit_uuid"]],
-                "minValue": convert_binary_into_human_readable_string(row[_["minimumvalue"]]),
-                "maxValue": convert_binary_into_human_readable_string(row[_["maximumvalue"]]),
-                "rangeMeaning": row[_["rangemeaning"]],
-                "informationSources": get_citations_by_item(row[_["uuid"]]),
-                "aliases": get_aliases(row[_["uuid"]]),
-            }
-        )
+        supersedingitem = get_supersededitem(row, _)
+
+        data = {
+            "uuid": row[_["uuid"]],
+            "dateAccepted": row[_["dateaccepted"]],
+            "status": row[_["status"]].lower(),
+            "name": row[_["name"]],
+            "remarks": row[_["remarks"]],
+            "identifier": int(row[_["identifier"]]),
+            "abbreviation": row[_["coord_axis_abbreviation"]],
+            "orientation": row[_["coord_axis_orientation"]],
+            "unitOfMeasurement": row[_["axisunit_uuid"]],
+            "minValue": convert_binary_into_human_readable_string(row[_["minimumvalue"]]),
+            "maxValue": convert_binary_into_human_readable_string(row[_["maximumvalue"]]),
+            "rangeMeaning": row[_["rangemeaning"]],
+            "informationSources": get_citations_by_item(row[_["uuid"]]),
+            "aliases": get_aliases(row[_["uuid"]]),
+        }
+
+        if supersedingitem:
+            data["supersededBy"] = supersedingitem
+        items.append(data)
 
     if uuid:
         if items:
@@ -1743,23 +1794,25 @@ def units_dump(uuid=None):
     items = []
 
     for row in cur.fetchall():
-        items.append(
-            {
-                "uuid": row[_["uuid"]],
-                "dateAccepted": row[_["dateaccepted"]],
-                "status": row[_["status"]].lower(),
-                "name": row[_["name"]],
-                "identifier": int(row[_["identifier"]]),
-                "aliases": get_aliases(row[_["uuid"]]),
-                "remarks": row[_["remarks"]],
-                "measureType": row[_["measuretype"]],
-                "symbol": row[_["symbol"]],
-                "numerator": row[_["scaletostandardunitnumerator"]],
-                "denominator": row[_["scaletostandardunitdenominator"]],
-                "standardUnit": row[_["standardunit_uuid"]],
-                "informationSources": get_citations_by_item(row[_["uuid"]])
-            }
-        )
+        supersedingitem = get_supersededitem(row, _)
+        data = {
+            "uuid": row[_["uuid"]],
+            "dateAccepted": row[_["dateaccepted"]],
+            "status": row[_["status"]].lower(),
+            "name": row[_["name"]],
+            "identifier": int(row[_["identifier"]]),
+            "aliases": get_aliases(row[_["uuid"]]),
+            "remarks": row[_["remarks"]],
+            "measureType": row[_["measuretype"]],
+            "symbol": row[_["symbol"]],
+            "numerator": row[_["scaletostandardunitnumerator"]],
+            "denominator": row[_["scaletostandardunitdenominator"]],
+            "standardUnit": row[_["standardunit_uuid"]],
+            "informationSources": get_citations_by_item(row[_["uuid"]])
+        }
+        if supersedingitem:
+            data["supersededBy"] = supersedingitem
+        items.append(data)
 
     if uuid:
         if items:
@@ -1768,6 +1821,25 @@ def units_dump(uuid=None):
             return None
     else:
         save_items(items, "unit-of-measurement")
+
+
+def get_transformation_item_status_by_uuid(uuid):
+    cur.execute(
+        """
+        SELECT
+            status
+        FROM
+            transformationitem
+        WHERE
+            uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    _row = cur.fetchone()
+
+    if _row:
+        return _row[0]
 
 
 def transformations_dump(uuid=None):
@@ -1805,8 +1877,10 @@ def transformations_dump(uuid=None):
     items = []
 
     for row in cur.fetchall():
-        items.append(
-            {
+
+        supersedingitem = get_supersededitem(row, _)
+
+        data = {
                 "uuid": row[_["uuid"]],
                 "dateAccepted": row[_["dateaccepted"]],
                 "status": row[_["status"]].lower(),
@@ -1825,7 +1899,11 @@ def transformations_dump(uuid=None):
                 "informationSources": get_citations_by_item(row[_["uuid"]]),
                 "aliases": get_aliases(row[_["uuid"]]),
             }
-        )
+
+        if supersedingitem:
+            data["supersededBy"] = supersedingitem
+
+        items.append(data)
 
     if uuid:
         if items:
@@ -1834,6 +1912,34 @@ def transformations_dump(uuid=None):
             return None
     else:
         save_items(items, "coordinate-ops--transformation")
+
+
+def get_supersededitem(row, _):
+    supersedingitem_uuid = None
+    supersedingitem_classID = None
+
+    item_uuids = get_proposals_management_uuids(row[_["uuid"]])
+    for item_uuid in item_uuids:
+        sp = get_simple_proposal_by_management_uuid(item_uuid)
+
+        proposal = get_proposal_by_simple_proposal_uuid(sp['uuid'])
+
+        proposal_type = get_proposal_type(sp["proposalmanagementinformation_uuid"])
+        item_type = proposal_type["type"]
+
+        if item_type == "amendment":
+
+            if proposal_type["amendmentType"] == "supersession":
+                supersedingitem_uuid = get_supersedingitems_uuid(proposal["parent_uuid"])
+                class_slug = name_classes[sp["itemclassname"]]
+                supersedingitem_classID = list(item_classes.keys())[list(item_classes.values()).index(class_slug)]
+
+    if supersedingitem_uuid:
+        return {
+            "supersedingitem_uuid": supersedingitem_uuid,
+            "supersedingitem_classID": supersedingitem_classID
+        }
+    return None
 
 
 def get_operation_by_uuid(uuid):
@@ -1919,29 +2025,35 @@ def crs_geodetic_dump(uuid=None):
     items = []
 
     for row in cur.fetchall():
-        items.append(
-            {
-                "uuid": row[_["uuid"]],
-                "dateAccepted": row[_["dateaccepted"]],
-                "status": row[_["status"]].lower(),
-                "name": row[_["name"]],
-                "identifier": int(row[_["identifier"]]),
-                "scope": row[_["crs_scope"]],
-                "aliases": get_aliases(row[_["uuid"]]),
-                "remarks": row[_["remarks"]],
-                "description": row[_["description"]],
-                "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
-                "operation": get_operation_by_uuid(row[_["operation_uuid"]]),
-                "datum": row[_["datum_uuid"]],
-                "coordinateSystem": get_coord_sys_by_uuid(
-                    row[_["coordinatesystem_uuid"]]
-                ),
-                "baseCRS": get_baseCRS_by_uuid(
-                    row[_["basecrs_uuid"]]
-                ),
-                "informationSources": get_citations_by_item(row[_["uuid"]])
-            }
-        )
+        supersedingitem = get_supersededitem(row, _)
+
+        data = {
+            "uuid": row[_["uuid"]],
+            "dateAccepted": row[_["dateaccepted"]],
+            "status": row[_["status"]].lower(),
+            "name": row[_["name"]],
+            "identifier": int(row[_["identifier"]]),
+            "scope": row[_["crs_scope"]],
+            "aliases": get_aliases(row[_["uuid"]]),
+            "remarks": row[_["remarks"]],
+            "description": row[_["description"]],
+            "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
+            "operation": get_operation_by_uuid(row[_["operation_uuid"]]),
+            "datum": row[_["datum_uuid"]],
+            "coordinateSystem": get_coord_sys_by_uuid(
+                row[_["coordinatesystem_uuid"]]
+            ),
+            "baseCRS": get_baseCRS_by_uuid(
+                row[_["basecrs_uuid"]]
+            ),
+            "informationSources": get_citations_by_item(row[_["uuid"]])
+        }
+
+        if supersedingitem:
+            data["supersededBy"] = supersedingitem
+
+        items.append(data)
+
 
     if uuid:
         if items:
@@ -1992,31 +2104,36 @@ def crs_vertical_dump(uuid=None):
     items = []
 
     for row in cur.fetchall():
-        items.append(
-            {
-                "uuid": row[_["uuid"]],
-                "dateAccepted": row[_["dateaccepted"]],
-                "status": row[_["status"]].lower(),
-                "name": row[_["name"]],
-                "identifier": int(row[_["identifier"]]),
-                "scope": row[_["crs_scope"]],
-                "aliases": get_aliases(row[_["uuid"]]),
-                "remarks": row[_["remarks"]],
-                "description": row[_["description"]],
-                "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
-                "operation": get_operation_by_uuid(row[_["operation_uuid"]]),
-                "datum": row[_["datum_uuid"]],
-                "coordinateSystem": get_coord_sys_by_uuid(
-                    row[_["coordinatesystem_uuid"]]
-                ),
-                "baseCRS": get_baseCRS_by_uuid(
-                    row[_["basecrs_uuid"]]
-                ),
-                    # get_base_crs_by_uuid(row[_["basecrs_uuid"]]),
-                "informationSources": get_citations_by_item(row[_["uuid"]])
-            }
-        )
 
+        supersedingitem = get_supersededitem(row, _)
+
+        data = {
+            "uuid": row[_["uuid"]],
+            "dateAccepted": row[_["dateaccepted"]],
+            "status": row[_["status"]].lower(),
+            "name": row[_["name"]],
+            "identifier": int(row[_["identifier"]]),
+            "scope": row[_["crs_scope"]],
+            "aliases": get_aliases(row[_["uuid"]]),
+            "remarks": row[_["remarks"]],
+            "description": row[_["description"]],
+            "extent": get_extent_by_uuid(row[_["domainofvalidity_uuid"]]),
+            "operation": get_operation_by_uuid(row[_["operation_uuid"]]),
+            "datum": row[_["datum_uuid"]],
+            "coordinateSystem": get_coord_sys_by_uuid(
+                row[_["coordinatesystem_uuid"]]
+            ),
+            "baseCRS": get_baseCRS_by_uuid(
+                row[_["basecrs_uuid"]]
+            ),
+                # get_base_crs_by_uuid(row[_["basecrs_uuid"]]),
+            "informationSources": get_citations_by_item(row[_["uuid"]])
+        }
+
+        if supersedingitem:
+            data["supersededBy"] = supersedingitem
+
+        items.append(data)
     if uuid:
         if items:
             return items[0]
@@ -2126,8 +2243,8 @@ def proposals_dump():
                 if item_type == "amendment":
                     proposal_items[item_filename]["amendmentType"] = proposal_type["amendmentType"]
                     if proposal_type["amendmentType"] == "supersession":
-                        if supersedingitems_uuid := get_supersedingitems_uuid(row[_["uuid"]]):
-                            proposal_items[item_filename]["supersedingItemIDs"] = supersedingitems_uuid
+                        if supersedingitems_uuid := get_supersedingitems_uuid(row[_["parent_uuid"]]):
+                            proposal_items[item_filename]["supersedingItemIDs"] = [supersedingitems_uuid]
                         else:
                             proposal_items[item_filename]["supersedingItemIDs"] = []
 
@@ -2135,31 +2252,64 @@ def proposals_dump():
             responsible_parties = transform_responsible_parties(mgnt_info['responsible_party'])
             role = responsible_parties.pop('role')
 
+            dateproposed = mgnt_info['dateproposed']
+            datedisposed = mgnt_info['datedisposed']
+
             data = {
-                    "submittingStakeholderGitServerUsername": "984851E6-82C6-4CE6-AB58-EF09D3FE412B",
-                    "controlBodyDecisionEvent": mgnt_info['controlbody_decision_event'],
-                    "controlBodyNotes": mgnt_info['controlbody_notes'],
-                    "justification": mgnt_info['justification'],
-                    "state": disposition,
-                    "sponsor": {
-                        "gitServerUsername": "",
-                        "name": "",
-                        "role": role,
-                        "parties": [responsible_parties]
-                    },
+                "submittingStakeholderGitServerUsername": "984851E6-82C6-4CE6-AB58-EF09D3FE412B",
+                "controlBodyDecisionEvent": mgnt_info['controlbody_decision_event'],
+                "controlBodyNotes": mgnt_info['controlbody_notes'],
+                "registerManagerNotes": mgnt_info['register_manager_notes'],
+                "justification": mgnt_info['justification'],
+                "state": disposition,
+                # "sponsor": {
+                #     "gitServerUsername": "",
+                #     "name": mgnt_info['responsible_party'][0]['name'],
+                #     "role": role,
+                #     "parties": [responsible_parties]
+                # },
 
-                    "timeProposed": mgnt_info['datedisposed'],
+                "timeProposed": dateproposed,
+                "timeDisposed": datedisposed,
 
-                    "items": proposal_items,
+                "items": proposal_items,
 
-                    "id": row[_["uuid"]],
-                    "title": row[_["title"]],
-                    "isConcluded": row[_["isconcluded"]],
-                    "notes": get_proposals_notes(row[_["uuid"]]),
+                "id": row[_["uuid"]],
+                "title": row[_["title"]],
+                "isConcluded": row[_["isconcluded"]],
+                "notes": get_proposals_notes(row[_["uuid"]]),
             }
 
-            if mgnt_info['dateproposed']:
-                data['timeDisposed'] = mgnt_info['dateproposed']
+            data["pastTransitions"] = []
+            if dateproposed:
+                data["pastTransitions"].append({
+                    "label": "Propose",
+                    "timestamp": str(dateproposed),
+                    # "fromState": "draft",
+                    # "toState": "proposed",
+                    "stakeholder": {
+                        "name": mgnt_info['responsible_party'][0]['name'],
+                        "role": role
+                    },
+                    "input": {
+                        "justification": mgnt_info['justification']
+                    }
+                })
+
+            if datedisposed:
+                data["pastTransitions"].append({
+                    "label": "Accept",
+                    "timestamp": str(datedisposed),
+                    # "fromState": "pending-control-body-review",
+                    # "toState": "accepted",
+                    "stakeholder": {
+                        "name": mgnt_info['responsible_party'][0]['name'],
+                        "role": role
+                    },
+                    "input": {
+                        "controlBodyNotes": mgnt_info['controlbody_notes']
+                    }
+                })
 
             proposals.append(data)
         # else:
@@ -2413,6 +2563,28 @@ def get_proposals_management(uuid):
     return items[0]
 
 
+def get_proposals_management_uuids(item_uuid):
+    cur.execute(
+        """
+        SELECT
+            uuid
+        FROM
+            re_proposalmanagementinformation
+        WHERE
+            item_uuid = %(item_uuid)s
+    """,
+        {"item_uuid": item_uuid},
+    )
+
+    items = []
+    _ = get_cols_dict()
+
+    for row in cur.fetchall():
+        items.append(row[_["uuid"]])
+
+    return items
+
+
 def get_proposals_organization(uuid):
     cur.execute(
         """
@@ -2526,6 +2698,70 @@ def get_simple_proposal(uuid):
     else:
         return None
 
+
+def get_simple_proposal_by_management_uuid(uuid):
+    cur.execute(
+        """
+        SELECT
+            uuid,
+            proposalmanagementinformation_uuid,
+            itemclassname
+            
+        FROM
+            simpleproposal
+        WHERE
+            proposalmanagementinformation_uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    items = []
+    _ = get_cols_dict()
+
+    for row in cur.fetchall():
+        items.append(
+            {
+                "uuid": row[_["uuid"]],
+                "proposalmanagementinformation_uuid": row[_["proposalmanagementinformation_uuid"]],
+                "itemclassname": row[_["itemclassname"]]
+            }
+        )
+
+    # uuid is PK
+    if items:
+        return items[0]
+    else:
+        return None
+
+
+def get_proposal_by_simple_proposal_uuid(uuid):
+    cur.execute(
+        """
+        SELECT
+            parent_uuid
+        FROM
+            proposal
+        WHERE
+            uuid = %(uuid)s
+    """,
+        {"uuid": uuid},
+    )
+
+    items = []
+    _ = get_cols_dict()
+
+    for row in cur.fetchall():
+        items.append(
+            {
+                "parent_uuid": row[_["parent_uuid"]]
+            }
+        )
+
+    # uuid is PK
+    if items:
+        return items[0]
+    else:
+        return None
 
 if __name__ == "__main__":
 

@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2155
+#
+
+# set -euo pipefail
 
 # See:
 # https://superuser.com/questions/1415717/how-to-download-an-entire-site-with-wget-including-its-images
 # https://www.gnu.org/software/wget/manual/html_node/Download-Options.html
 #
+
+DEFAULT_WAIT_SECONDS=5
+DEFAULT_LIMIT_RATE=300k
 
 log() {
 	echo "scraper: -> $*"
@@ -17,6 +23,13 @@ warn() {
 wgetit() {
 	local url="${1:?Missing URL}"; shift
 
+	if [[ -z "${SCRAPE_START}" ]]
+	then
+		SCRAPE_START=$(date -u '+%s')
+	fi
+
+	local rv
+
 	wget \
 		--level 5 \
 		--exclude-directories robots.txt \
@@ -26,12 +39,18 @@ wgetit() {
 		--span-hosts \
 		--restrict-file-names=windows \
 		--domains "${DOMAIN:?Missing domain}" \
-		--limit-rate=300k \
-		--wait=5 \
+		--limit-rate="${LIMIT_RATE:-${DEFAULT_LIMIT_RATE}}" \
+		--wait="${WAIT_SECONDS:-${DEFAULT_WAIT_SECONDS}}" \
 		--random-wait \
 		--no-parent \
 		"${url}" \
 		"$@"
+
+	rv=$?
+
+	SCRAPE_END=$(date -u '+%s')
+
+	return "${rv}"
 }
 
 remove404Css() {
@@ -87,27 +106,162 @@ gatherAjaxSource() {
 
 removeUselessMenuItems() {
 	local scrape_dir="${1:?Missing dir}"
+	local del_start
+	local del_delta=31
+
+	while IFS= read -r file
+	do
+		del_start=$(sed -n '/Login/ { =; q }' "${file}")
+		del_start=$((del_start - 1))
+
+		sed -i \
+			-e "${del_start},+${del_delta}d" \
+			"${file}"
+	done < <(fd -t f . -e html "${scrape_dir}/")
+}
+
+fixCssPageBottom() {
+	local scrape_dir="${1:?Missing dir}"
+
+	local append_this="\\
+\\
+.container-fluid {\
+\n    margin-bottom: 30px;\
+\n}"
 
 	while IFS= read -r file
 	do
 		sed -i \
-			-e '131,167d' \
+			-e "\${\
+a\
+${append_this}
+}" \
 			"${file}"
-	done < <(fd -t f . -e html "${scrape_dir}/register")
+	done < <(fd -t f registry.css -e css "${scrape_dir}/")
+}
+
+addItemNumberRedirects() {
+	local scrape_dir="${1:?Missing dir}"
+
+	mkdir -p "${scrape_dir}/register/geodetic/items"
+	while IFS= read -r line
+	do
+		local item_number=$(<<< "${line}" jq -r '.itemId')
+		local uuid=$(<<< "${line}" jq -r '.uuid')
+		local new_html_path="${scrape_dir}/register/geodetic/items/${item_number}.html"
+		local new_html_path_2="${new_html_path%.*}/index.html"
+		local new_html_path_2_dir="${new_html_path_2%/*}"
+		local redirect_url="/item/${uuid}.html"
+
+		cat > "${new_html_path}" <<-EOF
+		<!DOCTYPE html>
+		<html><head>
+		<meta http-equiv="refresh" content="0; url=${redirect_url}">
+		</head></html>
+		EOF
+
+		mkdir -p "${new_html_path_2_dir}"
+
+		cat > "${new_html_path_2}" <<-EOF
+		<!DOCTYPE html>
+		<html><head>
+		<meta http-equiv="refresh" content="0; url=${redirect_url}">
+		</head></html>
+		EOF
+
+	done < <(< "$(fd -t f --glob containedItems "${scrape_dir}/")" jq --compact-output -r '.aaData[] | { "uuid": .uuid, "itemId": .itemIdentifier }')
+}
+
+# Sort keys in JSON files to avoid git noises
+sortJsonKeys() {
+	local scrape_dir="${1:?Missing dir}"
+
+	while IFS= read -r file
+	do
+		log "Fixing[sortJsonKeys] ${file}"
+		jq --sort-keys --compact-output < "${file}" > "${file}.sorted"
+		mv "${file}.sorted" "${file}"
+	done < <(fd -t f --glob 'containedItems*' "${scrape_dir}/")
+}
+
+addScrapeTimes() {
+	local scrape_dir="${1:?Missing dir}"
+
+	# Only add timing texts if available.
+	if [[ -z "$SCRAPE_START" || -z "$SCRAPE_END" ]]
+	then
+		log "Skipping timing text addition"
+		return
+	fi
+
+	local new_js_path="${scrape_dir}/resources/js/scrape.js"
+
+	SCRAPER_REPO=https://github.com/isogr/register-system-transition/tree/main/isogr-snapshooter
+
+	cat > "${new_js_path}" <<-EOF
+	function s(i) { return (new Date(i * 1000).toISOString()).split(/\.\d*/).join(''); }
+	var scrapeStart = s(${SCRAPE_START});
+	var scrapeEnd = s(${SCRAPE_END});
+	var scrapeText = '<span id="scrape-timing">';
+	scrapeText += '<a href="${SCRAPER_REPO}" target="_blank">Page scraped</a> from <span title="${SCRAPE_START}">' + scrapeStart + '</span> to <span title="${SCRAPE_END}">' + scrapeEnd + '</span>';
+	scrapeText += ' by <a href="${SCRAPER_REPO}" target="_blank">isogr-snapshooter</a>.';
+	scrapeText += '</span>';
+	document.querySelector('footer p.text-muted').innerHTML += '<span>(' + scrapeText + ')</span>';
+	EOF
+
+	local append_this="\  <script id=\"scrape-timing-script\" type=\"text/javascript\" src=\"/resources/js/scrape.js\"></script>"
 
 	while IFS= read -r file
 	do
 		sed -i \
-			-e '131,167d' \
+			-e "\@^\s*</footer>@{\
+a\
+${append_this}
+}" \
 			"${file}"
-	done < <(fd -t f . -e html -d 1 "${scrape_dir}/")
+	done < <(fd -t f . -e html "${scrape_dir}/")
+}
+
+neutralizePdfRetrievalTime() {
+	local scrape_dir="${1:?Missing dir}"
+
+	while IFS= read -r input_file
+	do
+		log "Uncompressing PDF $input_file"
+		local uncompressed_pdf="${input_file%.*}.uncompressed-pdf"
+		local neutralized_pdf="${input_file%.*}.neutralized-pdf"
+		pdftk "${input_file}" output "${uncompressed_pdf}" uncompress
+
+		# Input format: Retrieved: 2024-02-02T02:29:50
+		sed \
+			-E \
+			-e "s/Retrieved:\s*[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}/Retrieved: 1970-01-01T00:00:00/g" \
+			"${uncompressed_pdf}" > "${neutralized_pdf}"
+
+		log "Repairing PDF $neutralized_pdf"
+
+		# NOTE: Using qpdf instead of pdftk because it compresses much better.
+		# Resulting PDF from qpdf matches more closely in size to the original than
+		# pdftk.
+		# #pdftk "${neutralized_pdf}" output "${input_file}"
+		qpdf --linearize "${neutralized_pdf}" "${input_file}"
+	done < <(fd -t f . -e pdf "${scrape_dir}/")
+
+	log "Removing all intermediate PDF files"
+	fd -t f '(uncompressed|neutralized)-pdf' "${scrape_dir}/" -x rm
+}
+
+changePageTitle() {
+	local scrape_dir="${1:?Missing dir}"
+	local append_this=" (read-only)"
 
 	while IFS= read -r file
 	do
 		sed -i \
-			-e '132,168d' \
+			-e "s@\(<title>.*\)</title>@\1${append_this}</title>@" \
+			-e "s@\(class=\"test navbar-brand\" href=\".*\">Geodetic Registry\)\(</a>\)@\1${append_this}\2@" \
 			"${file}"
-	done < <(fd -t f . -e html "${scrape_dir}/item")
+	done < <(fd -t f . -e html "${scrape_dir}/")
 }
 
 gatherRegistryItems() {
@@ -124,10 +278,13 @@ gatherRegistryItems() {
 		item_classes+=("${item_class}")
 	done < <(fd -t f . "${scrape_dir}"/register/geodetic/)
 
+	# scrape all 'containedItems' for the main index
+	gatherRegistryItemsIndexByOptionalItemClass "${scrape_dir}" ""
+
 	for item_class in "${item_classes[@]}"
 	do
 		log processing item class "${item_class}"
-		gatherRegistryItemsIndexByItemClass "${scrape_dir}" "${item_class}"
+		gatherRegistryItemsIndexByOptionalItemClass "${scrape_dir}" "${item_class}"
 		replaceHtmlForItemClass "${scrape_dir}" "${item_class}"
 		gatherRegistryItemsByItemClass "${scrape_dir}" "${item_class}"
 	done
@@ -161,6 +318,8 @@ disableSorting() {
 		sed -i \
 			-e 's/"bSortable": true/"bSortable": false/g' \
 			-e 's/"bSearchable": true/"bSortable": false/g' \
+			-e '/"mDataProp": "itemIdentifier"/a\
+					"bSortable": false,' \
 			"${file}"
 	done < <(fd -t f . -e html "${scrape_dir}"/register)
 }
@@ -256,19 +415,20 @@ gatherRegistryItemsByItemClass() {
 	done < <(jq -r '.aaData | .[] | .uuid' < "${local_uuid_source}")
 }
 
-gatherRegistryItemsIndexByItemClass() {
+# Empty 'item_class' means no filtering by item class, i.e. download all items
+gatherRegistryItemsIndexByOptionalItemClass() {
 	local scrape_dir="${1:?Missing dir}"
 	# local item_class=EngineeringCRS
-	local item_class="${2:?Missing item class}"
+	local item_class="${2:-}"
 
-	local local_new_ajax_source="${scrape_dir}/${AJAX_SOURCE}-${item_class}"
+	local local_new_ajax_source="${scrape_dir}/${AJAX_SOURCE}${item_class:+-${item_class}}"
 
 	mkdir -p "${local_new_ajax_source%/*}"
 
 	wgetit \
 		--recursive \
 		-O "${local_new_ajax_source}" \
-		"${FULL_AJAX_SOURCE}?sEcho=1&iColumns=5&sColumns=&iDisplayStart=0&iDisplayLength=${NEW_PAGE_SIZE}&mDataProp_0=itemIdentifier&mDataProp_1=name&mDataProp_2=itemClassName&mDataProp_3=status&mDataProp_4=&sSearch=&bRegex=false&sSearch_0=&bRegex_0=false&bSearchable_0=true&sSearch_1=&bRegex_1=false&bSearchable_1=true&sSearch_2=&bRegex_2=false&bSearchable_2=true&sSearch_3=&bRegex_3=false&bSearchable_3=true&sSearch_4=&bRegex_4=false&bSearchable_4=true&iSortCol_0=0&sSortDir_0=asc&iSortingCols=1&bSortable_0=true&bSortable_1=true&bSortable_2=false&bSortable_3=true&bSortable_4=true&itemClassFilter=${item_class}&statusFilter=valid%2Csuperseded%2Cretired%2Cinvalid&_=1704972445499"
+		"${FULL_AJAX_SOURCE}?sEcho=1&iColumns=5&sColumns=&iDisplayStart=0&iDisplayLength=${NEW_PAGE_SIZE}&mDataProp_0=itemIdentifier&mDataProp_1=name&mDataProp_2=itemClassName&mDataProp_3=status&mDataProp_4=&sSearch=&bRegex=false&sSearch_0=&bRegex_0=false&bSearchable_0=true&sSearch_1=&bRegex_1=false&bSearchable_1=true&sSearch_2=&bRegex_2=false&bSearchable_2=true&sSearch_3=&bRegex_3=false&bSearchable_3=true&sSearch_4=&bRegex_4=false&bSearchable_4=true&iSortCol_0=0&sSortDir_0=asc&iSortingCols=1&bSortable_0=true&bSortable_1=true&bSortable_2=false&bSortable_3=true&bSortable_4=true${item_class:+"&itemClassFilter=${item_class}"}&statusFilter=valid%2Csuperseded%2Cretired%2Cinvalid&_=1704972445499"
 }
 
 replaceHtmlForItemClass() {
@@ -285,6 +445,38 @@ replaceHtmlForItemClass() {
 
 	# log would do: sed -i -e "s@${AJAX_SOURCE}@${new_ajax_source}@g" "${file}"
 	sed -i -e "s@${AJAX_SOURCE}@${new_ajax_source}@g" "${file}"
+}
+
+patchJSONBasePaths() {
+	local target_dir="${1:?Missing target dir}"; shift
+	local base_path="${1:?Missing base path}"; shift
+	local depth="${1:-1}"
+
+	while IFS= read -r file
+	do
+		log "Fixing[patchJSONBasePaths] ${file}"
+		sed \
+			-i \
+			-e 's@\("sAjaxSource":\s*"\)/\(register\)@\1'"${base_path}"'\2@' \
+			"${file}"
+	done < <(fd -t f . -e html -d "${depth}" "${target_dir}")
+}
+
+patchPageLinksBasePaths() {
+	local target_dir="${1:?Missing target dir}"; shift
+	local base_path="${1:?Missing base path}"; shift
+	local depth="${1:-1}"
+
+	while IFS= read -r file
+	do
+		log "Fixing[patchPageLinksBasePaths] ${file}"
+		sed \
+			-i \
+			-e 's@\(href="\)/@\1'"${base_path}"'@g' \
+			-e 's@\(src="\)/@\1'"${base_path}"'@g' \
+			-e "s@location.href = '/@location.href = '${base_path}@g" \
+			"${file}"
+	done < <(fd -t f . -e html -d "${depth}" "${target_dir}")
 }
 
 # Additional resources not scraped by wget, due to them only being loaded by
@@ -307,27 +499,70 @@ scrapePatch() {
 	fixPagination "${scrape_dir}"
 	removeUselessMenuItems "${scrape_dir}"
 	remove404Css "${scrape_dir}"
+	changePageTitle "${scrape_dir}"
+	fixCssPageBottom "${scrape_dir}"
+	addScrapeTimes "${scrape_dir}"
+	addItemNumberRedirects "${scrape_dir}"
+	neutralizePdfRetrievalTime "${scrape_dir}"
+	sortJsonKeys "${scrape_dir}"
+
+	patchJSONBasePaths "${scrape_dir}/register" ../
+	patchJSONBasePaths "${scrape_dir}/register/geodetic" ../../
+	# patchJSONBasePaths "${scrape_dir}/item" ../
+
+	patchPageLinksBasePaths "${scrape_dir}/register" ../
+	patchPageLinksBasePaths "${scrape_dir}/register/geodetic" ../../
+	patchPageLinksBasePaths "${scrape_dir}/item" ../
+}
+
+sanityCheck() {
+	if ! curl -sSL "${1:?Missing URL}" | command grep -iq "${2:?Missing pattern}"
+	then
+		log "URL \`${1:?Missing URL}' does not contain pattern \`${2:?Missing pattern}'."
+		log "Aborting."
+		exit 1
+	fi
 }
 
 main() {
 	export DEFAULT_URL=https://geodetic.isotc211.org
 
+	# If first parameter looks like a URL, then use it like a URL.
+	# Otherwise, treat it like a function name from this file, and call it.
+	local URL="${DEFAULT_URL}"
+
+	if [[ "${1}" == http*://* ]]
+	then
+		URL="${1}"
+	fi
+	export URL
+
 	# Extract domain for use in wget, to make it only scrape resources within
 	# that domain.
-	local URL="${1:-"${DEFAULT_URL}"}"
-	export URL
 	local DOMAIN="${URL#http*://}"
 	DOMAIN="${DOMAIN%%/*}"
 	export DOMAIN
 
-	export NEW_PAGE_SIZE="${NEW_PAGE_SIZE:-1000}"
+	export NEW_PAGE_SIZE="${NEW_PAGE_SIZE:-2000}"
 
-	if [[ $# -gt 0 ]]
+	# debug...
+	log "WAIT_SECONDS=${WAIT_SECONDS:-}"
+	log "LIMIT_RATE=${LIMIT_RATE:-}"
+
+	# Initialize scrape timing variables
+	SCRAPE_START=${SCRAPE_START:-}
+	SCRAPE_END=${SCRAPE_END:-}
+
+	if [[ $# -gt 0 && "${1}" == http*://* ]]
 	then
+		sanityCheck "${URL}" ribose
 		wgetit --recursive --convert-links "$URL"
+		scrapePatch
+	else
+		local scrape_dir="./${DOMAIN:?Missing DOMAIN}"
+		log "Running: $* ${scrape_dir}"
+		"$@" "${scrape_dir}"
 	fi
-
-	scrapePatch
 }
 
 

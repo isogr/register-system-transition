@@ -6,7 +6,7 @@
  *
  * 1. Overwrite .select2-container's original display:inline-block
  *    with Bootstrap 3's default for .form-control, display:block;
- *    courtesy of @juristr (@see github.com/fk/select2-bootstrap-css/pull/1)
+ *    courtesy of @juristr (@see https://github.com/fk/select2-bootstrap-css/pull/1)
  */
 .select2-container.form-control {
   background: transparent;

@@ -1,21 +1,44 @@
 = ISOGR Snapshooter
 
+ifdef::env-github[]
+image:https://github.com/isogr/register-system-transition/actions/workflows/isogr-scrape.yml/badge.svg[
+  "Scrape",
+  link="https://github.com/isogr/register-system-transition/actions/workflows/isogr-scrape.yml",
+  window="_blank"
+]
+image:https://github.com/isogr/register-system-transition/actions/workflows/isogr-snapshot.yml/badge.svg[
+  "Deploy",
+  link="https://github.com/isogr/register-system-transition/actions/workflows/isogr-snapshot.yml",
+  window="_blank"
+]
+endif::[]
+
+== Introduction
+
+This folder consists of:
+
+* https://github.com/isogr/register-system-transition/tree/main/isogr-snapshooter/scripts[scripts^] to scrape the https://geodetic.isotc211.org[Java-based ISOGR website^],
+* the https://github.com/isogr/register-system-transition/tree/main/isogr-snapshooter/geodetic.isotc211.org[latest snapshot of the website^] itself,
+* a daily CI job to scrape the website,
+* as well as https://github.com/isogr/register-system-transition/actions/workflows/isogr-snapshot.yml[a (manually trigger-able) CI job^] to deploy the snapshot to https://geodetic-static.isotc211.org[^].
+
 == Prerequisites
 
 * https://nixos.org/[Nix^] (with https://nixos.wiki/wiki/Flakes[flake^] and https://github.com/nix-community/nix-direnv[`nix-direnv`^] support)
 
 If Nix is not installed, then the following prerequisites must be met:
 
-* https://www.gnu.org/software/bash/[`bash 4+`^]
-* https://github.com/sharkdp/fd[`fd`^]
-* https://www.gnu.org/software/sed/[`gnused`^]
-* https://github.com/jqlang/jq[`jq`^]
 * https://github.com/BurntSushi/ripgrep[`ripgrep`^]
-* https://www.gnu.org/software/wget/[`wget`^]
+* https://github.com/jqlang/jq[`jq`^]
+* https://github.com/qpdf/qpdf[`qpdf`^]
+* https://github.com/sharkdp/fd[`fd`^]
+* https://www.gnu.org/software/bash/[`bash 4+`^]
+* https://www.gnu.org/software/sed/[`gnused`^]
+* https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/[`pdftk (CLI)`^]
 
 Further, if serving the site locally is required, the following must also be met:
 
-* https://www.python.org/[Python 3^]
+* https://github.com/emikulic/darkhttpd[darkhttpd^]
 
 == Usage
 
@@ -26,7 +49,6 @@ Further, if serving the site locally is required, the following must also be met
 > cd isogr-snapshooter
 > direnv allow # <- Run this (one-off only) if not already allowed
 > scrape        https://mysite  # wait until site is scraped
-> deploy-patch  ../
 > serve                         # head to http://localhost:8000
 ----
 
@@ -37,7 +59,6 @@ Further, if serving the site locally is required, the following must also be met
 > cd isogr-snapshooter
 > nix develop
 > scrape        https://mysite  # wait until site is scraped
-> deploy-patch  ../
 > serve                         # head to http://localhost:8000
 ----
 
@@ -47,6 +68,5 @@ Further, if serving the site locally is required, the following must also be met
 ----
 > cd isogr-snapshooter
 > scripts/scrape        https://mysite  # wait until site is scraped
-> scripts/deploy-patch  ../
 > scripts/serve                         # head to http://localhost:8000
 ----
