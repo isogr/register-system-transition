@@ -863,6 +863,8 @@ def save_items(items, class_id):
             "status": status,
             "data": item,
         }
+        if supersededby := item.pop("supersededBy", None):
+            data["supersededBy"] = supersededby
 
         save_yaml(uuid, class_id, data)
 
@@ -926,6 +928,7 @@ def crs_projected_dump(uuid=None):
 
         if supersedingitem:
             data["supersededBy"] = supersedingitem
+            data["status"] = "superseded"
         items.append(data)
 
     if uuid:
@@ -1013,6 +1016,7 @@ def concat_conversion_dump(uuid=None):
 
         if supersedingitem:
             data["supersededBy"] = supersedingitem
+            data["status"] = "superseded"
         items.append(data)
 
     if uuid:
@@ -1143,6 +1147,7 @@ def datums_geodetic_dump(uuid=None):
 
         if supersedingitem:
             data["supersededBy"] = supersedingitem
+            data["status"] = "superseded"
         items.append(data)
 
     if uuid:
@@ -1289,6 +1294,7 @@ def ellipsoid_dump(uuid=None):
         }
         if supersedingitem:
             data["supersededBy"] = supersedingitem
+            data["status"] = "superseded"
         items.append(data)
 
     if uuid:
@@ -1360,6 +1366,7 @@ def co_method_dump(uuid=None):
 
         if supersedingitem:
             data["supersededBy"] = supersedingitem
+            data["status"] = "superseded"
         items.append(data)
 
     if uuid:
@@ -1426,6 +1433,7 @@ def co_parameter_dump(uuid=None):
 
         if supersedingitem:
             data["supersededBy"] = supersedingitem
+            data["status"] = "superseded"
         items.append(data)
 
     if uuid:
@@ -1488,6 +1496,7 @@ def prime_meridian_dump(uuid=None):
 
         if supersedingitem:
             data["supersededBy"] = supersedingitem
+            data["status"] = "superseded"
         items.append(data)
 
     if uuid:
@@ -1542,6 +1551,7 @@ def cs_cartesian_dump(uuid=None):
 
         if supersedingitem:
             data["supersededBy"] = supersedingitem
+            data["status"] = "superseded"
         items.append(data)
 
     if uuid:
@@ -1595,6 +1605,7 @@ def cs_ellipsoidal_dump(single_uuid=None):
         }
         if supersedingitem:
             data["supersededBy"] = supersedingitem
+            data["status"] = "superseded"
         items.append(data)
 
 
@@ -1671,6 +1682,7 @@ def cs_vertical_dump(uuid=None):
 
         if supersedingitem:
             data["supersededBy"] = supersedingitem
+            data["status"] = "superseded"
         items.append(data)
 
     if uuid:
@@ -1745,6 +1757,7 @@ def cs_axis_dump(uuid=None):
 
         if supersedingitem:
             data["supersededBy"] = supersedingitem
+            data["status"] = "superseded"
         items.append(data)
 
     if uuid:
@@ -1812,6 +1825,7 @@ def units_dump(uuid=None):
         }
         if supersedingitem:
             data["supersededBy"] = supersedingitem
+            data["status"] = "superseded"
         items.append(data)
 
     if uuid:
@@ -1902,6 +1916,7 @@ def transformations_dump(uuid=None):
 
         if supersedingitem:
             data["supersededBy"] = supersedingitem
+            data["status"] = "superseded"
 
         items.append(data)
 
@@ -1932,13 +1947,13 @@ def get_supersededitem(row, _):
             if proposal_type["amendmentType"] == "supersession":
                 supersedingitem_uuid = get_supersedingitems_uuid(proposal["parent_uuid"])
                 class_slug = name_classes[sp["itemclassname"]]
-                supersedingitem_classID = list(item_classes.keys())[list(item_classes.values()).index(class_slug)]
+                # supersedingitem_classID = list(item_classes.keys())[list(item_classes.values()).index(class_slug)]
 
     if supersedingitem_uuid:
-        return {
-            "supersedingitem_uuid": supersedingitem_uuid,
-            "supersedingitem_classID": supersedingitem_classID
-        }
+        return [{
+            "itemID": supersedingitem_uuid,
+            "classID": class_slug
+        }]
     return None
 
 
@@ -2051,6 +2066,7 @@ def crs_geodetic_dump(uuid=None):
 
         if supersedingitem:
             data["supersededBy"] = supersedingitem
+            data["status"] = "superseded"
 
         items.append(data)
 
@@ -2132,6 +2148,7 @@ def crs_vertical_dump(uuid=None):
 
         if supersedingitem:
             data["supersededBy"] = supersedingitem
+            data["status"] = "superseded"
 
         items.append(data)
     if uuid:
