@@ -1931,7 +1931,7 @@ def transformations_dump(uuid=None):
 
 def get_supersededitem(row, _):
     supersedingitem_uuid = None
-    supersedingitem_classID = None
+    supersedingitem = None
 
     item_uuids = get_proposals_management_uuids(row[_["uuid"]])
     for item_uuid in item_uuids:
@@ -1947,9 +1947,10 @@ def get_supersededitem(row, _):
             if proposal_type["amendmentType"] == "supersession":
                 supersedingitem_uuid = get_supersedingitems_uuid(proposal["parent_uuid"])
                 class_slug = name_classes[sp["itemclassname"]]
-                # supersedingitem_classID = list(item_classes.keys())[list(item_classes.values()).index(class_slug)]
+                # Exclude referencing supersededBy when item is NOT VALID (identifier<0)
+                supersedingitem = transformations_dump(supersedingitem_uuid)
 
-    if supersedingitem_uuid:
+    if supersedingitem_uuid and supersedingitem:
         return [{
             "itemID": supersedingitem_uuid,
             "classID": class_slug
@@ -2770,7 +2771,7 @@ def get_proposal_by_simple_proposal_uuid(uuid):
     for row in cur.fetchall():
         items.append(
             {
-                "parent_uuid": row[_["parent_uuid"]]
+                "parent_uuid": row[_["parent_uuid"]],
             }
         )
 
