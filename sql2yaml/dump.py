@@ -7,6 +7,7 @@ import glob
 import json
 import pathlib
 import re
+import sys
 
 import javaobj
 import psycopg2
@@ -14,9 +15,8 @@ from yaml import dump
 
 import config
 
+
 extents = []
-
-
 def get_cols_dict():
     i = 0
     result = {}
@@ -555,6 +555,7 @@ def get_tf_params_by_tf_uuid(uuid):
             _val = cur.fetchone()
 
             if _val and _param_val:
+
                 # param = get_op_parameter_by_uuid(param_uuid)
                 # if param:
                 # item["parameter"] = {
@@ -1009,7 +1010,7 @@ def concat_conversion_dump(uuid=None):
             "status": row[_["status"]].lower(),
             "name": row[_["name"]],
             "identifier": int(row[_["identifier"]]),
-            "aliases": get_aliases(row[_["uuid"]]),  # V
+            "aliases": get_aliases(row[_["uuid"]]),
             "extent": extent_data,
             "accuracy": get_conversion_accuracy(int(row[_["accuracy"]]) if row[_["accuracy"]] else None),
             # "accuracy": get_coord_op_accuracy(row[_["uuid"]]),
@@ -1920,24 +1921,24 @@ def transformations_dump(uuid=None):
         extent_data = get_extent_by_uuid(row[_["domainofvalidity_uuid"]])
 
         data = {
-            "uuid": row[_["uuid"]],
-            "dateAccepted": row[_["dateaccepted"]],
-            "status": row[_["status"]].lower(),
-            "name": row[_["name"]],
-            "identifier": int(row[_["identifier"]]),
-            "description": row[_["description"]],
-            "remarks": row[_["remarks"]],
-            "operationVersion": row[_["operationversion"]],
-            "extent": extent_data,
-            "scope": get_coord_op_scope(row[_["uuid"]]),
-            "accuracy": get_coord_op_accuracy(row[_["uuid"]]),
-            "parameters": get_tf_params_by_tf_uuid(row[_["uuid"]]),
-            "coordOperationMethod": row[_["method_uuid"]],
-            "sourceCRS": get_crs_by_uuid(row[_["sourcecrs_uuid"]]),
-            "targetCRS": get_crs_by_uuid(row[_["targetcrs_uuid"]]),
-            "informationSources": get_citations_by_item(row[_["uuid"]]),
-            "aliases": get_aliases(row[_["uuid"]]),
-        }
+                "uuid": row[_["uuid"]],
+                "dateAccepted": row[_["dateaccepted"]],
+                "status": row[_["status"]].lower(),
+                "name": row[_["name"]],
+                "identifier": int(row[_["identifier"]]),
+                "description": row[_["description"]],
+                "remarks": row[_["remarks"]],
+                "operationVersion": row[_["operationversion"]],
+                "extent": extent_data,
+                "scope": get_coord_op_scope(row[_["uuid"]]),
+                "accuracy": get_coord_op_accuracy(row[_["uuid"]]),
+                "parameters": get_tf_params_by_tf_uuid(row[_["uuid"]]),
+                "coordOperationMethod": row[_["method_uuid"]],
+                "sourceCRS": get_crs_by_uuid(row[_["sourcecrs_uuid"]]),
+                "targetCRS": get_crs_by_uuid(row[_["targetcrs_uuid"]]),
+                "informationSources": get_citations_by_item(row[_["uuid"]]),
+                "aliases": get_aliases(row[_["uuid"]]),
+            }
 
         if supersedingitem:
             data["supersededBy"] = supersedingitem
@@ -2822,7 +2823,6 @@ def get_proposal_by_simple_proposal_uuid(uuid):
     else:
         return None
 
-
 if __name__ == "__main__":
 
     con = psycopg2.connect(
@@ -2949,15 +2949,13 @@ if __name__ == "__main__":
         south = extent.get("s")
 
         extent_name = extent.get("name")
-        pattern = re.compile(r'^(.*?)([.,!?;:\'"()-]*)$')
-        cleaned_text = pattern.sub(r'\1', extent_name)
+        punctuation = re.compile(r'^(.*?)([.,!?;:\'"()-]*)$')
+        cleaned_text = punctuation.sub(r'\1', extent_name)
 
         # remove trailing whitespaces
         cleaned_text = cleaned_text.strip()
         # remove duplicate whitespaces
         cleaned_text = re.sub(r'\s+', ' ', cleaned_text)
-
-        # import ipdb; ipdb.set_trace()
 
         if extent_data := extents_data.get(cleaned_text):
             if extent_data.get("e") == east and \
@@ -2982,11 +2980,11 @@ if __name__ == "__main__":
                 "s": south,
             }
 
-    # print(extents_data)
-    import ipdb; ipdb.set_trace()
-
-    with open('extents.csv', 'w') as csv_file:
-        writer = csv.writer(csv_file)
-        # writer.writerow(None)
-        for key, value in sorted(extents_data.items()):
-            writer.writerow([key, value])
+    fields = ['name', 'ids', 'e', 'n', 'w', 's']
+    with open("extents.csv", "w") as f:
+        w = csv.DictWriter(f, fieldnames=fields)
+        w.writeheader()
+        for key, val in sorted(extents_data.items()):
+            row = {'name': key}
+            row.update(val)
+            w.writerow(row)
