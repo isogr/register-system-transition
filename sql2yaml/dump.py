@@ -2964,7 +2964,7 @@ if __name__ == "__main__":
                     extent_data.get("s") == south:
                 extents_data[cleaned_text]["ids"].append(extent["id"])
             else:
-                extents_data[cleaned_text] = {
+                extents_data[cleaned_text + "  ***POSSIBLE DUPLICATE***"] = {
                     "ids": [extent["id"]],
                     "e": east,
                     "n": north,
