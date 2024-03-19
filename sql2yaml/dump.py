@@ -795,7 +795,6 @@ def get_coord_op_accuracy(uuid):
             cur.execute(
                 """
                 SELECT
-                    dtype,
                     accuracy,
                     accuracyunit_uuid
                 FROM
@@ -810,9 +809,8 @@ def get_coord_op_accuracy(uuid):
 
             items.append(
                 {
-                    "dtype": result[0],
-                    "value": result[1],
-                    "unitOfMeasurement": result[2],
+                    "value": str(result[0]),
+                    "unitOfMeasurement": result[1],
                 }
             )
 
