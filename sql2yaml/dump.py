@@ -17,6 +17,7 @@ import config
 
 
 extents = []
+information_sources = []
 def get_cols_dict():
     i = 0
     result = {}
@@ -69,7 +70,7 @@ def get_crs_by_uuid(uuid):
         }
 
 
-def get_citations_by_item(uuid):
+def get_citations_by_item(uuid, identifier):
     cur.execute(
         """
         SELECT
@@ -91,6 +92,13 @@ def get_citations_by_item(uuid):
             citation = get_citation(row[0])
             if citation:
                 result.append(citation)
+
+                # Used to output data for "information_sources.csv"
+                info_source_data = {
+                    "id": identifier,
+                    **citation
+                }
+                information_sources.append(info_source_data)
 
     return result
 
@@ -924,7 +932,7 @@ def crs_projected_dump(uuid=None):
             "baseCRS": get_baseCRS_by_uuid(
                 row[_["basecrs_uuid"]]
             ),
-            "informationSources": get_citations_by_item(row[_["uuid"]])
+            "informationSources": get_citations_by_item(row[_["uuid"]], row[_["identifier"]])
         }
 
         if supersedingitem:
@@ -1019,7 +1027,7 @@ def concat_conversion_dump(uuid=None):
             "sourcecrs_uuid": row[_["sourcecrs_uuid"]],
             "targetcrs_uuid": row[_["targetcrs_uuid"]],
             "method_uuid": row[_["method_uuid"]],
-            "informationSources": get_citations_by_item(row[_["uuid"]])
+            "informationSources": get_citations_by_item(row[_["uuid"]], row[_["identifier"]])
         }
 
         if supersedingitem:
@@ -1089,7 +1097,7 @@ def convert_binary_into_human_readable_string(binary_value):
     if binary_value:
         binary_data = bytes.fromhex(binary_value)
         deserialized_object = javaobj.loads(binary_data)
-        return deserialized_object.value
+        return str(deserialized_object.value)
     return None
 
 
@@ -1156,7 +1164,7 @@ def datums_geodetic_dump(uuid=None):
             "ellipsoid": row[_["ellipsoid_uuid"]],
             "primeMeridian": row[_["primemeridian_uuid"]],
             "coordinateReferenceEpoch": row[_["coordinatereferenceepoch"]],
-            "informationSources": get_citations_by_item(row[_["uuid"]])
+            "informationSources": get_citations_by_item(row[_["uuid"]], row[_["identifier"]])
         }
 
         if supersedingitem:
@@ -1236,7 +1244,7 @@ def datums_vertical_dump(uuid=None):
                 "originDescription": row[_["origin_description"]],
                 "scope": row[_["datum_scope"]],
                 "coordinateReferenceEpoch": row[_["coordinatereferenceepoch"]],
-                "informationSources": get_citations_by_item(row[_["uuid"]])
+                "informationSources": get_citations_by_item(row[_["uuid"]], row[_["identifier"]])
             }
 
             if supersedingitem:
@@ -1316,7 +1324,7 @@ def ellipsoid_dump(uuid=None):
             "semiMinorAxisUoM": row[_["semiminoraxisuom_uuid"]],
             "inverseFlattening": row[_["inverseflattening"]],
             "inverseFlatteningUoM": row[_["inverseflatteninguom_uuid"]],
-            "informationSources": get_citations_by_item(row[_["uuid"]])
+            "informationSources": get_citations_by_item(row[_["uuid"]], row[_["identifier"]])
         }
         if supersedingitem:
             data["supersededBy"] = supersedingitem
@@ -1387,7 +1395,7 @@ def co_method_dump(uuid=None):
             "remarks": row[_["remarks"]],
             "formula": row[_["formula"]],
             "formulaCitation": get_citation((row[_["formulacitation_uuid"]])),
-            "informationSources": get_citations_by_item(row[_["uuid"]])
+            "informationSources": get_citations_by_item(row[_["uuid"]], row[_["identifier"]])
         }
 
         if supersedingitem:
@@ -1454,7 +1462,7 @@ def co_parameter_dump(uuid=None):
             "definition": row[_["definition"]],
             "remarks": row[_["remarks"]],
             "minimumOccurs": minimum_occurs,
-            "informationSources": get_citations_by_item(row[_["uuid"]])
+            "informationSources": get_citations_by_item(row[_["uuid"]], row[_["identifier"]])
         }
 
         if supersedingitem:
@@ -1514,7 +1522,7 @@ def prime_meridian_dump(uuid=None):
             "identifier": row[_["identifier"]],
             "name": row[_["name"]],
             "remarks": row[_["remarks"]],
-            "informationSources": get_citations_by_item(row[_["uuid"]]),
+            "informationSources": get_citations_by_item(row[_["uuid"]], row[_["identifier"]]),
             "aliases": get_aliases(row[_["uuid"]]),
             "longitudeFromGreenwich": row[_["greenwichlongitude"]],
             "longitudeFromGreenwichUoM": row[_["greenwichlongitudeuom_uuid"]]
@@ -1571,7 +1579,7 @@ def cs_cartesian_dump(uuid=None):
             ),
             "name": row[_["name"]],
             "remarks": row[_["remarks"]],
-            "informationSources": get_citations_by_item(row[_["uuid"]]),
+            "informationSources": get_citations_by_item(row[_["uuid"]], row[_["identifier"]]),
             "aliases": get_aliases(row[_["uuid"]]),
         }
 
@@ -1626,7 +1634,7 @@ def cs_ellipsoidal_dump(single_uuid=None):
             ),
             "name": row[_["name"]],
             "remarks": row[_["remarks"]],
-            "informationSources": get_citations_by_item(row[_["uuid"]]),
+            "informationSources": get_citations_by_item(row[_["uuid"]], row[_["identifier"]]),
             "aliases": get_aliases(row[_["uuid"]]),
         }
         if supersedingitem:
@@ -1700,7 +1708,7 @@ def cs_vertical_dump(uuid=None):
             ),
             "name": row[_["name"]],
             "remarks": row[_["remarks"]],
-            "informationSources": get_citations_by_item(row[_["uuid"]]),
+            "informationSources": get_citations_by_item(row[_["uuid"]], row[_["identifier"]]),
             "aliases": get_aliases(row[_["uuid"]]),
         }
 
@@ -1775,7 +1783,7 @@ def cs_axis_dump(uuid=None):
             "minValue": convert_binary_into_human_readable_string(row[_["minimumvalue"]]),
             "maxValue": convert_binary_into_human_readable_string(row[_["maximumvalue"]]),
             "rangeMeaning": row[_["rangemeaning"]],
-            "informationSources": get_citations_by_item(row[_["uuid"]]),
+            "informationSources": get_citations_by_item(row[_["uuid"]], row[_["identifier"]]),
             "aliases": get_aliases(row[_["uuid"]]),
         }
 
@@ -1845,7 +1853,7 @@ def units_dump(uuid=None):
             "numerator": row[_["scaletostandardunitnumerator"]],
             "denominator": row[_["scaletostandardunitdenominator"]],
             "standardUnit": row[_["standardunit_uuid"]],
-            "informationSources": get_citations_by_item(row[_["uuid"]])
+            "informationSources": get_citations_by_item(row[_["uuid"]], row[_["identifier"]])
         }
         if supersedingitem:
             data["supersededBy"] = supersedingitem
@@ -1934,7 +1942,7 @@ def transformations_dump(uuid=None):
                 "coordOperationMethod": row[_["method_uuid"]],
                 "sourceCRS": get_crs_by_uuid(row[_["sourcecrs_uuid"]]),
                 "targetCRS": get_crs_by_uuid(row[_["targetcrs_uuid"]]),
-                "informationSources": get_citations_by_item(row[_["uuid"]]),
+                "informationSources": get_citations_by_item(row[_["uuid"]], row[_["identifier"]]),
                 "aliases": get_aliases(row[_["uuid"]]),
             }
 
@@ -1976,8 +1984,8 @@ def get_supersededitem(row, _):
             if proposal_type["amendmentType"] == "supersession":
                 supersedingitem_uuid = get_supersedingitems_uuid(proposal["parent_uuid"])
                 class_slug = name_classes[sp["itemclassname"]]
-                # Exclude including supersededBy when superseding item is NOT VALID (identifier<0)
-                supersedingitem = transformations_dump(supersedingitem_uuid)
+                # Exclude supersededBy when superseding item is NOT VALID (identifier<0)
+                supersedingitem = transformations_dump(supersedingitem_uuid)  # all supersedingitems are transformations
 
     if supersedingitem_uuid and supersedingitem:
         return [{
@@ -2092,7 +2100,7 @@ def crs_geodetic_dump(uuid=None):
             "baseCRS": get_baseCRS_by_uuid(
                 row[_["basecrs_uuid"]]
             ),
-            "informationSources": get_citations_by_item(row[_["uuid"]])
+            "informationSources": get_citations_by_item(row[_["uuid"]], row[_["identifier"]])
         }
 
         if supersedingitem:
@@ -2178,7 +2186,7 @@ def crs_vertical_dump(uuid=None):
                 row[_["basecrs_uuid"]]
             ),
             # get_base_crs_by_uuid(row[_["basecrs_uuid"]]),
-            "informationSources": get_citations_by_item(row[_["uuid"]])
+            "informationSources": get_citations_by_item(row[_["uuid"]], row[_["identifier"]])
         }
 
         if supersedingitem:
@@ -2643,7 +2651,8 @@ def get_proposals_management_uuids(item_uuid):
     return items
 
 
-def get_proposals_organization(uuid):
+def get_proposals_organization(uuid):\
+
     cur.execute(
         """
         SELECT
@@ -2821,6 +2830,147 @@ def get_proposal_by_simple_proposal_uuid(uuid):
     else:
         return None
 
+
+def export_extents_to_csv(extents):
+    extents_data = {}
+    for extent in extents:
+
+        east = extent.get("e")
+        north = extent.get("n")
+        west = extent.get("w")
+        south = extent.get("s")
+
+        extent_description = extent.get("name")
+        punctuation = re.compile(r'^(.*?)([.,!?;:\'"()-]*)$')
+        cleaned_text = punctuation.sub(r"\1", extent_description)
+
+        # remove trailing whitespaces
+        cleaned_text = cleaned_text.strip()
+        # remove duplicate whitespaces
+        cleaned_text = re.sub(r"\s+", " ", cleaned_text)
+
+        if extent_data := extents_data.get(cleaned_text):
+            if extent_data.get("e") == east and \
+                    extent_data.get("n") == north and \
+                    extent_data.get("w") == west and \
+                    extent_data.get("s") == south:
+                extents_data[cleaned_text]["ids"].append(extent["id"])
+            else:
+                extents_data[cleaned_text + "  ***POSSIBLE DUPLICATE***"] = {
+                    "ids": [extent["id"]],
+                    "e": east,
+                    "n": north,
+                    "w": west,
+                    "s": south,
+                    "name": None
+                }
+        else:
+            extents_data[cleaned_text] = {
+                "ids": [extent["id"]],
+                "e": east,
+                "n": north,
+                "w": west,
+                "s": south,
+                "name": None
+            }
+
+    fields = ['description', 'ids', 'e', 'n', 'w', 's', 'name']
+    with open("extents.csv", "w") as f:
+        w = csv.DictWriter(f, fieldnames=fields)
+        w.writeheader()
+        for key, val in sorted(extents_data.items()):
+            row = {"description": key}
+            row.update(val)
+            w.writerow(row)
+
+
+def export_information_sources_to_csv(information_sources):
+    information_sources_data = {}
+    for information_source in information_sources:
+        description = information_source.get("title")
+        seriesName = information_source.get("seriesName")
+        seriesIssueId = information_source.get("seriesIssueID")
+
+        author = information_source.get("author")
+        publisher = information_source.get("publisher")
+        publicationDate = information_source.get("publicationDate")
+        editionDate = information_source.get("editionDate")
+        otherDetails = information_source.get("otherDetails")
+
+        source_citation_online_resource = None
+        if otherDetails:
+            urls = re.findall(r'(https?://\S+)', otherDetails)
+            if len(urls) > 0:
+                source_citation_online_resource = urls[0]
+
+        punctuation = re.compile(r'^(.*?)([.,!?;:\'"()-]*)$')
+        cleaned_text = punctuation.sub(r"\1", description)
+
+        if seriesName:
+            seriesName = punctuation.sub(r"\1", seriesName)
+        if seriesName == '':
+            seriesName = None
+
+        if seriesIssueId:
+            seriesIssueId = punctuation.sub(r"\1", seriesIssueId)
+        if seriesIssueId == '':
+            seriesIssueId = None
+
+        # remove trailing whitespaces
+        cleaned_text = cleaned_text.strip()
+        # remove duplicate whitespaces
+        cleaned_text = re.sub(r"\s+", " ", cleaned_text)
+
+        if information_source_data := information_sources_data.get(cleaned_text):
+            if information_source_data.get("seriesName") == seriesName and \
+                    information_source_data.get("seriesIssueID") == seriesIssueId and \
+                    information_source_data.get("author") == author and \
+                    information_source_data.get("publisher") == publisher and \
+                    information_source_data.get("publicationDate") == publicationDate and \
+                    information_source_data.get("editionDate") == editionDate and \
+                    information_source_data.get("otherDetails") == otherDetails:
+                information_sources_data[cleaned_text]["ids"].append(information_source["id"])
+            else:
+                information_sources_data[cleaned_text + "  ***POSSIBLE DUPLICATE***"] = {
+                    "ids": [information_source["id"]],
+                    "name": "",
+                    "seriesName": seriesName,
+                    "seriesIssueID": seriesIssueId,
+                    "author": author,
+                    "publisher": publisher,
+                    "publicationDate": publicationDate,
+                    "editionDate": editionDate,
+                    "otherDetails": otherDetails,
+                    "source_citation_online_resource": source_citation_online_resource
+                }
+        else:
+            information_sources_data[cleaned_text] = {
+                "ids": [information_source["id"]],
+                "name": "",
+                "seriesName": seriesName,
+                "seriesIssueID": seriesIssueId,
+                "author": author,
+                "publisher": publisher,
+                "publicationDate": publicationDate,
+                "editionDate": editionDate,
+                "otherDetails": otherDetails,
+                "source_citation_online_resource": source_citation_online_resource
+            }
+
+    fields = [
+        'title', 'ids', 'seriesName', 'seriesIssueID', 'name', 'author',
+        'publisher', 'publicationDate', 'editionDate', 'otherDetails',
+        'source_citation_online_resource'
+    ]
+    with open("information_sources.csv", "w") as f:
+        w = csv.DictWriter(f, fieldnames=fields)
+        w.writeheader()
+        for key, val in sorted(information_sources_data.items()):
+            row = {"title": key}
+            row.update(val)
+            w.writerow(row)
+
+
 if __name__ == "__main__":
 
     con = psycopg2.connect(
@@ -2938,51 +3088,5 @@ if __name__ == "__main__":
             else:
                 print("Not specified object(s) to dump.")
 
-    extents_data = {}
-    for extent in extents:
-
-        east = extent.get("e")
-        north = extent.get("n")
-        west = extent.get("w")
-        south = extent.get("s")
-
-        extent_name = extent.get("name")
-        punctuation = re.compile(r'^(.*?)([.,!?;:\'"()-]*)$')
-        cleaned_text = punctuation.sub(r'\1', extent_name)
-
-        # remove trailing whitespaces
-        cleaned_text = cleaned_text.strip()
-        # remove duplicate whitespaces
-        cleaned_text = re.sub(r'\s+', ' ', cleaned_text)
-
-        if extent_data := extents_data.get(cleaned_text):
-            if extent_data.get("e") == east and \
-                    extent_data.get("n") == north and \
-                    extent_data.get("w") == west and \
-                    extent_data.get("s") == south:
-                extents_data[cleaned_text]["ids"].append(extent["id"])
-            else:
-                extents_data[cleaned_text + "  ***POSSIBLE DUPLICATE***"] = {
-                    "ids": [extent["id"]],
-                    "e": east,
-                    "n": north,
-                    "w": west,
-                    "s": south,
-                }
-        else:
-            extents_data[cleaned_text] = {
-                "ids": [extent["id"]],
-                "e": east,
-                "n": north,
-                "w": west,
-                "s": south,
-            }
-
-    fields = ['name', 'ids', 'e', 'n', 'w', 's']
-    with open("extents.csv", "w") as f:
-        w = csv.DictWriter(f, fieldnames=fields)
-        w.writeheader()
-        for key, val in sorted(extents_data.items()):
-            row = {'name': key}
-            row.update(val)
-            w.writerow(row)
+    export_extents_to_csv(extents)
+    export_information_sources_to_csv(information_sources)
