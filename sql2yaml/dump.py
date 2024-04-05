@@ -2875,8 +2875,8 @@ def export_extents_to_csv(extents):
             }
 
     fields = ['description', 'ids', 'e', 'n', 'w', 's', 'name']
-    with open("extents.csv", "w") as f:
-        w = csv.DictWriter(f, fieldnames=fields)
+    with open("extents.csv", "w", newline='') as f:
+        w = csv.DictWriter(f, fieldnames=fields, lineterminator="\n")
         w.writeheader()
         for key, val in sorted(extents_data.items()):
             row = {"description": key}
@@ -2894,8 +2894,13 @@ def export_information_sources_to_csv(information_sources):
         author = information_source.get("author")
         publisher = information_source.get("publisher")
         publicationDate = information_source.get("publicationDate")
+        revisionDate = information_source.get("revisionDate")
+
         editionDate = information_source.get("editionDate")
         otherDetails = information_source.get("otherDetails")
+
+        seriesPage = information_source.get("seriesPage")
+        edition = information_source.get("edition")
 
         source_citation_online_resource = None
         if otherDetails:
@@ -2916,6 +2921,8 @@ def export_information_sources_to_csv(information_sources):
         if seriesIssueId == '':
             seriesIssueId = None
 
+        name = f"{author} ({str(revisionDate or publicationDate)})"
+
         # remove trailing whitespaces
         cleaned_text = cleaned_text.strip()
         # remove duplicate whitespaces
@@ -2928,12 +2935,15 @@ def export_information_sources_to_csv(information_sources):
                     information_source_data.get("publisher") == publisher and \
                     information_source_data.get("publicationDate") == publicationDate and \
                     information_source_data.get("editionDate") == editionDate and \
-                    information_source_data.get("otherDetails") == otherDetails:
+                    information_source_data.get("otherDetails") == otherDetails and \
+                    information_source_data.get("revisionDate") == revisionDate and \
+                    information_source_data.get("page") == seriesPage and \
+                    information_source_data.get("edition") == edition:
                 information_sources_data[cleaned_text]["ids"].append(information_source["id"])
             else:
                 information_sources_data[cleaned_text + "  ***POSSIBLE DUPLICATE***"] = {
                     "ids": [information_source["id"]],
-                    "name": "",
+                    "name": name,
                     "seriesName": seriesName,
                     "seriesIssueID": seriesIssueId,
                     "author": author,
@@ -2941,12 +2951,15 @@ def export_information_sources_to_csv(information_sources):
                     "publicationDate": publicationDate,
                     "editionDate": editionDate,
                     "otherDetails": otherDetails,
+                    "revisionDate": revisionDate,
+                    "page": seriesPage,
+                    "edition": edition,
                     "source_citation_online_resource": source_citation_online_resource
                 }
         else:
             information_sources_data[cleaned_text] = {
                 "ids": [information_source["id"]],
-                "name": "",
+                "name": name,
                 "seriesName": seriesName,
                 "seriesIssueID": seriesIssueId,
                 "author": author,
@@ -2954,16 +2967,19 @@ def export_information_sources_to_csv(information_sources):
                 "publicationDate": publicationDate,
                 "editionDate": editionDate,
                 "otherDetails": otherDetails,
-                "source_citation_online_resource": source_citation_online_resource
+                "source_citation_online_resource": source_citation_online_resource,
+                "revisionDate": revisionDate,
+                "page": seriesPage,
+                "edition": edition
             }
 
     fields = [
-        'title', 'ids', 'seriesName', 'seriesIssueID', 'name', 'author',
-        'publisher', 'publicationDate', 'editionDate', 'otherDetails',
-        'source_citation_online_resource'
+        'title', 'ids', 'author', 'publisher', 'publicationDate', 'revisionDate',
+        'edition', 'editionDate', 'seriesName', 'seriesIssueID', 'page',
+        'otherDetails', 'source_citation_online_resource', 'name'
     ]
-    with open("information_sources.csv", "w") as f:
-        w = csv.DictWriter(f, fieldnames=fields)
+    with open("information_sources.csv", "w", newline='') as f:
+        w = csv.DictWriter(f, fieldnames=fields, lineterminator="\n")
         w.writeheader()
         for key, val in sorted(information_sources_data.items()):
             row = {"title": key}
