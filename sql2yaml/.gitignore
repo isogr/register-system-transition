@@ -1,3 +1,12 @@
+# nix direnv
+.direnv
+
+# postgresql
+logfile
+.pgsql/
+data/pg-dump/
+
+# python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -5,7 +14,6 @@ pip-log.txt
 pip-delete-this-directory.txt
 venv/
 out/
-data/pg-dump/
 .notes.txt
 config.py
 run.conf

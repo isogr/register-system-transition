@@ -1,5 +1,7 @@
-output_dir = './out'
-data_dir = './data'
+import os
+
+output_dir = os.environ['PGOUTPUT'] or './out'
+data_dir = os.environ['PGDATA'] or './data'
 
 db_name='isoreg'
 db_user='isoreg'
