@@ -2859,15 +2859,15 @@ def export_extents_to_csv(extents):
         if extent_data := extents_data.get(key):
             diff_result = diff_extent_data(extents_data, to_diff)
             if len(diff_result) == 0:
-                extents_data[key]["ids"] = list(set(
-                    extents_data[key]["ids"] + [extent["id"]]))
+                extents_data[key]["ids"] = sorted(list(set(
+                    extents_data[key]["ids"] + [extent["id"]])))
             else:
                 print(f"diff: {extent['id']} {cleaned_text}")
                 print(f"      {diff_result}")
                 key = cleaned_text + "  ***POSSIBLE DUPLICATE***"
                 if extents_data.get(key):
-                    extents_data[key]["ids"] = list(set(
-                        extents_data[key]["ids"] + [extent["id"]]))
+                    extents_data[key]["ids"] = sorted(list(set(
+                        extents_data[key]["ids"] + [extent["id"]])))
                 else:
                     extents_data[key] = {
                         "ids": [extent["id"]],
@@ -2999,15 +2999,15 @@ def export_information_sources_to_csv(information_sources):
         if information_source_data := information_sources_data.get(key):
             diff_result = diff_info_source_data(information_source_data, to_diff)
             if len(diff_result) == 0:
-                information_sources_data[key]["ids"] = list(set(
-                    information_sources_data[key]["ids"] + [information_source["id"]]))
+                information_sources_data[key]["ids"] = sorted(list(set(
+                    information_sources_data[key]["ids"] + [information_source["id"]])))
             else:
                 print(f"diff: {information_source['id']} {cleaned_text}")
                 print(f"      {diff_result}")
                 key = cleaned_text + "  ***POSSIBLE DUPLICATE***"
                 if information_sources_data.get(key):
-                    information_sources_data[key]["ids"] = list(set(
-                        information_sources_data[key]["ids"] + [information_source["id"]]))
+                    information_sources_data[key]["ids"] = sorted(list(set(
+                        information_sources_data[key]["ids"] + [information_source["id"]])))
                 else:
                     information_sources_data[key] = {
                         "ids": [information_source["id"]],
