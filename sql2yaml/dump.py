@@ -2849,14 +2849,21 @@ def export_extents_to_csv(extents):
         # remove duplicate whitespaces
         key = re.sub(r"\s+", " ", cleaned_text)
 
+        to_diff = {
+            "e": east,
+            "s": south,
+            "w": west,
+            "n": north,
+        }
+
         if extent_data := extents_data.get(key):
-            if extent_data.get("e") == east and \
-                    extent_data.get("n") == north and \
-                    extent_data.get("w") == west and \
-                    extent_data.get("s") == south:
+            diff_result = diff_extent_data(extents_data, to_diff)
+            if len(diff_result) == 0:
                 extents_data[key]["ids"] = list(set(
                     extents_data[key]["ids"] + [extent["id"]]))
             else:
+                print(f"diff: {extent['id']} {cleaned_text}")
+                print(f"      {diff_result}")
                 key = cleaned_text + "  ***POSSIBLE DUPLICATE***"
                 if extents_data.get(key):
                     extents_data[key]["ids"] = list(set(
@@ -2888,6 +2895,42 @@ def export_extents_to_csv(extents):
             row = {"description": key}
             row.update(val)
             w.writerow(row)
+
+def diff_data(fields, a_data, b_data):
+    diff_fields = {}
+    for key in fields:
+        source_val = a_data.get(key)
+        obj_val = b_data.get(key)
+        if source_val != obj_val:
+            diff_fields[key] = [source_val, obj_val]
+
+    return diff_fields
+
+def diff_info_source_data(a_data, b_data):
+    fields = [
+        "seriesName",
+        "seriesIssueID",
+        "author",
+        "publisher",
+        "publicationDate",
+        "editionDate",
+        "otherDetails",
+        "revisionDate",
+        "page",
+        "edition",
+    ]
+
+    return diff_data(fields, a_data, b_data)
+
+def diff_extent_data(a_data, b_data):
+    fields = [
+        "e",
+        "s",
+        "w",
+        "n",
+    ]
+
+    return diff_data(fields, a_data, b_data)
 
 
 def export_information_sources_to_csv(information_sources):
@@ -2927,6 +2970,12 @@ def export_information_sources_to_csv(information_sources):
         if seriesIssueId == '':
             seriesIssueId = None
 
+        if seriesPage == '':
+            seriesPage = None
+
+        if edition == '':
+            edition = None
+
         name = f"{author} ({str(revisionDate or publicationDate)})"
 
         # remove trailing whitespaces
@@ -2934,20 +2983,27 @@ def export_information_sources_to_csv(information_sources):
         # remove duplicate whitespaces
         key = re.sub(r"\s+", " ", cleaned_text)
 
+        to_diff = {
+            "seriesName": seriesName,
+            "seriesIssueID": seriesIssueId,
+            "author": author,
+            "publisher": publisher,
+            "publicationDate": publicationDate,
+            "editionDate": editionDate,
+            "otherDetails": otherDetails,
+            "revisionDate": revisionDate,
+            "page": seriesPage,
+            "edition": edition,
+        }
+
         if information_source_data := information_sources_data.get(key):
-            if information_source_data.get("seriesName") == seriesName and \
-                    information_source_data.get("seriesIssueID") == seriesIssueId and \
-                    information_source_data.get("author") == author and \
-                    information_source_data.get("publisher") == publisher and \
-                    information_source_data.get("publicationDate") == publicationDate and \
-                    information_source_data.get("editionDate") == editionDate and \
-                    information_source_data.get("otherDetails") == otherDetails and \
-                    information_source_data.get("revisionDate") == revisionDate and \
-                    information_source_data.get("page") == seriesPage and \
-                    information_source_data.get("edition") == edition:
+            diff_result = diff_info_source_data(information_source_data, to_diff)
+            if len(diff_result) == 0:
                 information_sources_data[key]["ids"] = list(set(
                     information_sources_data[key]["ids"] + [information_source["id"]]))
             else:
+                print(f"diff: {information_source['id']} {cleaned_text}")
+                print(f"      {diff_result}")
                 key = cleaned_text + "  ***POSSIBLE DUPLICATE***"
                 if information_sources_data.get(key):
                     information_sources_data[key]["ids"] = list(set(
