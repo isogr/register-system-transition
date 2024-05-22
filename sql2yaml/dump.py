@@ -2847,25 +2847,31 @@ def export_extents_to_csv(extents):
         # remove trailing whitespaces
         cleaned_text = cleaned_text.strip()
         # remove duplicate whitespaces
-        cleaned_text = re.sub(r"\s+", " ", cleaned_text)
+        key = re.sub(r"\s+", " ", cleaned_text)
 
-        if extent_data := extents_data.get(cleaned_text):
+        if extent_data := extents_data.get(key):
             if extent_data.get("e") == east and \
                     extent_data.get("n") == north and \
                     extent_data.get("w") == west and \
                     extent_data.get("s") == south:
-                extents_data[cleaned_text]["ids"].append(extent["id"])
+                extents_data[key]["ids"] = list(set(
+                    extents_data[key]["ids"] + [extent["id"]]))
             else:
-                extents_data[cleaned_text + "  ***POSSIBLE DUPLICATE***"] = {
-                    "ids": [extent["id"]],
-                    "e": east,
-                    "n": north,
-                    "w": west,
-                    "s": south,
-                    "name": None
-                }
+                key = cleaned_text + "  ***POSSIBLE DUPLICATE***"
+                if extents_data.get(key):
+                    extents_data[key]["ids"] = list(set(
+                        extents_data[key]["ids"] + [extent["id"]]))
+                else:
+                    extents_data[key] = {
+                        "ids": [extent["id"]],
+                        "e": east,
+                        "n": north,
+                        "w": west,
+                        "s": south,
+                        "name": None
+                    }
         else:
-            extents_data[cleaned_text] = {
+            extents_data[key] = {
                 "ids": [extent["id"]],
                 "e": east,
                 "n": north,
@@ -2926,9 +2932,9 @@ def export_information_sources_to_csv(information_sources):
         # remove trailing whitespaces
         cleaned_text = cleaned_text.strip()
         # remove duplicate whitespaces
-        cleaned_text = re.sub(r"\s+", " ", cleaned_text)
+        key = re.sub(r"\s+", " ", cleaned_text)
 
-        if information_source_data := information_sources_data.get(cleaned_text):
+        if information_source_data := information_sources_data.get(key):
             if information_source_data.get("seriesName") == seriesName and \
                     information_source_data.get("seriesIssueID") == seriesIssueId and \
                     information_source_data.get("author") == author and \
@@ -2939,25 +2945,31 @@ def export_information_sources_to_csv(information_sources):
                     information_source_data.get("revisionDate") == revisionDate and \
                     information_source_data.get("page") == seriesPage and \
                     information_source_data.get("edition") == edition:
-                information_sources_data[cleaned_text]["ids"].append(information_source["id"])
+                information_sources_data[key]["ids"] = list(set(
+                    information_sources_data[key]["ids"] + [information_source["id"]]))
             else:
-                information_sources_data[cleaned_text + "  ***POSSIBLE DUPLICATE***"] = {
-                    "ids": [information_source["id"]],
-                    "name": name,
-                    "seriesName": seriesName,
-                    "seriesIssueID": seriesIssueId,
-                    "author": author,
-                    "publisher": publisher,
-                    "publicationDate": publicationDate,
-                    "editionDate": editionDate,
-                    "otherDetails": otherDetails,
-                    "revisionDate": revisionDate,
-                    "page": seriesPage,
-                    "edition": edition,
-                    "source_citation_online_resource": source_citation_online_resource
-                }
+                key = cleaned_text + "  ***POSSIBLE DUPLICATE***"
+                if information_sources_data.get(key):
+                    information_sources_data[key]["ids"] = list(set(
+                        information_sources_data[key]["ids"] + [information_source["id"]]))
+                else:
+                    information_sources_data[key] = {
+                        "ids": [information_source["id"]],
+                        "name": name,
+                        "seriesName": seriesName,
+                        "seriesIssueID": seriesIssueId,
+                        "author": author,
+                        "publisher": publisher,
+                        "publicationDate": publicationDate,
+                        "editionDate": editionDate,
+                        "otherDetails": otherDetails,
+                        "revisionDate": revisionDate,
+                        "page": seriesPage,
+                        "edition": edition,
+                        "source_citation_online_resource": source_citation_online_resource
+                    }
         else:
-            information_sources_data[cleaned_text] = {
+            information_sources_data[key] = {
                 "ids": [information_source["id"]],
                 "name": name,
                 "seriesName": seriesName,
