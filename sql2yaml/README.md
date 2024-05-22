@@ -30,7 +30,7 @@ Setup the environment using the install.sh file:
 Usage
 -----
 
-Run the data extraction tool (this will extract all objects).
+Run the data extraction tool (this will extract all objects specified in `run.conf`).
 
 ```
 ./run.sh
@@ -39,7 +39,11 @@ Run the data extraction tool (this will extract all objects).
 Specific objects can be extracted independently using the following command:
 
 ```
- python3 dump.py -o [OBJECT_NAMES]
+ # Dump all objects
+ ./dump.py
+
+ # or
+ ./dump.py -o OBJECT_NAMES
  ```
 
 Import of Database
