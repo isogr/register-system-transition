@@ -852,7 +852,7 @@ def read_json_dir(alias):
 def save_yaml(uuid, dname, data):
     file_path = "%s/%s" % (config.output_dir, dname)
     pathlib.Path(file_path).mkdir(parents=True, exist_ok=True)
-    file = open("%s/%s.yaml" % (file_path, uuid), "w")
+    file = open("%s/%s.yaml" % (file_path, uuid), "w", encoding='utf-8')
     file.write(dump(data, allow_unicode=True))
     file.close()
 
@@ -2888,7 +2888,7 @@ def export_extents_to_csv(extents):
             }
 
     fields = ['description', 'ids', 'e', 'n', 'w', 's', 'name']
-    with open("extents.csv", "w", newline='') as f:
+    with open("extents.csv", "w", newline='', encoding='utf-8') as f:
         w = csv.DictWriter(f, fieldnames=fields, lineterminator="\n")
         w.writeheader()
         for key, val in sorted(extents_data.items()):
@@ -3046,7 +3046,7 @@ def export_information_sources_to_csv(information_sources):
         'edition', 'editionDate', 'seriesName', 'seriesIssueID', 'page',
         'otherDetails', 'source_citation_online_resource', 'name'
     ]
-    with open("information_sources.csv", "w", newline='') as f:
+    with open("information_sources.csv", "w", newline='', encoding='utf-8') as f:
         w = csv.DictWriter(f, fieldnames=fields, lineterminator="\n")
         w.writeheader()
         for key, val in sorted(information_sources_data.items()):
