@@ -27,6 +27,17 @@ Setup the environment using the install.sh file:
 ./install.sh
 ```
 
+Then, make sure to configure the `config.py` file for Postgresql DB access,
+or set up the following environmental variables:
+
+```
+export PGHOST=127.0.0.1
+export PGPORT=5432
+export PGUSER=$USER
+export PGPASSWORD=#...
+export PGDATABASE=isoregistry
+```
+
 Usage
 -----
 
@@ -39,11 +50,14 @@ Run the data extraction tool (this will extract all objects specified in `run.co
 Specific objects can be extracted independently using the following command:
 
 ```
- # Dump all objects
- ./dump.py
+# Open fzf to select multiple objects (select using TAB)
+./run.sh -s
 
- # or
- ./dump.py -o OBJECT_NAMES
+# Dump all objects
+./dump.py
+
+# or
+./dump.py -o OBJECT_NAMES
  ```
 
 Import of Database

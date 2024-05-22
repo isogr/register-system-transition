@@ -1,10 +1,13 @@
 import os
 
-output_dir = os.environ['PGOUTPUT'] or './out'
-data_dir = os.environ['PGDATA'] or './data'
+def env(name, default=None):
+    return os.environ.get(name, default)
 
-db_name='isoreg'
-db_user='isoreg'
-db_password='isoreg'
-db_host='127.0.0.1'
-db_port='5433'
+output_dir = env('PGOUTPUT', './out')
+data_dir = env('PGDATA', './data')
+
+db_name = env('PGDATABASE', 'isoregistry')
+db_user = env('PGUSER', env('USER', 'isoreg'))
+db_password = env('PGPASSWORD', 'isoreg')
+db_host = env('PGHOST', '127.0.0.1')
+db_port = env('PGPORT', '5433')

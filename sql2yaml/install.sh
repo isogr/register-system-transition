@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 # May be necessary on some linux distros:
 # sudo apt-get update -y
@@ -10,7 +11,7 @@ echo ""
 
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
-    project_dir=`pwd`
+    project_dir=$PWD
 
     python3 -m venv "${project_dir}/venv"
 

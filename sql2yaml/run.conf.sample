@@ -25,4 +25,4 @@ objects+=('unit-of-measurement')
 
 # Set false or true if you need to zip results:
 
-make_zip_archive=false
+make_zip_archive="${make_zip_archive:-false}"
