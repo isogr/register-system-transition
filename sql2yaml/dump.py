@@ -3095,16 +3095,19 @@ if __name__ == "__main__":
         "--objects",
         action="append",
         help="<Required> list of objects to dump",
-        required=True,
+        required=False,
         nargs="+",
         type=str,
     )
     args = parser.parse_args()
 
-    if " " in args.objects[0][0]:
-        arg_objects = args.objects[0][0].split(" ")
+    if args.objects is None or len(args.objects) == 0:
+        arg_objects = objects_dumpers.keys()
     else:
-        arg_objects = [args.objects[0][0]]
+        if " " in args.objects[0][0]:
+            arg_objects = args.objects[0][0].split(" ")
+        else:
+            arg_objects = [args.objects[0][0]]
 
     for obj in arg_objects:
         if objects_dumpers.get(obj, None):
