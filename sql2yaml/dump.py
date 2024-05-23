@@ -2857,7 +2857,7 @@ def export_extents_to_csv(extents):
         }
 
         if extent_data := extents_data.get(key):
-            diff_result = diff_extent_data(extents_data, to_diff)
+            diff_result = diff_extent_data(extent_data, to_diff)
             if len(diff_result) == 0:
                 extents_data[key]["ids"] = sorted(list(set(
                     extents_data[key]["ids"] + [extent["id"]])))
