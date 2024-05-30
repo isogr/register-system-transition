@@ -2832,6 +2832,9 @@ def get_proposal_by_simple_proposal_uuid(uuid):
 
 punctuation = re.compile(r'^(.*?)[.,!?;:\'"\r\n-]*$')
 
+def strip_newlines(str):
+    return ' '.join(str.splitlines())
+
 def export_extents_to_csv(extents):
     extents_data = {}
     for extent in extents:
@@ -2958,6 +2961,10 @@ def export_information_sources_to_csv(information_sources):
                 source_citation_online_resource = urls[0]
 
         cleaned_text = punctuation.sub(r"\1", description)
+        if publisher:
+            publisher = strip_newlines(publisher)
+        if otherDetails:
+            otherDetails = strip_newlines(otherDetails)
 
         if seriesName:
             seriesName = punctuation.sub(r"\1", seriesName)
