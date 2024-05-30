@@ -7,7 +7,6 @@ import glob
 import json
 import pathlib
 import re
-import sys
 
 import javaobj
 import psycopg2
