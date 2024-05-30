@@ -2830,6 +2830,7 @@ def get_proposal_by_simple_proposal_uuid(uuid):
     else:
         return None
 
+punctuation = re.compile(r'^(.*?)[.,!?;:\'"\r\n-]*$')
 
 def export_extents_to_csv(extents):
     extents_data = {}
@@ -2841,7 +2842,6 @@ def export_extents_to_csv(extents):
         south = extent.get("s")
 
         extent_description = extent.get("name")
-        punctuation = re.compile(r'^(.*?)([.,!?;:\'"()-]*)$')
         cleaned_text = punctuation.sub(r"\1", extent_description)
 
         # remove trailing whitespaces
@@ -2957,7 +2957,6 @@ def export_information_sources_to_csv(information_sources):
             if len(urls) > 0:
                 source_citation_online_resource = urls[0]
 
-        punctuation = re.compile(r'^(.*?)([.,!?;:\'"()-]*)$')
         cleaned_text = punctuation.sub(r"\1", description)
 
         if seriesName:
