@@ -129,10 +129,10 @@ const readRegistry = (grDataPath: string) => Effect.gen(function * (_) {
 });
 
 const ExtentData = S.Struct({
-  n: S.Number,
-  e: S.Number,
-  s: S.Number,
-  w: S.Number,
+  n: S.String.pipe(S.nonEmpty()),
+  e: S.String.pipe(S.nonEmpty()),
+  s: S.String.pipe(S.nonEmpty()),
+  w: S.String.pipe(S.nonEmpty()),
   name: S.String.pipe(S.nonEmpty()),
 });
 
