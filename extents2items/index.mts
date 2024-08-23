@@ -200,7 +200,7 @@ const generate = (opts: S.Schema.Type<typeof OptionSchema>) => Effect.gen(functi
 
     let extentRef: S.Schema.Type<typeof S.UUID>;
 
-    if (extent.name.trim().toLowerCase().replace('.', '') !== 'world') {
+    if (true) {
       extentRef = crypto.randomUUID();
 
       const extentPath = `/extent/${extentRef}.yaml`;
@@ -221,9 +221,9 @@ const generate = (opts: S.Schema.Type<typeof OptionSchema>) => Effect.gen(functi
       itemPayloads[extentPath] = extentItemData;
       proposalDraft.items[extentPath] = { type: 'addition' };
 
-    } else {
-      // Special case—we already added World extent before
-      extentRef = '538fb551-86ee-4938-96dd-710226645762';
+    // } else {
+    //   // Special case—we already added World extent before
+    //   extentRef = '538fb551-86ee-4938-96dd-710226645762';
     }
 
     const otherItems_ = otherItemIDs.map(grID => itemsWithExtents[grID]);
