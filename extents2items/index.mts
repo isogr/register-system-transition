@@ -67,7 +67,7 @@ export function parseOptions(
 interface ExtentMapEntry {
   name: string
   grIDs: [number] & number[]
-  coordsNESW: [number, number, number, number]
+  coordsNESW: [string, string, string, string]
 }
 function parseExtentLine(line: string): ExtentMapEntry {
   if (line.startsWith('[')) {
@@ -79,8 +79,8 @@ function parseExtentLine(line: string): ExtentMapEntry {
       }
       const grIDs = ids as [number] & number[]; // have at least one item
       const [e, n, w, s, ...nameParts] = rest.trim().split(/\s/);
-      const coordsNESW =
-        [n, e, s, w].map(c => parseInt(c!.trim(), 10)) as [number, number, number, number];
+      const coordsNESW = [n, e, s, w] as [string, string, string, string];
+      //[n, e, s, w].map(c => parseInt(c!.trim(), 10));
       const name = nameParts.join(' ');
       return {
         name,
@@ -129,10 +129,10 @@ const readRegistry = (grDataPath: string) => Effect.gen(function * (_) {
 });
 
 const ExtentData = S.Struct({
-  n: S.String.pipe(S.nonEmpty()),
-  e: S.String.pipe(S.nonEmpty()),
-  s: S.String.pipe(S.nonEmpty()),
-  w: S.String.pipe(S.nonEmpty()),
+  n: S.Union(S.Number, S.String.pipe(S.nonEmpty())),
+  e: S.Union(S.Number, S.String.pipe(S.nonEmpty())),
+  s: S.Union(S.Number, S.String.pipe(S.nonEmpty())),
+  w: S.Union(S.Number, S.String.pipe(S.nonEmpty())),
   name: S.String.pipe(S.nonEmpty()),
 });
 
@@ -195,7 +195,14 @@ const generate = (opts: S.Schema.Type<typeof OptionSchema>) => Effect.gen(functi
     if (!referenceItem) {
       throw new Error(`Unable to find item with GRID ${referenceItemID}`);
     }
-    const extent = referenceItem.itemData.data.extent;
+    const referenceExtent = referenceItem.itemData.data.extent;
+    const extent = {
+      ...referenceExtent,
+      n: referenceExtent.n.toString(),
+      e: referenceExtent.e.toString(),
+      s: referenceExtent.s.toString(),
+      w: referenceExtent.w.toString(),
+    };
     yield * _(Effect.log(`Creating extent ${JSON.stringify(extent)}`));
 
     let extentRef: S.Schema.Type<typeof S.UUID>;
