@@ -30,3 +30,5 @@ Requirements: Node 20, Yarn 4.2.
 Usage::
 
     yarn generate-extent-migration-proposal --registry-dir /path/to/gr/registry --out-json test.json --extent-map /path/to/extents.txt --stakeholder-username <git-username> --register-version <version>
+
+Register version is the UUID of latest accepted proposal.
