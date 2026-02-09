@@ -1,3 +1,5 @@
+NOTE: WIP, not yet operational.
+
 Given a path to GR directory
 (a directory with register.yaml, see https://github.com/isogr/registry/tree/master/gr-registry)
 and a path to an citation map file, outputs proposal (in importable JSON format)
