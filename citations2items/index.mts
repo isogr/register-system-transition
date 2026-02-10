@@ -64,20 +64,25 @@ export function parseOptions(
   });
 }
 
-interface ExtentMapEntry {
+type ItemID = number;
+type CitationIndex = number;
+type CitationInstance = `${ItemID}-${CitationIndex}`;
+
+interface CitationMapEntry {
   name: string
-  grIDs: [number] & number[]
+  citationRefs: [CitationInstance] & CitationInstance[]
   coordsNESW: [string, string, string, string]
 }
-function parseCitationLine(line: string): ExtentMapEntry {
+function parseCitationLine(line: string): CitationMapEntry {
   if (line.startsWith('[')) {
+
     const [idsRaw, rest] = line.slice(1).split(']');
     if (idsRaw && rest) {
-      const ids = idsRaw.split(',').map(f => parseInt(f.trim(), 10));
+      const ids = idsRaw.split(' ').map(id => id.split('-').map(f => parseInt(f.trim(), 10))) as [number, number][];
       if (ids.length < 1) {
-        throw new Error("Need at least one register item ID");
+        throw new Error("Need at least one citation instance");
       }
-      const grIDs = ids as [number] & number[]; // have at least one item
+      const citationRefs = ids.map(([itemID, citationIndex]) => `${itemID}-${citationIndex}`) as [CitationInstance] & CitationInstance[]; // have at least one item
       const [e, n, w, s, ...nameParts] = rest.trim().split(/\s/);
       const coordsNESW = [n, e, s, w] as [string, string, string, string];
       //[n, e, s, w].map(c => parseInt(c!.trim(), 10));
@@ -85,15 +90,16 @@ function parseCitationLine(line: string): ExtentMapEntry {
       return {
         name,
         coordsNESW,
-        grIDs,
+        citationRefs,
       };
     } else {
-      throw new Error("Invalid extent map entry");
+      throw new Error("Invalid citation map entry");
     }
+
   } else if (line.trim() !== '') {
-    throw new Error("Invalid extent map entry");
+    throw new Error("Invalid citation map entry");
   } else {
-    throw new Error("Empty extent map entry");
+    throw new Error("Empty citation map entry");
   }
 }
 
@@ -101,15 +107,15 @@ const readRegistry = (grDataPath: string) => Effect.gen(function * (_) {
   const fs = yield * _(FileSystem.FileSystem);
   const itemPaths = yield * _(readdirRecursive(grDataPath));
 
-  const out: Record<number, { itemData: S.Schema.Type<typeof GRItemWithExtent>, clsID: string }> =
+  const out: Record<number, { itemData: S.Schema.Type<typeof GRItemWithCitations>, clsID: string }> =
   yield * _(Effect.reduceEffect(
     itemPaths.
     filter(p => p.endsWith('.yaml') || p.endsWith('.yml')).
-    filter(p => p.indexOf('/') > 1 && !p.startsWith('extent') && !p.startsWith('proposals') && !p.startsWith('/')).
+    filter(p => p.indexOf('/') > 1 && !p.startsWith('information-source') && !p.startsWith('proposals') && !p.startsWith('/')).
     map(path => pipe(
       fs.readFileString(join(grDataPath, path)),
       Effect.map(parseYAML),
-      Effect.flatMap(S.decodeUnknown(S.Union(GRItemWithExtent), { onExcessProperty: "preserve" })),
+      Effect.flatMap(S.decodeUnknown(S.Union(GRItemWithCitations), { onExcessProperty: "preserve" })),
       // Catches Schema.parse failures. We do nothing with non register items.
       Effect.catchTag(
         "ParseError",
@@ -128,18 +134,14 @@ const readRegistry = (grDataPath: string) => Effect.gen(function * (_) {
   return out;
 });
 
-const ExtentData = S.Struct({
-  n: S.Union(S.Number, S.String.pipe(S.nonEmpty())),
-  e: S.Union(S.Number, S.String.pipe(S.nonEmpty())),
-  s: S.Union(S.Number, S.String.pipe(S.nonEmpty())),
-  w: S.Union(S.Number, S.String.pipe(S.nonEmpty())),
-  name: S.String.pipe(S.nonEmpty()),
+const InformationSourceData = S.Struct({
+  title: S.String.pipe(S.nonEmpty()),
 });
 
-const GRItemWithExtentData = S.Struct({
+const GRItemWithCitationsData = S.Struct({
   identifier: S.Number,
-  extent: ExtentData,
-  extentRef: S.optional(S.UUID),
+  informationSources: S.Array(InformationSourceData),
+  informationSourceRefs: S.Array(S.String.pipe(S.nonEmpty())),
 }).pipe(S.extend(S.Record(S.String, S.Unknown)));
 
 const ItemBase = S.Struct({
@@ -148,17 +150,17 @@ const ItemBase = S.Struct({
   status: S.Literal('submitted', 'valid', 'superseded', 'retired', 'invalid'),
 });
 
-const GRItemWithExtent = S.Struct({
-  data: GRItemWithExtentData,
+const GRItemWithCitations = S.Struct({
+  data: GRItemWithCitationsData,
 }).pipe(S.extend(ItemBase));
 
-const GRExtentItem = S.Struct({
+const GRInformationSourceItem = S.Struct({
   data: S.Struct({
     identifier: S.Number, // 0
     name: S.String.pipe(S.nonEmpty()), // description
-    extent: ExtentData,
     aliases: S.Array(S.String.pipe(S.nonEmpty())),
     informationSources: S.Array(S.Unknown), // empty
+    informationSourceRefs: S.Array(S.Unknown), // empty
     remarks: S.String, // empty
   }),
 }).pipe(S.extend(ItemBase));
@@ -167,7 +169,7 @@ const generate = (opts: S.Schema.Type<typeof OptionSchema>) => Effect.gen(functi
   const fs = yield * _(FileSystem.FileSystem);
   const itemsWithCitations = yield * _(readRegistry(opts.registryDir));
   yield * _(Effect.log(`Found ${Object.keys(itemsWithCitations).length} items with citations`));
-  const extentMapFileData = yield * _(fs.readFileString(opts.citationMap));
+  const citationMapFileData = yield * _(fs.readFileString(opts.citationMap));
 
   const proposalTS = new Date();
   const proposalTSString = proposalTS.toISOString().split('T')[0]!;
@@ -183,43 +185,47 @@ const generate = (opts: S.Schema.Type<typeof OptionSchema>) => Effect.gen(functi
     items: {} as Record<string, { type: 'addition' | 'clarification' }>,
   };
 
-  const itemPayloads: Record<string, S.Schema.Type<typeof GRItemWithExtent> | S.Schema.Type<typeof GRExtentItem>> = {
-  };
+  const itemPayloads:
+  Record<string, S.Schema.Type<typeof GRItemWithCitations> | S.Schema.Type<typeof GRInformationSourceItem>> =
+  {};
 
-  for (const lineRaw of extentMapFileData.split('\n').filter(l => l.trim() !== '')) {
+  for (const lineRaw of citationMapFileData.split('\n').filter(l => l.trim() !== '')) {
     const line = lineRaw.replaceAll('¬∞', '°');
     yield * _(Effect.log(`Parsing line ${line}`));
     const infoSourceEntry = parseCitationLine(line);
-    const [referenceItemID, ...otherItemIDs] = infoSourceEntry.grIDs;
-    const referenceItem = itemsWithExtents[referenceItemID];
+    // Reference reference woo
+    const [referenceRef, ...otherRefs] = infoSourceEntry.citationRefs;
+    const [referenceItemID, refPosition] = referenceRef.split('-').map(f => parseInt(f, 10)) as [number, number];
+    const referenceItem = itemsWithCitations[referenceItemID];
     if (!referenceItem) {
       throw new Error(`Unable to find item with GRID ${referenceItemID}`);
     }
-    const referenceExtent = referenceItem.itemData.data.extent;
-    const extent = {
-      ...referenceExtent,
+    const referenceCitation = referenceItem.itemData.data.informationSources[refPosition];
+    const informationSource = {
+      // TBD
+      ...referenceCitation,
       n: referenceExtent.n.toString(),
       e: referenceExtent.e.toString(),
       s: referenceExtent.s.toString(),
       w: referenceExtent.w.toString(),
     };
-    yield * _(Effect.log(`Creating extent ${JSON.stringify(extent)}`));
+    yield * _(Effect.log(`Creating information source ${JSON.stringify(informationSource)}`));
 
-    let extentRef: S.Schema.Type<typeof S.UUID>;
+    let infoSourceRef: S.Schema.Type<typeof S.UUID>;
 
     if (true) {
-      extentRef = crypto.randomUUID();
+      infoSourceRef = crypto.randomUUID();
 
-      const extentPath = `/extent/${extentRef}.yaml`;
-      const extentItemData: S.Schema.Type<typeof GRExtentItem> = {
-        id: extentRef,
+      const extentPath = `/extent/${infoSourceRef}.yaml`;
+      const extentItemData: S.Schema.Type<typeof GRInformationSourceItem> = {
+        id: infoSourceRef,
         dateAccepted: proposalTSString,
         status: 'valid',
         data: {
           identifier: 0,
-          name: extentEntry.name,
-          extent,
+          name: infoSourceEntry.name,
           informationSources: [],
+          informationSourceRefs: [],
           remarks: '',
           aliases: [],
         },
@@ -233,7 +239,7 @@ const generate = (opts: S.Schema.Type<typeof OptionSchema>) => Effect.gen(functi
     //   extentRef = '538fb551-86ee-4938-96dd-710226645762';
     }
 
-    const otherItems_ = otherItemIDs.map(grID => itemsWithExtents[grID]);
+    const otherItems_ = otherItemIDs.map(grID => itemsWithCitations[grID]);
     if (otherItems_.includes(undefined)) {
       throw new Error(`Unable to find item with GRID ${otherItemIDs[otherItems_.indexOf(undefined)]}`);
     }
