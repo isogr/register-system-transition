@@ -31,7 +31,7 @@ export const ReportingConfigSchema = S.Struct({
 export const options = {
   registryDir: Options.directory('registry-dir'),
   outJSON: Options.file('out-json'),
-  extentMap: Options.file('extent-map'),
+  citationMap: Options.file('citation-map'),
 
   stakeholderGitUsername: Options.file('stakeholder-username'),
   registerVersion: Options.file('register-version'),
@@ -40,7 +40,7 @@ export const options = {
 export const OptionSchema = S.Struct({
   registryDir: S.String.pipe(S.nonEmpty()),
   outJSON: S.String.pipe(S.nonEmpty()),
-  extentMap: S.String.pipe(S.nonEmpty()),
+  citationMap: S.String.pipe(S.nonEmpty()),
 
   stakeholderGitUsername: S.String.pipe(S.nonEmpty()),
   registerVersion: S.String.pipe(S.nonEmpty()),
@@ -51,14 +51,14 @@ export function parseOptions(
   const {
     registryDir,
     outJSON,
-    extentMap,
+    citationMap,
     stakeholderGitUsername,
     registerVersion,
   } = rawOpts;
   return S.decodeUnknownSync(OptionSchema)({
     registryDir,
     outJSON,
-    extentMap,
+    citationMap,
     stakeholderGitUsername,
     registerVersion,
   });
@@ -69,7 +69,7 @@ interface ExtentMapEntry {
   grIDs: [number] & number[]
   coordsNESW: [string, string, string, string]
 }
-function parseExtentLine(line: string): ExtentMapEntry {
+function parseCitationLine(line: string): ExtentMapEntry {
   if (line.startsWith('[')) {
     const [idsRaw, rest] = line.slice(1).split(']');
     if (idsRaw && rest) {
@@ -165,9 +165,9 @@ const GRExtentItem = S.Struct({
 
 const generate = (opts: S.Schema.Type<typeof OptionSchema>) => Effect.gen(function * (_) {
   const fs = yield * _(FileSystem.FileSystem);
-  const itemsWithExtents = yield * _(readRegistry(opts.registryDir));
-  yield * _(Effect.log(`Found ${Object.keys(itemsWithExtents).length} items with extents`));
-  const extentMapFileData = yield * _(fs.readFileString(opts.extentMap));
+  const itemsWithCitations = yield * _(readRegistry(opts.registryDir));
+  yield * _(Effect.log(`Found ${Object.keys(itemsWithCitations).length} items with citations`));
+  const extentMapFileData = yield * _(fs.readFileString(opts.citationMap));
 
   const proposalTS = new Date();
   const proposalTSString = proposalTS.toISOString().split('T')[0]!;
@@ -189,8 +189,8 @@ const generate = (opts: S.Schema.Type<typeof OptionSchema>) => Effect.gen(functi
   for (const lineRaw of extentMapFileData.split('\n').filter(l => l.trim() !== '')) {
     const line = lineRaw.replaceAll('¬∞', '°');
     yield * _(Effect.log(`Parsing line ${line}`));
-    const extentEntry = parseExtentLine(line);
-    const [referenceItemID, ...otherItemIDs] = extentEntry.grIDs;
+    const infoSourceEntry = parseCitationLine(line);
+    const [referenceItemID, ...otherItemIDs] = infoSourceEntry.grIDs;
     const referenceItem = itemsWithExtents[referenceItemID];
     if (!referenceItem) {
       throw new Error(`Unable to find item with GRID ${referenceItemID}`);
