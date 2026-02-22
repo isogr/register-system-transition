@@ -176,7 +176,7 @@ const generate = (opts: S.Schema.Type<typeof OptionSchema>) => Effect.gen(functi
 
   const proposalDraft = {
     id: crypto.randomUUID(),
-    justification: "Migrating extents",
+    justification: "Migrating information sources",
     timeStarted: proposalTS,
     timeEdited: proposalTS,
     state: 'draft',
@@ -204,10 +204,7 @@ const generate = (opts: S.Schema.Type<typeof OptionSchema>) => Effect.gen(functi
     const informationSource = {
       // TBD
       ...referenceCitation,
-      n: referenceExtent.n.toString(),
-      e: referenceExtent.e.toString(),
-      s: referenceExtent.s.toString(),
-      w: referenceExtent.w.toString(),
+      // ...citation data
     };
     yield * _(Effect.log(`Creating information source ${JSON.stringify(informationSource)}`));
 
@@ -216,8 +213,8 @@ const generate = (opts: S.Schema.Type<typeof OptionSchema>) => Effect.gen(functi
     if (true) {
       infoSourceRef = crypto.randomUUID();
 
-      const extentPath = `/extent/${infoSourceRef}.yaml`;
-      const extentItemData: S.Schema.Type<typeof GRInformationSourceItem> = {
+      const itemPath = `/information-source/${infoSourceRef}.yaml`;
+      const itemData: S.Schema.Type<typeof GRInformationSourceItem> = {
         id: infoSourceRef,
         dateAccepted: proposalTSString,
         status: 'valid',
@@ -231,8 +228,8 @@ const generate = (opts: S.Schema.Type<typeof OptionSchema>) => Effect.gen(functi
         },
       } as const;
 
-      itemPayloads[extentPath] = extentItemData;
-      proposalDraft.items[extentPath] = { type: 'addition' };
+      itemPayloads[itemPath] = itemData;
+      proposalDraft.items[itemPath] = { type: 'addition' };
 
     // } else {
     //   // Special case—we already added World extent before
