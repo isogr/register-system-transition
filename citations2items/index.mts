@@ -230,10 +230,6 @@ const generate = (opts: S.Schema.Type<typeof OptionSchema>) => Effect.gen(functi
 
       itemPayloads[itemPath] = itemData;
       proposalDraft.items[itemPath] = { type: 'addition' };
-
-    // } else {
-    //   // Special case—we already added World extent before
-    //   extentRef = '538fb551-86ee-4938-96dd-710226645762';
     }
 
     const otherItems_ = otherItemIDs.map(grID => itemsWithCitations[grID]);
@@ -248,7 +244,7 @@ const generate = (opts: S.Schema.Type<typeof OptionSchema>) => Effect.gen(functi
         ...item.itemData,
         data: {
           ...item.itemData.data,
-          extentRef,
+          infoSourcRef,
         },
       };
       proposalDraft.items[itemPath] = { type: 'clarification' };
@@ -277,7 +273,7 @@ const generateCommand = Command.
     ),
   ).
   pipe(
-    Command.withDescription('generate proposal that migrates extents'),
+    Command.withDescription('generate proposal that migrates information sources'),
   );
 
 
@@ -285,7 +281,7 @@ const main = generateCommand.
   pipe(
     //Command.withSubcommands([watch]),
     Command.run({
-      name: "Extent migration proposal generator",
+      name: "Information source migration proposal generator",
       version: "N/A",
     }),
   );
