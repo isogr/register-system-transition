@@ -731,6 +731,7 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [
 }, {
   key: '_citingItems',
   name: "Citing items",
+  sortable: false,
   width: '10%',
   renderCell: ({ row }) => {
     const { getRow } =
@@ -769,6 +770,7 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [
   name: "Verdict",
   width: 140,
   resizable: false,
+  sortable: false,
   cellClass: classNames.verdictCell,
   renderCell: ({ row }) => {
     const { highlightRows } =
