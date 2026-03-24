@@ -50,9 +50,9 @@
 
     .diffActions {
       display: flex;
-      flex-flow: row nowrap;
-      justify-content: space-around;
+      flex-flow: column nowrap;
       align-items: center;
+      gap: 4px;
       padding: .5em;
 
       button[aria-selected=true] {

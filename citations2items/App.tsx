@@ -372,47 +372,44 @@ const Differ: React.FC<{
     return item;
   }), [_items]);
 
-  if (_items.length !== 2) {
-    return <div className={classNames.differEmpty}>
-      To de-duplicate further, select two citations.
-    </div>;
-  }
+  //if (_items.length !== 2) {
+  //  return <div className={classNames.differEmpty}>
+  //    To de-duplicate further, select two citations.
+  //  </div>;
+  //}
 
-  const leftPreferredForThisItem =
-    _items[1]!._verdict[0] === 'DEDUPED'
-    && _items[1]!._verdict[1].includes(_items[0]!._ephemeralID);
-  const leftPreferredForAnyItem =
-    _items[0]!._verdict[0] === 'PREFERRED';
-  const leftDeduped =
-    _items[0]!._verdict[0] === 'DEDUPED';
+  let actions: React.JSX.Element;
 
-  const rightPreferredForThisItem =
-    _items[0]!._verdict[0] === 'DEDUPED'
-    && _items[0]!._verdict[1].includes(_items[1]!._ephemeralID);
-  const rightPreferredForAnyItem =
-    _items[1]!._verdict[0] === 'PREFERRED';
-  const rightDeduped =
-    _items[1]!._verdict[0] === 'DEDUPED';
+  if (items.length === 2) {
+    const leftPreferredForThisItem =
+      _items[1]!._verdict[0] === 'DEDUPED'
+      && _items[1]!._verdict[1].includes(_items[0]!._ephemeralID);
+    const leftPreferredForAnyItem =
+      _items[0]!._verdict[0] === 'PREFERRED';
+    const leftDeduped =
+      _items[0]!._verdict[0] === 'DEDUPED';
 
-  const canChooseLeft =
-    !leftPreferredForThisItem
-    && !rightPreferredForAnyItem
-    && !leftDeduped
-    && !rightDeduped;
-  const canChooseRight =
-    !rightPreferredForThisItem
-    && !leftPreferredForAnyItem
-    && !rightDeduped
-    && !leftDeduped;
+    const rightPreferredForThisItem =
+      _items[0]!._verdict[0] === 'DEDUPED'
+      && _items[0]!._verdict[1].includes(_items[1]!._ephemeralID);
+    const rightPreferredForAnyItem =
+      _items[1]!._verdict[0] === 'PREFERRED';
+    const rightDeduped =
+      _items[1]!._verdict[0] === 'DEDUPED';
 
-  return (
-    <div className={classNames.differ}>
-      <json-diff-viewer
-        className={classNames.diffViewer}
-        left={items[0] ?? EMPTY_OBJECT}
-        right={items[1] ?? EMPTY_OBJECT}
-      />
-      <div className={classNames.diffActions}>
+    const canChooseLeft =
+      !leftPreferredForThisItem
+      && !rightPreferredForAnyItem
+      && !leftDeduped
+      && !rightDeduped;
+    const canChooseRight =
+      !rightPreferredForThisItem
+      && !leftPreferredForAnyItem
+      && !rightDeduped
+      && !leftDeduped;
+
+    actions = (
+      <>
         <button
             aria-selected={rightPreferredForThisItem}
             disabled={!canChooseRight}
@@ -424,12 +421,7 @@ const Differ: React.FC<{
                   ? "Item on the left was already deduplicated."
                   : undefined}
             onClick={() => onDeduplicate(_items[0]!._ephemeralID, _items[1]!._ephemeralID)}>
-          Dedupe left & prefer right →
-        </button>
-        <button
-            disabled={!leftPreferredForThisItem && !rightPreferredForThisItem}
-            onClick={() => onResetDecision(_items[1]!._ephemeralID, _items[0]!._ephemeralID)}>
-          Reset decision
+          ❌ Dedupe left, prefer right ➡️
         </button>
         <button
             aria-selected={leftPreferredForThisItem}
@@ -442,8 +434,30 @@ const Differ: React.FC<{
                   ? "Item on the right was already deduplicated."
                   : undefined}
             onClick={() => onDeduplicate(_items[1]!._ephemeralID, _items[0]!._ephemeralID)}>
-          ← Dedupe right & prefer left
+          ⬅️ Prefer left, dedupe right ❌
         </button>
+        <button
+            disabled={!leftPreferredForThisItem && !rightPreferredForThisItem}
+            onClick={() => onResetDecision(_items[1]!._ephemeralID, _items[0]!._ephemeralID)}>
+          Reset decision
+        </button>
+      </>
+    );
+  } else {
+    actions = <>To deduplicate further, select two citations.</>;
+  }
+
+  return (
+    <div className={classNames.differ}>
+      {items.length === 2
+        ? <json-diff-viewer
+            className={classNames.diffViewer}
+            left={items[0] ?? EMPTY_OBJECT}
+            right={items[1] ?? EMPTY_OBJECT}
+          />
+        : null}
+      <div className={classNames.diffActions}>
+        {actions}
       </div>
     </div>
   );
@@ -719,22 +733,45 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [
   name: "Citing items",
   width: '10%',
   renderCell: ({ row }) => {
+    const { getRow } =
+    useContext<GridContextType<CitationWithReferencingItems>>
+    (GridContext as any);
+
     const { getItem } = useContext(RegistryContext);
-    const citingItems = Object.entries(row._citingItems).map(([grID, citIdx]) =>
-      `#${grID} (${getItem(parseInt(grID, 10))?.data.name ?? 'item data not found'}) as citation no. ${citIdx}`
-    ).join('\n— ')
-    return <span title={`Cited by:\n— ${citingItems}`}>
+    const citingItemsTitle = Object.entries(row._citingItems).map(([grID, citIdx]) =>
+      `#${grID} (${getItem(parseInt(grID, 10))?.data.name ?? 'item data not found'})`
+      //`#${grID} (${getItem(parseInt(grID, 10))?.data.name ?? 'item data not found'}) as citation no. ${citIdx + 1}`
+    ).join('\n— ');
+
+    // after deduplication:
+    const additionalCitingItems = row._verdict[0] === 'PREFERRED'
+      ? row._verdict[1]!.
+          flatMap(id => Object.keys(getRow(r => r._ephemeralID === id)?._citingItems ?? {}))
+      : [];
+    const additionalCitingItemsTitle = additionalCitingItems
+      ? additionalCitingItems.map((grID) =>
+          `#${grID} (${getItem(parseInt(grID, 10))?.data.name ?? 'item data not found'})`
+        ).join('\n— ')
+      : '';
+    const deduplicationSuffix = additionalCitingItemsTitle
+      ? `\nAfter deduplication, also by:\n— ${additionalCitingItemsTitle}`
+      : row._verdict[0] === 'DEDUPED'
+        ? '\n(before deduplication; click “show preferred” for what these items will be citing after)'
+        : '';
+
+    return <span title={`Cited by:\n— ${citingItemsTitle}${deduplicationSuffix}`}>
       {Object.keys(row._citingItems).join(', ')}
+      {additionalCitingItems.length > 0 ? ` + ${additionalCitingItems}` : ''}
     </span>
   },
 }, {
   key: '_verdict',
   name: "Verdict",
-  width: 200,
+  width: 140,
   resizable: false,
   cellClass: classNames.verdictCell,
   renderCell: ({ row }) => {
-    const { highlightRows, getRow } =
+    const { highlightRows } =
     useContext<GridContextType<CitationWithReferencingItems>>
     (GridContext as any);
     switch (row._verdict[0]) {
@@ -744,11 +781,10 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [
           {row._verdict[0] === 'PREFERRED'
             ? <span className={classNames.verdictSummary}>
                 ✅
-                ← {row._verdict[1]!.
-                flatMap(id => Object.keys(getRow(r => r._ephemeralID === id)?._citingItems ?? {})).
-                join(', ')}
               </span>
-            : <span className={classNames.verdictSummary}>🟠 →</span>}
+            : <span className={classNames.verdictSummary}>
+                🟠
+              </span>}
           &nbsp;
           <button
               className={classNames.verdictButton}
