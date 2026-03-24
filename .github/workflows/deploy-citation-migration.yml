@@ -26,7 +26,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Build
+      - name: Enable corepack
         run: cd citations2items && corepack enable
 
       - name: Build
