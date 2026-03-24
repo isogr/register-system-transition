@@ -289,11 +289,13 @@ function ({ infoSources, searchQ, onDedupe, onUndoDedupe, className }) {
       return [...infoSources].
       filter(filterFunc).
       sort((s1, s2) => {
-        function getValString(val: string | string[] | null | undefined | unknown): string {
+        function getValString(val: number | string | string[] | null | undefined | unknown): string {
           if (typeof val === 'string') {
             return val;
-          } else if (val && (val as string[]).length) {
-            return (val as string[]).map(getValString).sort(EN_COLLATOR.compare).join(', ');
+          } else if (typeof val === 'number') {
+            return `${val}`;
+          } else if (val && (val as any[]).length) {
+            return (val as any[]).map(getValString).join(', ');
           } else if (val === null) {
             return '|';
           } else if (val === undefined) {
@@ -770,7 +772,6 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [
   name: "Verdict",
   width: 140,
   resizable: false,
-  sortable: false,
   cellClass: classNames.verdictCell,
   renderCell: ({ row }) => {
     const { highlightRows } =
