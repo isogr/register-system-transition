@@ -706,6 +706,7 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [
   key: '_verdict',
   name: "Verdict",
   width: 200,
+  resizable: false,
   cellClass: classNames.verdictCell,
   renderCell: ({ row }) => {
     const { highlightRows, getRow } =
@@ -735,10 +736,6 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [
     }
   },
 }, {
-  key: 'alternateTitles',
-  name: "Alternate titles",
-  renderCell: ({ row }) => <RenderCell val={row.alternateTitles} />,
-}, {
   key: 'author',
   name: "Author",
   renderCell: ({ row }) => <RenderCell val={row.author} />,
@@ -759,6 +756,7 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [
 }, {
   key: 'seriesIssueID',
   name: "Series issue ID",
+  width: 80,
   renderCell: ({ row }) => <RenderCell val={row.seriesIssueID} />,
 }, {
   key: 'seriesName',
@@ -767,16 +765,18 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [
   width: '20%',
 }, {
   key: 'seriesPage',
+  width: 80,
   name: "Series page",
   renderCell: ({ row }) => <RenderCell val={row.seriesPage} />,
-  width: '20%',
 }, {
   key: 'doi',
   name: "DOI",
+  width: 100,
   renderCell: ({ row }) => <RenderCell val={row.doi} />,
 }, {
   key: 'uri',
   name: "URI",
+  width: 100,
   renderCell: ({ row }) => <RenderCell val={row.uri} />,
 }, {
   key: 'edition',
@@ -791,6 +791,10 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [
   name: "Other details",
   renderCell: ({ row }) => <RenderCell val={row.otherDetails} />,
   width: '20%',
+}, {
+  key: 'alternateTitles',
+  name: "Alternate titles",
+  renderCell: ({ row }) => <RenderCell val={row.alternateTitles} />,
 }, {
   key: '_ephemeralID',
   name: "Ephemeral ID",
