@@ -289,16 +289,27 @@ function ({ infoSources, searchQ, onDedupe, onUndoDedupe, className }) {
       return [...infoSources].
       filter(filterFunc).
       sort((s1, s2) => {
+        function getValString(val: string | string[] | null | undefined | unknown): string {
+          if (typeof val === 'string') {
+            return val;
+          } else if (val && (val as string[]).length) {
+            return (val as string[]).map(getValString).sort(EN_COLLATOR.compare).join(', ');
+          } else if (!val) {
+            return '|';
+          } else {
+            return `${val}`;
+          }
+        }
         const col = state.sortColumns![0]!;
         const compareArgs: [string, string] =
           col.direction === 'ASC'
             ? [
-                `${s1[col.columnKey as keyof CitationWithReferencingItems]}`,
-                `${s2[col.columnKey as keyof CitationWithReferencingItems]}`,
+                getValString(s1[col.columnKey]),
+                getValString(s2[col.columnKey]),
               ]
             : [
-                `${s2[col.columnKey as keyof CitationWithReferencingItems]}`,
-                `${s1[col.columnKey as keyof CitationWithReferencingItems]}`,
+                getValString(s2[col.columnKey]),
+                getValString(s1[col.columnKey]),
               ];
         return EN_COLLATOR.compare(...compareArgs);
       });
