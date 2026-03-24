@@ -15,3 +15,27 @@ body {
   color: light-dark(black, white);
   background-color: light-dark(white, black);
 }
+
+json-diff-viewer {
+  max-height: 30vh;
+
+  /* Diff colors */
+  --add: #22c55e; /* Added items */
+  --rem: #ef4444; /* Removed items */
+  --mod: #eab308; /* Modified items */
+
+  --bg:   light-dark(#fafafa, #18181b); /* Main background */
+  --bg2:  light-dark(#ffffff, #27272a); /* Panel background */
+
+  --bdr:  light-dark(#e4e4e7, #3f3f46); /* Border color */
+  --txt:  light-dark(#18181b, #fafafa); /* Primary text */
+  --dim:  light-dark(#71717a, #a1a1aa); /* Dimmed/secondary text */
+  --key:  light-dark(#0284c7, #38bdf8); /* Object keys */
+  --str:  light-dark(#7c3aed, #a78bfa); /* String values */
+  --num:  light-dark(#059669, #34d399); /* Number values */
+  --bool: #fb923c; /* Boolean values */
+  --nul:  #f472b6; /* Null values */
+  --br:   #71717a; /* Brackets and braces */
+
+  --slider: var(--bdr); /* Slider toggle active color */
+}
