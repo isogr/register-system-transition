@@ -27,10 +27,13 @@ export interface GridState<T> {
 }
 
 
-export const ScrollToCellContext = createContext<{
+export interface GridContextType<T> {
   highlightRows: (rID: string[]) => void
-}>({
+  getRow: (test: (r: T) => boolean) => T | undefined
+}
+export const GridContext = createContext<GridContextType<unknown>>({
   highlightRows: () => void 0,
+  getRow: () => undefined,
 });
 
 
@@ -77,6 +80,17 @@ export function Grid<T extends Record<string, unknown>>({
     return out;
   }, [rows]);
 
+  //useEffect(() => {
+  //  if (state.selectedRows.length > 0) {
+  //    if (state.selectedRows.find(rID => !rows.find(r => keyGetter(r) === rID))) {
+  //      onStateChange?.({
+  //        ...state,
+  //        selectedRows: state.selectedRows.filter
+  //      });
+  //    }
+  //  }
+  //}, [state]);
+
   function highlightRows(rIDs: string[]) {
     if (rIDs.length < 1) {
       return;
@@ -93,15 +107,15 @@ export function Grid<T extends Record<string, unknown>>({
     }
   }
 
-  useEffect(() => {
-    console.debug(state.recentlyScrolledTo);
-  }, [state.recentlyScrolledTo]);
+  function getRow(check: (r: T) => boolean): T | undefined {
+    return rows.find(r => check(r));
+  }
 
   //const defaultGroupBy: TreeDataGridProps<T>['groupBy'] = useMemo(() => {
   //  return [];
   //}, []);
 
-  return <ScrollToCellContext.Provider value={{ highlightRows }}>
+  return <GridContext.Provider value={{ highlightRows, getRow }}>
     <TreeDataGrid<T>
       ref={ref}
       groupBy={state.groupBy}
@@ -112,7 +126,10 @@ export function Grid<T extends Record<string, unknown>>({
       //    : undefined
       //  : undefined
       //}), [state.recentlyScrolledTo])}
-      columnWidths={useMemo(() => new Map(Object.entries(state.columnWidths)), [state.columnWidths])}
+      columnWidths={useMemo(() =>
+        new Map(Object.entries(state.columnWidths)),
+        [state.columnWidths],
+      )}
       onColumnWidthsChange={(columnWidths) => {
         onStateChange?.({
           ...state,
@@ -150,5 +167,5 @@ export function Grid<T extends Record<string, unknown>>({
       }}
       {...props}
     />
-  </ScrollToCellContext.Provider>
+  </GridContext.Provider>
 };

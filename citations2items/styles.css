@@ -8,8 +8,8 @@ body {
   inset: 0;
   display: grid;
   grid-template:
-    "toolbar" 2em
-    "sources" calc(100% - 2em)
+    "toolbar" 4em
+    "sources" calc(100% - 4em)
     / 1fr;
   color-scheme: light dark;
   color: light-dark(black, white);

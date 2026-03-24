@@ -1,4 +1,4 @@
-FROM node:20.11.0
+FROM node:22.22.0
 ARG project_path
 RUN corepack enable
 RUN corepack prepare yarn@stable --activate

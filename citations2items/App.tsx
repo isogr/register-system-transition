@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
 import {
   fileSave,
+  fileOpen,
   directoryOpen,
 } from 'browser-fs-access';
 import {
@@ -23,7 +24,8 @@ import classNames from './App.module.css';
 
 import {
   Grid,
-  ScrollToCellContext,
+  GridContext,
+  type GridContextType,
   type GridState,
 } from './Grid';
 
@@ -85,6 +87,21 @@ function () {
   const [annotations, updateAnnotations] =
     useDB<Annotations>('existing-item-annotations', INITIAL_ANNOTATIONS);
 
+  const handleUpdateAnnotations = useCallback((newA: Annotations) => {
+    const newAnnotations = { ...newA };
+    for (const [key, ids] of Object.entries(newAnnotations.deduped)) {
+      if (ids && ids.length < 1) {
+        newAnnotations.deduped[key] = undefined;
+      }
+    }
+    for (const [key, ids] of Object.entries(newAnnotations.preferred)) {
+      if (ids && ids.length < 1) {
+        newAnnotations.preferred[key] = undefined;
+      }
+    }
+    updateAnnotations?.(newAnnotations);
+  }, [updateAnnotations]);
+
   const [searchQ, onSearchQChange] =
     useDB<string>('search-q', '');
 
@@ -95,6 +112,32 @@ function () {
     window.location.reload();
   }, []);
 
+  const handleDownloadWIP = useCallback(() => {
+    const data = {
+      registry: JSON.parse(localStorage.getItem('registry') ?? ''),
+      annotations: JSON.parse(localStorage.getItem('existing-item-annotations') ?? ''),
+    };
+    const dataSerialized = JSON.stringify(data, null, 4);
+    const encoder = new TextEncoder();
+    const dataBytes = new Blob([encoder.encode(dataSerialized)]);
+    fileSave(dataBytes, { fileName: 'isogr-migration-wip.json' });
+  }, []);
+
+  const handleLoadWIP = useCallback(() => {
+    (async () => {
+      const rawData = await fileOpen();
+      const decoder = new TextDecoder();
+      const dataDecoded = decoder.decode(await rawData.bytes());
+      const dataDeserialized = JSON.parse(dataDecoded);
+      const { registry, annotations } = dataDeserialized;
+      storeRegistry?.(registry);
+      updateAnnotations?.(annotations);
+    })();
+  }, [storeRegistry, updateAnnotations]);
+
+  const handleExportProposal = useCallback(() => {
+  }, []);
+
   return (
     <>
       {infoSources.length > 0
@@ -103,18 +146,22 @@ function () {
             infoSources={infoSources}
             onReset={handleReset}
             searchQ={searchQ}
+            onDownloadWIP={handleDownloadWIP}
+            onLoadWIP={handleLoadWIP}
+            onExportProposal={handleExportProposal}
             onSearchQChange={onSearchQChange ?? (() => void 0)}
           />
         : storeRegistry
           ? <LoadPrompt
               onLoad={storeRegistry}
+              onLoadWIP={handleLoadWIP}
               className={classNames.loadPrompt}
             />
           : <>Loading…</>}
       <RegistryContext.Provider value={{ getItem }}>
         <ExistingInformationSources
           onDedupe={useMemo(() => function (deduped, preferred) {
-            updateAnnotations?.({
+            handleUpdateAnnotations({
               ...annotations,
               deduped: {
                 ...annotations.deduped,
@@ -133,7 +180,23 @@ function () {
                 [deduped]: undefined,
               },
             })
-          }, [updateAnnotations, annotations])}
+          }, [handleUpdateAnnotations, annotations])}
+          onUndoDedupe={useMemo(() => function (item1, item2) {
+            handleUpdateAnnotations({
+              ...annotations,
+              deduped: {
+                ...annotations.deduped,
+                [item1]: (annotations.deduped[item1] ?? []).filter(i => i !== item2),
+                [item2]: (annotations.deduped[item2] ?? []).filter(i => i !== item1),
+              },
+              preferred: {
+                ...annotations.preferred,
+                [item1]: (annotations.preferred[item1] ?? []).filter(i => i !== item2),
+                [item2]: (annotations.preferred[item2] ?? []).filter(i => i !== item1),
+              },
+            })
+          }, [handleUpdateAnnotations, annotations])}
+          searchQ={searchQ}
           infoSources={infoSources}
         />
       </RegistryContext.Provider>
@@ -149,24 +212,40 @@ const Toolbar: React.FC<{
   onReset: () => void
   searchQ: string,
   onSearchQChange: (q: string) => void
+  onDownloadWIP: () => void
+  onLoadWIP: () => void
+  onExportProposal: () => void
   className?: string | undefined
 }> =
-function ({ registry, infoSources, onReset, searchQ, onSearchQChange, className }) {
+function ({ registry, infoSources, onReset, searchQ, onSearchQChange, onDownloadWIP, onLoadWIP, onExportProposal, className }) {
   const totalItems = useMemo((() =>
     Object.values(registry.items).flatMap(items => Object.values(items)).length
   ), [registry.items]);
   return <div className={classNames.toolbar}>
     {infoSources.length < 1
-      ? <>Please select the root directory of GR repository first</>
+      ? <>
+          Loading…
+        </>
       : <>
-          <div className={classNames.actions}>
-          </div>
           <div className={classNames.stats}>
             <div>Register version (latest proposal) {registry.version}</div>
             <div>{totalItems} items</div>
             <div>{infoSources.length} de-duplicated citations</div>
             <button onClick={onReset}>Restart from scratch</button>
-            <input value={searchQ} onChange={evt => onSearchQChange(evt.currentTarget.value)} />
+          </div>
+          <div className={classNames.actions}>
+            <div>
+              <input placeholder="exact string search…" value={searchQ} onChange={evt => onSearchQChange(evt.currentTarget.value)} />
+              <button onClick={() => onSearchQChange('')}>
+                clear
+              </button>
+            </div>
+            <button onClick={onDownloadWIP}>
+              download work in progress
+            </button>
+            <button disabled onClick={onExportProposal}>
+              export proposal
+            </button>
           </div>
         </>}
   </div>
@@ -187,17 +266,29 @@ const ExistingInformationSources:
 React.FC<{
   infoSources: CitationWithReferencingItems[]
   onDedupe: (dedupe: CitationKey, prefer: CitationKey) => void
+  onUndoDedupe: (item1: CitationKey, item2: CitationKey) => void
+  searchQ: string
   className?: string | undefined
 }> =
-function ({ infoSources, onDedupe, className }) {
+function ({ infoSources, searchQ, onDedupe, onUndoDedupe, className }) {
 
   const [state, storeState] =
     useDB<GridState<CitationWithReferencingItems>>
     ('existing-item-view-state', INITIAL_GRID_STATE);
 
   const rows = useMemo(() => {
+    const filterFunc = searchQ.trim() !== ''
+      ? ((c: CitationWithReferencingItems) =>
+          Object.entries(c).
+          filter(([k, ]) => !k.startsWith('_')).
+          map(([, v]) => v).
+          find(v => (JSON.stringify(v) ?? 'undefined').includes(searchQ))
+        )
+      : () => true;
     if (state.sortColumns && state.sortColumns.length > 0) {
-      return [...infoSources].sort((s1, s2) => {
+      return [...infoSources].
+      filter(filterFunc).
+      sort((s1, s2) => {
         const col = state.sortColumns![0]!;
         const compareArgs: [string, string] =
           col.direction === 'ASC'
@@ -212,9 +303,9 @@ function ({ infoSources, onDedupe, className }) {
         return EN_COLLATOR.compare(...compareArgs);
       });
     } else {
-      return infoSources;
+      return infoSources.filter(filterFunc);
     }
-  }, [infoSources, state.sortColumns]);
+  }, [infoSources, searchQ, state.sortColumns]);
 
   return <div className={classNames.sources}>
     <Grid<CitationWithReferencingItems>
@@ -246,6 +337,7 @@ function ({ infoSources, onDedupe, className }) {
           , [rows, state.selectedRows]
            )
         }
+        onResetDecision={onUndoDedupe}
         onDeduplicate={onDedupe}
       />
     </div>
@@ -256,8 +348,9 @@ function ({ infoSources, onDedupe, className }) {
 const Differ: React.FC<{
   items: CitationWithReferencingItems[]
   onDeduplicate: (dedupe: string, inFavorOf: string) => void
+  onResetDecision: (item1: string, item2: string) => void
   className?: string | undefined
-}> = function ({ items: _items, onDeduplicate, className }) {
+}> = function ({ items: _items, onDeduplicate, onResetDecision, className }) {
   const items: Citation[] = useMemo(() => _items.map(i => {
     const item = { ...i };
     delete (item as any)._ephemeralID;
@@ -272,12 +365,24 @@ const Differ: React.FC<{
     </div>;
   }
 
-  const leftPreferred =
+  const leftPreferredForThisItem =
     _items[1]!._verdict[0] === 'DEDUPED'
     && _items[1]!._verdict[1].includes(_items[0]!._ephemeralID);
-  const rightPreferred =
+  const leftPreferredForAnyItem =
+    _items[0]!._verdict[0] === 'PREFERRED';
+  const leftDeduped =
+    _items[0]!._verdict[0] === 'DEDUPED';
+
+  const rightPreferredForThisItem =
     _items[0]!._verdict[0] === 'DEDUPED'
     && _items[0]!._verdict[1].includes(_items[1]!._ephemeralID);
+  const rightPreferredForAnyItem =
+    _items[1]!._verdict[0] === 'PREFERRED';
+  const rightDeduped =
+    _items[1]!._verdict[0] === 'DEDUPED';
+
+  const canChooseLeft = !leftPreferredForThisItem && !rightPreferredForAnyItem && !leftDeduped;
+  const canChooseRight = !rightPreferredForThisItem && !leftPreferredForAnyItem && !rightDeduped;
 
   return (
     <div className={classNames.differ}>
@@ -288,16 +393,31 @@ const Differ: React.FC<{
       />
       <div className={classNames.diffActions}>
         <button
-            aria-selected={leftPreferred}
-            disabled={leftPreferred}
-            onClick={() => onDeduplicate(_items[1]!._ephemeralID, _items[0]!._ephemeralID)}>
-          Prefer left
+            aria-selected={rightPreferredForThisItem}
+            disabled={!canChooseRight}
+            title={leftPreferredForAnyItem
+              ? "Other items were deduplicated in favour of the left item, so it cannot be deduplicated"
+              : rightDeduped
+                ? "Item on the right was deduplicated, so it cannot be preferred."
+                : undefined}
+            onClick={() => onDeduplicate(_items[0]!._ephemeralID, _items[1]!._ephemeralID)}>
+          Dedupe left & prefer right →
         </button>
         <button
-            aria-selected={rightPreferred}
-            disabled={rightPreferred}
-            onClick={() => onDeduplicate(_items[0]!._ephemeralID, _items[1]!._ephemeralID)}>
-          Prefer right
+            disabled={!leftPreferredForThisItem && !rightPreferredForThisItem}
+            onClick={() => onResetDecision(_items[1]!._ephemeralID, _items[0]!._ephemeralID)}>
+          Reset decision
+        </button>
+        <button
+            aria-selected={leftPreferredForThisItem}
+            disabled={!canChooseLeft}
+            title={rightPreferredForAnyItem
+              ? "Other items were deduplicated in favour of the right item, so it cannot be deduplicated"
+              : leftDeduped
+                ? "Item on the left was deduplicated, so it cannot be preferred."
+                : undefined}
+            onClick={() => onDeduplicate(_items[1]!._ephemeralID, _items[0]!._ephemeralID)}>
+          ← Dedupe right & prefer left
         </button>
       </div>
     </div>
@@ -335,9 +455,10 @@ function () {
 
 const LoadPrompt: React.FC<{
   onLoad: (r: Registry) => void
+  onLoadWIP: () => void
   className?: string | undefined
 }> =
-function ({ onLoad, className }) {
+function ({ onLoad, onLoadWIP, className }) {
   const handleLoad = useCallback(async () => {
     const results: File[] = await directoryOpen({
       recursive: true,
@@ -405,9 +526,14 @@ function ({ onLoad, className }) {
     onLoad({ items, version: latestVersion?.toString() ?? '' });
   }, []);
   return (
-    <button onClick={handleLoad} className={className}>
-      Load GR repository root
-    </button>
+    <div className={className}>
+      <button onClick={handleLoad}>
+        Load GR repository root
+      </button>
+      <button onClick={onLoadWIP}>
+        Load work in progress
+      </button>
+    </div>
   );
 };
 
@@ -536,6 +662,28 @@ const DEFAULT_COLUMN_OPTIONS = {
 } as const;
 
 
+const RenderCell:
+React.FC<{
+  val: string | string[] | null | undefined
+}> = function ({ val }) {
+  if (val === null) {
+    return <span className={classNames.valueNull}>(null)</span>;
+  } else if (val === '') {
+    return <span className={classNames.valueEmptyString}>(empty string)</span>;
+  } else if (val === undefined) {
+    return <span className={classNames.valueUndefined}>(undefined)</span>;
+  } else if (typeof val === 'string') {
+    return <>{val}</>;
+  } else if ((val as string[]).length) {
+    return <span className={classNames.valueList}>
+      {(val as string[]).map(val => <RenderCell val={val} />)}
+    </span>;
+  } else {
+    return <span className={classNames.valueError}>(error)</span>;
+  }
+}
+
+
 const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [
   SelectColumn, {
   key: 'title',
@@ -557,15 +705,28 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [
 }, {
   key: '_verdict',
   name: "Verdict",
+  width: 200,
+  cellClass: classNames.verdictCell,
   renderCell: ({ row }) => {
-    const { highlightRows } = useContext(ScrollToCellContext);
+    const { highlightRows, getRow } =
+    useContext<GridContextType<CitationWithReferencingItems>>
+    (GridContext as any);
     switch (row._verdict[0]) {
       case 'DEDUPED':
       case 'PREFERRED':
         return <>
-          {row._verdict[0] === 'PREFERRED' ? <>✅</> : <>🟠</>}
+          {row._verdict[0] === 'PREFERRED'
+            ? <span className={classNames.verdictSummary}>
+                ✅
+                ← {row._verdict[1]!.
+                flatMap(id => Object.keys(getRow(r => r._ephemeralID === id)?._citingItems ?? {})).
+                join(', ')}
+              </span>
+            : <span className={classNames.verdictSummary}>🟠 →</span>}
           &nbsp;
-          <button onClick={() => highlightRows(row._verdict[1]!)}>
+          <button
+              className={classNames.verdictButton}
+              onClick={() => highlightRows(row._verdict[1]!)}>
             show {row._verdict[0] === 'DEDUPED' ? 'preferred' : 'deduped'}
           </button>
         </>
@@ -576,47 +737,60 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [
 }, {
   key: 'alternateTitles',
   name: "Alternate titles",
-  renderCell: ({ row }) => <>{(row.alternateTitles ?? []).join(', ')}</>,
+  renderCell: ({ row }) => <RenderCell val={row.alternateTitles} />,
 }, {
   key: 'author',
   name: "Author",
+  renderCell: ({ row }) => <RenderCell val={row.author} />,
   width: '20%',
 }, {
   key: 'publisher',
   name: "Publisher",
+  renderCell: ({ row }) => <RenderCell val={row.publisher} />,
   width: '20%',
 }, {
   key: 'publicationDate',
   name: "Publication date",
+  renderCell: ({ row }) => <RenderCell val={row.publicationDate} />,
 }, {
   key: 'revisionDate',
   name: "Revision date",
+  renderCell: ({ row }) => <RenderCell val={row.revisionDate} />,
 }, {
   key: 'seriesIssueID',
   name: "Series issue ID",
+  renderCell: ({ row }) => <RenderCell val={row.seriesIssueID} />,
 }, {
   key: 'seriesName',
   name: "Series name",
+  renderCell: ({ row }) => <RenderCell val={row.seriesName} />,
   width: '20%',
 }, {
   key: 'seriesPage',
   name: "Series page",
-}, {
-  key: 'edition',
-  name: "Edition",
-}, {
-  key: 'editionDate',
-  name: "Edition date",
-}, {
-  key: 'otherDetails',
-  name: "Other details",
+  renderCell: ({ row }) => <RenderCell val={row.seriesPage} />,
   width: '20%',
 }, {
   key: 'doi',
   name: "DOI",
+  renderCell: ({ row }) => <RenderCell val={row.doi} />,
 }, {
   key: 'uri',
   name: "URI",
+  renderCell: ({ row }) => <RenderCell val={row.uri} />,
+}, {
+  key: 'edition',
+  name: "Edition",
+  renderCell: ({ row }) => <RenderCell val={row.edition} />,
+}, {
+  key: 'editionDate',
+  name: "Edition date",
+  renderCell: ({ row }) => <RenderCell val={row.editionDate} />,
+}, {
+  key: 'otherDetails',
+  name: "Other details",
+  renderCell: ({ row }) => <RenderCell val={row.otherDetails} />,
+  width: '20%',
 }, {
   key: '_ephemeralID',
   name: "Ephemeral ID",
