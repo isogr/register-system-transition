@@ -1,0 +1,17 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#app {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template:
+    "toolbar" 2em
+    "sources" calc(100% - 2em)
+    / 1fr;
+  color-scheme: light dark;
+  color: light-dark(black, white);
+  background-color: light-dark(white, black);
+}

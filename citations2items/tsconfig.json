@@ -1,17 +1,20 @@
 {
-  "include": ["*.mts", "*.d.ts"],
+  "include": ["*.tsx", "*.mts", "*.d.ts"],
   "compilerOptions": {
     "target": "es2020",
-    "module": "node16",
+    "module": "preserve",
+    "moduleResolution": "bundler",
 
-    "lib": ["es2022", "dom"],
+    "lib": ["es2024", "dom", "dom.iterable", "ESNext.Array", "esnext"],
 
     "resolveJsonModule": true,
 
     "strict": true,
     "noUnusedLocals": true,
     "noFallthroughCasesInSwitch": true,
-    "verbatimModuleSyntax": true,
+
+    "verbatimModuleSyntax": false,
+
     "noImplicitReturns": true,
     "noImplicitAny": true,
     "exactOptionalPropertyTypes": true,

@@ -1,0 +1,60 @@
+.loadPrompt {
+}
+
+.toolbar {
+  grid-area: toolbar;
+  padding: .5em;
+  height: 2em;
+  box-sizing: border-box;
+
+  .stats {
+    display: flex;
+    flex-flow: row nowrap;
+    gap: 1em;
+    align-items: center;
+  }
+}
+
+.sources {
+  grid-area: sources;
+  position: relative;
+  overflow: hidden;
+
+  display: flex;
+  flex-flow: column nowrap;
+
+  .grid {
+    flex-grow: 1;
+    overflow: auto;
+  }
+
+  .differEmpty {
+    padding: .5em;
+  }
+
+  .differ {
+    flex-grow: 0;
+    flex-shrink: 0;
+    display: flex;
+    flex-flow: column nowrap;
+
+    .diffActions {
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: space-between;
+      align-items: center;
+      padding: .5em;
+
+      button[aria-selected=true] {
+        &::after {
+          display: block;
+          content: "(you have chosen this)";
+        }
+      }
+    }
+    .diffViewer {
+      border-radius: 0;
+    }
+  }
+
+}
