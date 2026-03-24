@@ -294,8 +294,10 @@ function ({ infoSources, searchQ, onDedupe, onUndoDedupe, className }) {
             return val;
           } else if (val && (val as string[]).length) {
             return (val as string[]).map(getValString).sort(EN_COLLATOR.compare).join(', ');
-          } else if (!val) {
+          } else if (val === null) {
             return '|';
+          } else if (val === undefined) {
+            return '||';
           } else {
             return `${val}`;
           }
