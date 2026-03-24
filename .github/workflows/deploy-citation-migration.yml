@@ -35,7 +35,7 @@ jobs:
       - uses: actions/upload-artifact@v6
         with:
           name: site
-          path: build/dist
+          path: citations2items/build/dist
           if-no-files-found: error
 
   deploy-pages:
