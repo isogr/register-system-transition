@@ -381,8 +381,16 @@ const Differ: React.FC<{
   const rightDeduped =
     _items[1]!._verdict[0] === 'DEDUPED';
 
-  const canChooseLeft = !leftPreferredForThisItem && !rightPreferredForAnyItem && !leftDeduped;
-  const canChooseRight = !rightPreferredForThisItem && !leftPreferredForAnyItem && !rightDeduped;
+  const canChooseLeft =
+    !leftPreferredForThisItem
+    && !rightPreferredForAnyItem
+    && !leftDeduped
+    && !rightDeduped;
+  const canChooseRight =
+    !rightPreferredForThisItem
+    && !leftPreferredForAnyItem
+    && !rightDeduped
+    && !leftDeduped;
 
   return (
     <div className={classNames.differ}>
@@ -399,7 +407,9 @@ const Differ: React.FC<{
               ? "Other items were deduplicated in favour of the left item, so it cannot be deduplicated"
               : rightDeduped
                 ? "Item on the right was deduplicated, so it cannot be preferred."
-                : undefined}
+                : leftDeduped
+                  ? "Item on the left was already deduplicated."
+                  : undefined}
             onClick={() => onDeduplicate(_items[0]!._ephemeralID, _items[1]!._ephemeralID)}>
           Dedupe left & prefer right →
         </button>
@@ -415,7 +425,9 @@ const Differ: React.FC<{
               ? "Other items were deduplicated in favour of the right item, so it cannot be deduplicated"
               : leftDeduped
                 ? "Item on the left was deduplicated, so it cannot be preferred."
-                : undefined}
+                : rightDeduped
+                  ? "Item on the right was already deduplicated."
+                  : undefined}
             onClick={() => onDeduplicate(_items[1]!._ephemeralID, _items[0]!._ephemeralID)}>
           ← Dedupe right & prefer left
         </button>
