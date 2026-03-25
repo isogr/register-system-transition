@@ -276,6 +276,14 @@ function ({ infoSources, searchQ, onDedupe, onUndoDedupe, className }) {
     useDB<GridState<CitationWithReferencingItems>>
     ('existing-item-view-state', INITIAL_GRID_STATE);
 
+  const handleReverseSelectionOrder = useCallback(() => {
+    const rows = [ ...state.selectedRows ].reverse();
+    storeState?.({
+      ...state,
+      selectedRows: rows,
+    });
+  }, [storeState, state.selectedRows]);
+
   const rows = useMemo(() => {
     const filterFunc = searchQ.trim() !== ''
       ? ((c: CitationWithReferencingItems) =>
@@ -352,6 +360,7 @@ function ({ infoSources, searchQ, onDedupe, onUndoDedupe, className }) {
           , [rows, state.selectedRows]
            )
         }
+        onSwapItems={handleReverseSelectionOrder}
         onResetDecision={onUndoDedupe}
         onDeduplicate={onDedupe}
       />
@@ -362,10 +371,11 @@ function ({ infoSources, searchQ, onDedupe, onUndoDedupe, className }) {
 
 const Differ: React.FC<{
   items: CitationWithReferencingItems[]
+  onSwapItems: () => void
   onDeduplicate: (dedupe: string, inFavorOf: string) => void
   onResetDecision: (item1: string, item2: string) => void
   className?: string | undefined
-}> = function ({ items: _items, onDeduplicate, onResetDecision, className }) {
+}> = function ({ items: _items, onSwapItems, onDeduplicate, onResetDecision, className }) {
   const items: Citation[] = useMemo(() => _items.map(i => {
     const item = { ...i };
     delete (item as any)._ephemeralID;
@@ -413,19 +423,6 @@ const Differ: React.FC<{
     actions = (
       <>
         <button
-            aria-selected={rightPreferredForThisItem}
-            disabled={!canChooseRight}
-            title={leftPreferredForAnyItem
-              ? "Other items were deduplicated in favour of the left item, so it cannot be deduplicated"
-              : rightDeduped
-                ? "Item on the right was deduplicated, so it cannot be preferred."
-                : leftDeduped
-                  ? "Item on the left was already deduplicated."
-                  : undefined}
-            onClick={() => onDeduplicate(_items[0]!._ephemeralID, _items[1]!._ephemeralID)}>
-          ❌ Dedupe left, prefer right ➡️
-        </button>
-        <button
             aria-selected={leftPreferredForThisItem}
             disabled={!canChooseLeft}
             title={rightPreferredForAnyItem
@@ -438,10 +435,26 @@ const Differ: React.FC<{
             onClick={() => onDeduplicate(_items[1]!._ephemeralID, _items[0]!._ephemeralID)}>
           ⬅️ Prefer left, dedupe right ❌
         </button>
+        <button onClick={onSwapItems}>
+          Swap items
+        </button>
         <button
             disabled={!leftPreferredForThisItem && !rightPreferredForThisItem}
             onClick={() => onResetDecision(_items[1]!._ephemeralID, _items[0]!._ephemeralID)}>
           Reset decision
+        </button>
+        <button
+            aria-selected={rightPreferredForThisItem}
+            disabled={!canChooseRight}
+            title={leftPreferredForAnyItem
+              ? "Other items were deduplicated in favour of the left item, so it cannot be deduplicated"
+              : rightDeduped
+                ? "Item on the right was deduplicated, so it cannot be preferred."
+                : leftDeduped
+                  ? "Item on the left was already deduplicated."
+                  : undefined}
+            onClick={() => onDeduplicate(_items[0]!._ephemeralID, _items[1]!._ephemeralID)}>
+          ❌ Dedupe left, prefer right ➡️
         </button>
       </>
     );

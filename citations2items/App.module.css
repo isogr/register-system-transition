@@ -50,15 +50,17 @@
 
     .diffActions {
       display: flex;
-      flex-flow: column nowrap;
+      flex-flow: row nowrap;
       align-items: center;
+      justify-content: center;
       gap: 4px;
       padding: .5em;
+      font-size: large;
 
-      button[aria-selected=true] {
+      [aria-selected=true] {
+        font-weight: bold;
         &::after {
           display: block;
-          content: "(you have chosen this)";
         }
       }
     }
