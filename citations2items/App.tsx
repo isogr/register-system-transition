@@ -338,15 +338,15 @@ function ({ infoSources, searchQ, onDedupe, onUndoDedupe, className }) {
       columns={INFOSOURCE_COLUMNS}
       defaultColumnOptions={DEFAULT_COLUMN_OPTIONS}
       rows={rows}
-      onCellClick={(args, evt) => {
-        //const r = Object.entries(args.row).
-        //filter(([k]) => k !== '_citingItems' && k !== '_ephemeralID').
-        //map(([k, v]) => ({ [k]: v })).
-        //reduce((prev, curr) => ({ ...prev, ...curr }), {});
-        //if (evt.metaKey) {
-        //  console.debug("META KEY");
-        //}
-      }}
+      //onCellClick={(args, evt) => {
+      //  //const r = Object.entries(args.row).
+      //  //filter(([k]) => k !== '_citingItems' && k !== '_ephemeralID').
+      //  //map(([k, v]) => ({ [k]: v })).
+      //  //reduce((prev, curr) => ({ ...prev, ...curr }), {});
+      //  //if (evt.metaKey) {
+      //  //  console.debug("META KEY");
+      //  //}
+      //}}
       state={state}
       onStateChange={storeState}
     />
