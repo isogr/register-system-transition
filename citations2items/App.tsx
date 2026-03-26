@@ -159,8 +159,8 @@ function () {
             />
           : <>Loading…</>}
       <RegistryContext.Provider value={{ getItem }}>
-        <ExistingInformationSources
-          onDedupe={useMemo(() => function (deduped, preferred) {
+        <InformationSources
+          onDedupe={useCallback(function (deduped, preferred) {
             handleUpdateAnnotations({
               ...annotations,
               deduped: {
@@ -181,7 +181,7 @@ function () {
               },
             })
           }, [handleUpdateAnnotations, annotations])}
-          onUndoDedupe={useMemo(() => function (item1, item2) {
+          onUndoDedupe={useCallback(function (item1, item2) {
             handleUpdateAnnotations({
               ...annotations,
               deduped: {
@@ -235,7 +235,11 @@ function ({ registry, infoSources, onReset, searchQ, onSearchQChange, onDownload
           </div>
           <div className={classNames.actions}>
             <div>
-              <input placeholder="exact string search…" value={searchQ} onChange={evt => onSearchQChange(evt.currentTarget.value)} />
+              <input
+                placeholder="exact string search…"
+                value={searchQ}
+                onChange={evt => onSearchQChange(evt.currentTarget.value)}
+              />
               <button onClick={() => onSearchQChange('')}>
                 clear
               </button>
@@ -262,7 +266,7 @@ const INITIAL_ANNOTATIONS: Annotations = Object.freeze({
   preferred: {},
 } as const);
 
-const ExistingInformationSources:
+const InformationSources:
 React.FC<{
   infoSources: CitationWithReferencingItems[]
   onDedupe: (dedupe: CitationKey, prefer: CitationKey) => void
@@ -330,42 +334,44 @@ function ({ infoSources, searchQ, onDedupe, onUndoDedupe, className }) {
     }
   }, [infoSources, searchQ, state.sortColumns]);
 
-  return <div className={classNames.sources}>
-    <Grid<CitationWithReferencingItems>
-      className={classNames.grid}
-      rowKeyGetter={ROW_KEY_GETTER}
-      groupBy={DEFAULT_GROUP_BY}
-      columns={INFOSOURCE_COLUMNS}
-      defaultColumnOptions={DEFAULT_COLUMN_OPTIONS}
-      rows={rows}
-      //onCellClick={(args, evt) => {
-      //  //const r = Object.entries(args.row).
-      //  //filter(([k]) => k !== '_citingItems' && k !== '_ephemeralID').
-      //  //map(([k, v]) => ({ [k]: v })).
-      //  //reduce((prev, curr) => ({ ...prev, ...curr }), {});
-      //  //if (evt.metaKey) {
-      //  //  console.debug("META KEY");
-      //  //}
-      //}}
-      state={state}
-      onStateChange={storeState}
-    />
-    <div className={classNames.differ}>
-      <Differ
-        items={
-          useMemo(() =>
-            state.selectedRows.
-            map(rID => rows.find(r => r._ephemeralID === rID)).
-            filter(r => r !== undefined)
-          , [rows, state.selectedRows]
-           )
-        }
-        onSwapItems={handleReverseSelectionOrder}
-        onResetDecision={onUndoDedupe}
-        onDeduplicate={onDedupe}
+  return (
+    <div className={classNames.sources}>
+      <Grid<CitationWithReferencingItems>
+        className={classNames.grid}
+        rowKeyGetter={ROW_KEY_GETTER}
+        groupBy={DEFAULT_GROUP_BY}
+        columns={INFOSOURCE_COLUMNS}
+        defaultColumnOptions={DEFAULT_COLUMN_OPTIONS}
+        rows={rows}
+        //onCellClick={(args, evt) => {
+        //  //const r = Object.entries(args.row).
+        //  //filter(([k]) => k !== '_citingItems' && k !== '_ephemeralID').
+        //  //map(([k, v]) => ({ [k]: v })).
+        //  //reduce((prev, curr) => ({ ...prev, ...curr }), {});
+        //  //if (evt.metaKey) {
+        //  //  console.debug("META KEY");
+        //  //}
+        //}}
+        state={state}
+        onStateChange={storeState}
       />
+      <div className={classNames.differ}>
+        <Differ
+          items={
+            useMemo(() =>
+              state.selectedRows.
+              map(rID => rows.find(r => r._ephemeralID === rID)).
+              filter(r => r !== undefined)
+            , [rows, state.selectedRows]
+             )
+          }
+          onSwapItems={handleReverseSelectionOrder}
+          onResetDecision={onUndoDedupe}
+          onDeduplicate={onDedupe}
+        />
+      </div>
     </div>
-  </div>
+  );
 };
 
 
