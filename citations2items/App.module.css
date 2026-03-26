@@ -80,13 +80,13 @@
 
 
 .dedupedRow {
-  background: light-dark(peachpuff, brown);
+  background: light-dark(silver, gray);
 }
 .clarifiedRow {
   background: light-dark(lightblue, teal);
 }
 .preferredAndClarifiedRow {
-  background: light-dark(plum, slateblue);
+  background: light-dark(peachpuff, brown);
 }
 .preferredRow {
   background: light-dark(palegreen, darkGreen);
