@@ -522,6 +522,8 @@ const Differ: React.FC<{
 
   let actions: React.JSX.Element;
 
+  const { getPossiblyClarifiedValue } = useContext(RegistryContext);
+
   const el = useMemo(() => {
     const summary = _items.length === 2
       ? {
@@ -536,6 +538,8 @@ const Differ: React.FC<{
             _items[0]!._verdict[0] === 'PREFERRED',
           leftDeduped:
             _items[0]!._verdict[0] === 'DEDUPED',
+          leftClarified:
+            isClarified(_items[0]!, getPossiblyClarifiedValue),
 
           rightPreferredForThisItem:
             _items[0]!._verdict[0] === 'DEDUPED'
@@ -544,26 +548,34 @@ const Differ: React.FC<{
             _items[1]!._verdict[0] === 'PREFERRED',
           rightDeduped:
             _items[1]!._verdict[0] === 'DEDUPED',
+          rightClarified:
+            isClarified(_items[1]!, getPossiblyClarifiedValue),
         }
       : {
           itemsDontHaveSameVerdict: undefined,
           leftPreferredForThisItem: undefined,
+          leftPreferredForAnyItem: undefined,
           leftDeduped: undefined,
+          leftClarified: undefined,
           rightPreferredForThisItem: undefined,
+          rightPreferredForAnyItem: undefined,
           rightDeduped: undefined,
+          rightClarified: undefined,
         };
 
     const canChooseLeft =
          !summary.leftPreferredForThisItem
       && !summary.rightPreferredForAnyItem
       && !summary.leftDeduped
-      && !summary.rightDeduped;
+      && !summary.rightDeduped
+      && !summary.rightClarified;
 
     const canChooseRight =
          !summary.rightPreferredForThisItem
       && !summary.leftPreferredForAnyItem
       && !summary.rightDeduped
-      && !summary.leftDeduped;
+      && !summary.leftDeduped
+      && !summary.leftClarified;
 
     return {
       ...summary,
@@ -574,7 +586,7 @@ const Differ: React.FC<{
         && !(summary.leftPreferredForAnyItem && summary.rightPreferredForAnyItem)
         && (canChooseLeft || canChooseRight || summary.leftPreferredForThisItem || summary.rightPreferredForThisItem),
     };
-  }, [_items.length, _items[0], _items[1]]);
+  }, [_items.length, _items[0], _items[1], getPossiblyClarifiedValue]);
 
   const preferRightItemTitle = el.leftPreferredForAnyItem
     ? "Other items were deduplicated in favour of the left item, so it cannot be deduplicated"
@@ -582,14 +594,18 @@ const Differ: React.FC<{
       ? "Item on the right was deduplicated, so it cannot be preferred."
       : el.leftDeduped
         ? "Item on the right cannot be chosen, because item on the left was deduplicated in favor of another item."
-        : undefined;
+        : el.leftClarified
+          ? "Item on the right cannot be chosen, because item on the left has been clarified."
+          : undefined;
   const preferLeftItemTitle = el.rightPreferredForAnyItem
     ? "Other items were deduplicated in favour of the right item, so it cannot be deduplicated"
     : el.leftDeduped
       ? "Item on the left was deduplicated, so it cannot be preferred."
       : el.rightDeduped
         ? "Item on the left cannot be chosen, because item on the right was deduplicated in favor of another item."
-        : undefined;
+        : el.rightClarified
+          ? "Item on the left cannot be chosen, because item on the right has been clarified."
+          : undefined;
 
   if (el.eligible) {
 
@@ -963,7 +979,7 @@ function useInfoSources(
 };
 
 
-function getStatusClass(
+function isClarified(
   row: CitationWithReferencingItems,
   getClarified: RegistryContextProps['getPossiblyClarifiedValue'],
 ) {
@@ -978,6 +994,13 @@ function getStatusClass(
       break;
     }
   }
+  return clarified;
+}
+function getStatusClass(
+  row: CitationWithReferencingItems,
+  getClarified: RegistryContextProps['getPossiblyClarifiedValue'],
+) {
+  const clarified = isClarified(row, getClarified);
   const deduped = row._verdict[0] === 'DEDUPED';
   const preferred = row._verdict[0] === 'PREFERRED';
   return (
