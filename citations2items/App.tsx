@@ -231,6 +231,17 @@ function () {
     for (const item of infoSources) {
       const i = { ...item };
       delete (i as any)._ephemeralID;
+      const citationProperties = Object.keys(i).
+        filter((k) => k !== 'alternateTitles' && !k.startsWith('_'))
+      for (const prop of citationProperties) {
+        const [val, maybeClarified] = getPossiblyClarifiedValue(
+          item._ephemeralID,
+          prop as keyof Omit<Citation, 'alternateTitles'>,
+        );
+        if (maybeClarified) {
+          i[prop] = val;
+        }
+      }
       sources[item._ephemeralID] = i;
     }
     const dataSerialized = JSON.stringify(sources, null, 4);
