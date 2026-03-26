@@ -130,7 +130,7 @@ export function Grid<T extends Record<string, unknown>>({
         new Map(Object.entries(state.columnWidths)),
         [state.columnWidths],
       )}
-      onColumnWidthsChange={(columnWidths) => {
+      onColumnWidthsChange={useCallback((columnWidths) => {
         onStateChange?.({
           ...state,
           columnWidths: columnWidths.
@@ -138,7 +138,7 @@ export function Grid<T extends Record<string, unknown>>({
           map(([key, value]) => ({ [key]: value })).
           reduce((p, c) => ({ ...p, ...c}), {}),
         });
-      }}
+      }, [state, onStateChange])}
       sortColumns={state.sortColumns}
       onSortColumnsChange={(sortColumns) => {
         onStateChange?.({
@@ -147,24 +147,24 @@ export function Grid<T extends Record<string, unknown>>({
         });
       }}
       expandedGroupIds={useMemo(() => new Set(state.expandedGroupIDs), [state.expandedGroupIDs])}
-      onExpandedGroupIdsChange={(ids) => {
+      onExpandedGroupIdsChange={useCallback((ids) => {
         onStateChange?.({
           ...state,
           expandedGroupIDs: Array.from(ids.values()) as string[]
         })
-      }}
+      }, [state, onStateChange])}
       className={classNames.grid}
       headerRowClass={classNames.headerGridRow}
       columns={columns}
       rows={rows}
       selectedRows={useMemo(() => new Set(state.selectedRows), [state.selectedRows])}
-      onSelectedRowsChange={(rows) => {
+      onSelectedRowsChange={useCallback((rows) => {
         console.debug('onstatechange onselectrowschange');
         onStateChange?.({
           ...state,
           selectedRows: Array.from(rows.values()) as string[],
         });
-      }}
+      }, [state, onStateChange])}
       {...props}
     />
   </GridContext.Provider>
