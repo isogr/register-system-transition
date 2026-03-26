@@ -259,7 +259,6 @@ function () {
             onReset={handleReset}
             searchQ={searchQ}
             onDownloadWIP={handleDownloadWIP}
-            onLoadWIP={handleLoadWIP}
             onExportProposal={handleExportProposal}
             onSearchQChange={onSearchQChange ?? (() => void 0)}
           />
@@ -334,11 +333,10 @@ const Toolbar: React.FC<{
   searchQ: string,
   onSearchQChange: (q: string) => void
   onDownloadWIP: () => void
-  onLoadWIP: () => void
   onExportProposal: () => void
   className?: string | undefined
 }> =
-function ({ registry, infoSources, onReset, searchQ, onSearchQChange, onDownloadWIP, onLoadWIP, onExportProposal, className }) {
+function ({ registry, infoSources, onReset, searchQ, onSearchQChange, onDownloadWIP, onExportProposal, className }) {
   const totalItems = useMemo((() =>
     Object.values(registry.items).flatMap(items => Object.values(items)).length
   ), [registry.items]);
