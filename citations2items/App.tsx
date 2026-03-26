@@ -239,6 +239,7 @@ function ({ registry, infoSources, onReset, searchQ, onSearchQChange, onDownload
                 placeholder="exact string search…"
                 value={searchQ}
                 onChange={evt => onSearchQChange(evt.currentTarget.value)}
+                className={searchQ !== '' ? classNames.searchEngaged : undefined}
               />
               <button onClick={() => onSearchQChange('')}>
                 clear
