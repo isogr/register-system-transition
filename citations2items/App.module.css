@@ -23,6 +23,7 @@
     gap: 1em;
     align-items: center;
   }
+
   .actions {
     display: flex;
     flex-flow: row nowrap;
@@ -57,9 +58,9 @@
     .diffActions {
       display: flex;
       flex-flow: row nowrap;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      gap: 4px;
+      gap: 8px;
       padding: .5em;
       font-size: large;
 
@@ -77,6 +78,44 @@
 
 }
 
+
+.dedupedRow {
+  background: light-dark(peachpuff, brown);
+}
+.clarifiedRow {
+  background: light-dark(lightblue, teal);
+}
+.preferredAndClarifiedRow {
+  background: light-dark(plum, slateblue);
+}
+.preferredRow {
+  background: light-dark(palegreen, darkGreen);
+}
+.activeEditButton {
+  background: light-dark(lightblue, teal);
+}
+
+.editableCell {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: space-between;
+
+  overflow: visible;
+
+  .value {
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+  }
+  .clarifyTextarea {
+    z-index: 4;
+  }
+  button {
+    flex-shrink: 0;
+  }
+}
 
 .verdictCell {
   display: flex;

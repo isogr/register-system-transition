@@ -44,6 +44,8 @@ interface Registry {
   items: Record<ClassID, Record<ItemID, RegisterItem<CommonGRItemData>>>
   version: string
 }
+const EMPTY_REGISTRY: Registry = Object.freeze({ items: {}, version: '' } as const);
+
 
 type Verdict = ['DEDUPED', CitationKey[]] | ['PREFERRED', CitationKey[]] | ['UNKNOWN', null];
 
@@ -59,14 +61,44 @@ type InfoSourceItems = Record<CitationKey, CitationWithReferencingItems>;
 const EN_COLLATOR = Intl.Collator('en');
 
 
-const RegistryContext = createContext<{
+interface RegistryContextProps {
   getItem: (grID: number) => RegisterItem<CommonGRItemData> | undefined
-}>({
+  clarifyValue:
+    <K extends keyof Omit<Citation, 'alternateTitles'>>(
+      citationKey: CitationKey,
+      prop: K,
+      val: Citation[K],
+    ) => void,
+  resetClarification:
+    <K extends keyof Omit<Citation, 'alternateTitles'>>(
+      citationKey: CitationKey,
+      prop: K,
+    ) => void,
+  getPossiblyClarifiedValue:
+    <K extends keyof Omit<Citation, 'alternateTitles'>>(
+      citationKey: CitationKey,
+      prop: K,
+    ) =>
+      [val: Citation[K] | undefined, edited: boolean | undefined],
+}
+const RegistryContext = createContext<RegistryContextProps>({
   getItem: () => undefined,
+  getPossiblyClarifiedValue: () => [undefined, undefined],
+  clarifyValue: () => void 0,
+  resetClarification: () => void 0,
 });
 
 
-const EMPTY_REGISTRY = Object.freeze({ items: {}, version: '' } as const);
+interface Annotations {
+  deduped: Record<CitationKey, undefined | CitationKey[]>
+  preferred: Record<CitationKey, undefined | CitationKey[]>
+  clarified: Record<CitationKey, Partial<Citation>>
+}
+const INITIAL_ANNOTATIONS: Annotations = Object.freeze({
+  deduped: {},
+  preferred: {},
+  clarified: {},
+} as const);
 
 
 export const TransitionWorkspace: React.FC<Record<never, never>> =
@@ -74,6 +106,9 @@ function () {
 
   const [registry, storeRegistry] =
     useDB<Registry>('registry', EMPTY_REGISTRY);
+
+  //const [clarifiedItems, storeClarifiedItems] =
+  //  useDB<Registry>('clarified-items', EMPTY_REGISTRY);
 
   const getItem = useCallback(
     function getItem(grID: number): RegisterItem<CommonGRItemData> | undefined {
@@ -107,6 +142,62 @@ function () {
 
   const infoSources = useInfoSources(registry, annotations);
 
+  const getPossiblyClarifiedValue = useCallback(
+    function getPossiblyClarifiedValue<K extends keyof Citation>(
+      citationKey: CitationKey,
+      prop: K,
+    ): [val: Citation[K] | undefined, edited: boolean | undefined] {
+      const cit = infoSources.find(c => c._ephemeralID === citationKey);
+      if (cit) {
+        const clarified = annotations.clarified[citationKey];
+        if (clarified?.[prop]) {
+          return [
+            clarified[prop],
+            JSON.stringify(clarified[prop]) !== JSON.stringify(cit[prop]),
+          ];
+        } else {
+          return [cit[prop], false];
+        }
+      } else {
+        return [undefined, undefined];
+      }
+    },
+    [infoSources, annotations],
+  );
+
+  const clarifyValue: RegistryContextProps['clarifyValue'] = useCallback(
+    function clarifyValue(citationKey, prop, val) {
+      updateAnnotations?.({
+        ...annotations,
+        clarified: {
+          ...annotations.clarified,
+          [citationKey]: {
+            ...(annotations.clarified[citationKey] ?? {}),
+            [prop]: val,
+          },
+        },
+      });
+    },
+    [updateAnnotations, annotations],
+  );
+
+  const resetClarification: RegistryContextProps['resetClarification'] = useCallback(
+    function resetClarification(citationKey, prop) {
+      const citAnn = { ...(annotations.clarified[citationKey] ?? {}) };
+      if (citAnn[prop]) {
+        delete citAnn[prop];
+      }
+      updateAnnotations?.({
+        ...annotations,
+        clarified: {
+          ...annotations.clarified,
+          [citationKey]: citAnn,
+        },
+      });
+    },
+    [updateAnnotations, annotations],
+  );
+
   const handleReset = useCallback(() => {
     localStorage.clear();
     window.location.reload();
@@ -114,14 +205,14 @@ function () {
 
   const handleDownloadWIP = useCallback(() => {
     const data = {
-      registry: JSON.parse(localStorage.getItem('registry') ?? ''),
-      annotations: JSON.parse(localStorage.getItem('existing-item-annotations') ?? ''),
+      registry,
+      annotations,
     };
     const dataSerialized = JSON.stringify(data, null, 4);
     const encoder = new TextEncoder();
     const dataBytes = new Blob([encoder.encode(dataSerialized)]);
     fileSave(dataBytes, { fileName: 'isogr-migration-wip.json' });
-  }, []);
+  }, [registry, annotations]);
 
   const handleLoadWIP = useCallback(() => {
     (async () => {
@@ -136,7 +227,17 @@ function () {
   }, [storeRegistry, updateAnnotations]);
 
   const handleExportProposal = useCallback(() => {
-  }, []);
+    const sources: Record<string, Omit<CitationWithReferencingItems, '_ephemeralID'>> = {};
+    for (const item of infoSources) {
+      const i = { ...item };
+      delete (i as any)._ephemeralID;
+      sources[item._ephemeralID] = i;
+    }
+    const dataSerialized = JSON.stringify(sources, null, 4);
+    const encoder = new TextEncoder();
+    const dataBytes = new Blob([encoder.encode(dataSerialized)]);
+    fileSave(dataBytes, { fileName: 'isogr-migration-export.json' });
+  }, [infoSources, getPossiblyClarifiedValue]);
 
   return (
     <>
@@ -158,8 +259,17 @@ function () {
               className={classNames.loadPrompt}
             />
           : <>Loading…</>}
-      <RegistryContext.Provider value={{ getItem }}>
+      <RegistryContext.Provider value={{
+        getItem,
+        getPossiblyClarifiedValue,
+        clarifyValue,
+        resetClarification,
+      }}>
         <InformationSources
+          //onClarify={useCallback(function (item, prop, val) {
+          //}, [handleUpdateAnnotations, annotations])}
+          //onUndoClarify={useCallback(function (item, prop) {
+          //}, [handleUpdateAnnotations, annotations])}
           onDedupe={useCallback(function (deduped, preferred) {
             handleUpdateAnnotations({
               ...annotations,
@@ -221,6 +331,7 @@ function ({ registry, infoSources, onReset, searchQ, onSearchQChange, onDownload
   const totalItems = useMemo((() =>
     Object.values(registry.items).flatMap(items => Object.values(items)).length
   ), [registry.items]);
+
   return <div className={classNames.toolbar}>
     {infoSources.length < 1
       ? <>
@@ -228,10 +339,17 @@ function ({ registry, infoSources, onReset, searchQ, onSearchQChange, onDownload
         </>
       : <>
           <div className={classNames.stats}>
-            <div>Register version (latest proposal) {registry.version}</div>
-            <div>{totalItems} items</div>
-            <div>{infoSources.length} de-duplicated citations</div>
-            <button onClick={onReset}>Restart from scratch</button>
+            <div title="Latest accepted proposal timestamp">Register ver. {registry.version}</div>
+            <div title="Total items in registry">{totalItems} items</div>
+            <div title="Number of citations, shown below, after automatic de-duplication (only items where all fields are exactly the same were deduplicated automatically)">
+              {infoSources.length} citations
+            </div>
+            <div><span className={classNames.dedupedRow}>&emsp;</span> manually de-duplicated</div>
+            <div title="Other items were manually de-duplicated in favor of item of this color.">
+              <span className={classNames.preferredRow}>&emsp;</span> manually preferred
+            </div>
+            <div><span className={classNames.clarifiedRow}>&emsp;</span> edited</div>
+            <div><span className={classNames.preferredAndClarifiedRow}>&emsp;</span> preferred + edited</div>
           </div>
           <div className={classNames.actions}>
             <div>
@@ -248,30 +366,22 @@ function ({ registry, infoSources, onReset, searchQ, onSearchQChange, onDownload
             <button onClick={onDownloadWIP}>
               download work in progress
             </button>
-            <button disabled onClick={onExportProposal}>
-              export proposal
+            <button onClick={onExportProposal}>
+              export result
             </button>
+            <button onClick={onReset}>Restart from scratch</button>
           </div>
         </>}
   </div>
 }
-
-
-interface Annotations {
-  deduped: Record<CitationKey, undefined | CitationKey[]>
-  preferred: Record<CitationKey, undefined | CitationKey[]>
-}
-
-const INITIAL_ANNOTATIONS: Annotations = Object.freeze({
-  deduped: {},
-  preferred: {},
-} as const);
 
 const InformationSources:
 React.FC<{
   infoSources: CitationWithReferencingItems[]
   onDedupe: (dedupe: CitationKey, prefer: CitationKey) => void
   onUndoDedupe: (item1: CitationKey, item2: CitationKey) => void
+  //onClarify: <K extends keyof Citation>(item: CitationKey, prop: K, val: Citation[K]) => void
+  //onUndoClarify: <K extends keyof Citation>(item: CitationKey, prop: K) => void
   searchQ: string
   className?: string | undefined
 }> =
@@ -337,25 +447,27 @@ function ({ infoSources, searchQ, onDedupe, onUndoDedupe, className }) {
 
   return (
     <div className={classNames.sources}>
-      <Grid<CitationWithReferencingItems>
-        className={classNames.grid}
-        rowKeyGetter={ROW_KEY_GETTER}
-        groupBy={DEFAULT_GROUP_BY}
-        columns={INFOSOURCE_COLUMNS}
-        defaultColumnOptions={DEFAULT_COLUMN_OPTIONS}
-        rows={rows}
-        //onCellClick={(args, evt) => {
-        //  //const r = Object.entries(args.row).
-        //  //filter(([k]) => k !== '_citingItems' && k !== '_ephemeralID').
-        //  //map(([k, v]) => ({ [k]: v })).
-        //  //reduce((prev, curr) => ({ ...prev, ...curr }), {});
-        //  //if (evt.metaKey) {
-        //  //  console.debug("META KEY");
-        //  //}
-        //}}
-        state={state}
-        onStateChange={storeState}
-      />
+      {storeState
+        ? <Grid<CitationWithReferencingItems>
+            className={classNames.grid}
+            rowKeyGetter={ROW_KEY_GETTER}
+            groupBy={DEFAULT_GROUP_BY}
+            columns={INFOSOURCE_COLUMNS}
+            defaultColumnOptions={DEFAULT_COLUMN_OPTIONS}
+            rows={rows}
+            //onCellClick={(args, evt) => {
+            //  //const r = Object.entries(args.row).
+            //  //filter(([k]) => k !== '_citingItems' && k !== '_ephemeralID').
+            //  //map(([k, v]) => ({ [k]: v })).
+            //  //reduce((prev, curr) => ({ ...prev, ...curr }), {});
+            //  //if (evt.metaKey) {
+            //  //  console.debug("META KEY");
+            //  //}
+            //}}
+            state={state}
+            onStateChange={storeState}
+          />
+        : null}
       <div className={classNames.differ}>
         <Differ
           items={
@@ -399,46 +511,83 @@ const Differ: React.FC<{
 
   let actions: React.JSX.Element;
 
-  if (items.length === 2) {
-    const leftPreferredForThisItem =
-      _items[1]!._verdict[0] === 'DEDUPED'
-      && _items[1]!._verdict[1].includes(_items[0]!._ephemeralID);
-    const leftPreferredForAnyItem =
-      _items[0]!._verdict[0] === 'PREFERRED';
-    const leftDeduped =
-      _items[0]!._verdict[0] === 'DEDUPED';
+  const el = useMemo(() => {
+    const summary = _items.length === 2
+      ? {
+          itemsDontHaveSameVerdict:
+            (_items[0]!._verdict[0] === 'UNKNOWN')
+            ||
+            (_items[0]!._verdict[0] !== _items[1]!._verdict[0]),
+          leftPreferredForThisItem:
+            _items[1]!._verdict[0] === 'DEDUPED'
+            && _items[1]!._verdict[1].includes(_items[0]!._ephemeralID),
+          leftPreferredForAnyItem:
+            _items[0]!._verdict[0] === 'PREFERRED',
+          leftDeduped:
+            _items[0]!._verdict[0] === 'DEDUPED',
 
-    const rightPreferredForThisItem =
-      _items[0]!._verdict[0] === 'DEDUPED'
-      && _items[0]!._verdict[1].includes(_items[1]!._ephemeralID);
-    const rightPreferredForAnyItem =
-      _items[1]!._verdict[0] === 'PREFERRED';
-    const rightDeduped =
-      _items[1]!._verdict[0] === 'DEDUPED';
+          rightPreferredForThisItem:
+            _items[0]!._verdict[0] === 'DEDUPED'
+            && _items[0]!._verdict[1].includes(_items[1]!._ephemeralID),
+          rightPreferredForAnyItem:
+            _items[1]!._verdict[0] === 'PREFERRED',
+          rightDeduped:
+            _items[1]!._verdict[0] === 'DEDUPED',
+        }
+      : {
+          itemsDontHaveSameVerdict: undefined,
+          leftPreferredForThisItem: undefined,
+          leftDeduped: undefined,
+          rightPreferredForThisItem: undefined,
+          rightDeduped: undefined,
+        };
 
     const canChooseLeft =
-      !leftPreferredForThisItem
-      && !rightPreferredForAnyItem
-      && !leftDeduped
-      && !rightDeduped;
+         !summary.leftPreferredForThisItem
+      && !summary.rightPreferredForAnyItem
+      && !summary.leftDeduped
+      && !summary.rightDeduped;
+
     const canChooseRight =
-      !rightPreferredForThisItem
-      && !leftPreferredForAnyItem
-      && !rightDeduped
-      && !leftDeduped;
+         !summary.rightPreferredForThisItem
+      && !summary.leftPreferredForAnyItem
+      && !summary.rightDeduped
+      && !summary.leftDeduped;
+
+    return {
+      ...summary,
+      canChooseLeft,
+      canChooseRight,
+      eligible: _items.length === 2
+        && !(summary.leftDeduped && summary.rightDeduped)
+        && !(summary.leftPreferredForAnyItem && summary.rightPreferredForAnyItem)
+        && (canChooseLeft || canChooseRight || summary.leftPreferredForThisItem || summary.rightPreferredForThisItem),
+    };
+  }, [_items.length, _items[0], _items[1]]);
+
+  const preferRightItemTitle = el.leftPreferredForAnyItem
+    ? "Other items were deduplicated in favour of the left item, so it cannot be deduplicated"
+    : el.rightDeduped
+      ? "Item on the right was deduplicated, so it cannot be preferred."
+      : el.leftDeduped
+        ? "Item on the right cannot be chosen, because item on the left was deduplicated in favor of another item."
+        : undefined;
+  const preferLeftItemTitle = el.rightPreferredForAnyItem
+    ? "Other items were deduplicated in favour of the right item, so it cannot be deduplicated"
+    : el.leftDeduped
+      ? "Item on the left was deduplicated, so it cannot be preferred."
+      : el.rightDeduped
+        ? "Item on the left cannot be chosen, because item on the right was deduplicated in favor of another item."
+        : undefined;
+
+  if (el.eligible) {
 
     actions = (
       <>
         <button
-            aria-selected={leftPreferredForThisItem}
-            disabled={!canChooseLeft}
-            title={rightPreferredForAnyItem
-              ? "Other items were deduplicated in favour of the right item, so it cannot be deduplicated"
-              : leftDeduped
-                ? "Item on the left was deduplicated, so it cannot be preferred."
-                : rightDeduped
-                  ? "Item on the right was already deduplicated."
-                  : undefined}
+            aria-selected={el.leftPreferredForThisItem}
+            disabled={!el.canChooseLeft}
+            title={preferLeftItemTitle}
             onClick={() => onDeduplicate(_items[1]!._ephemeralID, _items[0]!._ephemeralID)}>
           ⬅️ Prefer left, dedupe right ❌
         </button>
@@ -446,27 +595,37 @@ const Differ: React.FC<{
           Swap items
         </button>
         <button
-            disabled={!leftPreferredForThisItem && !rightPreferredForThisItem}
+            disabled={!el.leftPreferredForThisItem && !el.rightPreferredForThisItem}
             onClick={() => onResetDecision(_items[1]!._ephemeralID, _items[0]!._ephemeralID)}>
           Reset decision
         </button>
         <button
-            aria-selected={rightPreferredForThisItem}
-            disabled={!canChooseRight}
-            title={leftPreferredForAnyItem
-              ? "Other items were deduplicated in favour of the left item, so it cannot be deduplicated"
-              : rightDeduped
-                ? "Item on the right was deduplicated, so it cannot be preferred."
-                : leftDeduped
-                  ? "Item on the left was already deduplicated."
-                  : undefined}
+            aria-selected={el.rightPreferredForThisItem}
+            disabled={!el.canChooseRight}
+            title={preferRightItemTitle}
             onClick={() => onDeduplicate(_items[0]!._ephemeralID, _items[1]!._ephemeralID)}>
           ❌ Dedupe left, prefer right ➡️
         </button>
       </>
     );
   } else {
-    actions = <>To deduplicate further, select two citations.</>;
+    actions = <>
+      To deduplicate further, select two eligible citations.
+      <div>
+        {preferLeftItemTitle ? <div>{preferLeftItemTitle}</div> : null}
+        {preferRightItemTitle ? <div>{preferRightItemTitle}</div> : null}
+        <div>
+          {el.rightDeduped && el.leftDeduped
+            ? <>Both selected items were already deduplicated.</>
+            : null}
+        </div>
+        <div>
+          {el.rightPreferredForAnyItem && el.leftPreferredForAnyItem
+            ? <>Both selected items are already preferred in favor of different deduplicated items.</>
+            : null}
+        </div>
+      </div>
+    </>;
   }
 
   return (
@@ -599,49 +758,146 @@ function ({ onLoad, onLoadWIP, className }) {
 };
 
 
+async function compressString(str: string) {
+  const byteArray = new TextEncoder().encode(str);
+  const cs = new CompressionStream('gzip');
+  
+  const writer = cs.writable.getWriter();
+  writer.write(byteArray);
+  writer.close();
+  
+  return JSON.stringify(
+    Array.from(
+      new Uint8Array(await new Response(cs.readable).arrayBuffer())
+    )
+  );
+}
+
+async function decompressString(compressedString: string) {
+  const byteArray = new Uint8Array(JSON.parse(compressedString))
+  const cs = new DecompressionStream('gzip');
+  
+  const writer = cs.writable.getWriter();
+  writer.write(byteArray);
+  writer.close();
+  
+  return (new TextDecoder()).decode(
+    await new Response(cs.readable).arrayBuffer()
+  );
+}
+
+
 function useDB<T extends any = unknown>
 (id: string, init: T) {
   const [items, setItems] = useState<T>(init);
   const [initialized, setInitialized] = useState(false);
   useEffect(() => {
     if (!initialized) {
-      const maybeStored = localStorage.getItem(id);
-      localStorage.removeItem(id);
-      if (maybeStored) {
-        console.debug("Load", id, JSON.parse(maybeStored));
-        setItems(JSON.parse(maybeStored));
+      async function load() {
+        const maybeStored = localStorage.getItem(id);
+        localStorage.removeItem(id);
+        if (maybeStored) {
+          console.time(`Loading & decompressing ${id}`);
+          const decompressed = await decompressString(maybeStored);
+          setItems(JSON.parse(decompressed));
+          console.timeEnd(`Loading & decompressing ${id}`);
+        }
+        setInitialized(true);
       }
-      setInitialized(true);
+      load();
+      return function cleanUp() {
+        console.debug("Unmounting", id);
+      }
     }
+    return;
   }, [id, initialized, setItems]);
   useEffect(() => {
     if (initialized) {
-      console.debug("Store", id, items);
-      localStorage.setItem(id, JSON.stringify(items));
+      async function store(data: any, id: string) {
+        const compressed = await compressString(JSON.stringify(data));
+        console.debug("Store", id, data);
+        localStorage.setItem(id, compressed);
+      }
+      let timeout = setTimeout(() => store(items, id), 1000);
+      return function cleanUp() { clearTimeout(timeout); }
+      //localStorage.setItem(id, JSON.stringify(items));
     }
+    return;
   }, [id, initialized, items]);
-  return [items, initialized ? ((...args) => { return setItems(...args) }) : undefined] as [
+  return [
+    items,
+    initialized ? ((...args) => { return setItems(...args) }) : undefined,
+  ] as [
     T,
     React.Dispatch<React.SetStateAction<T>> | undefined,
   ];
 }
 
 
+// /**
+//  * Calculate a 32 bit FNV-1a hash
+//  * Found here: https://gist.github.com/vaiorabbit/5657561
+//  * Ref.: http://isthe.com/chongo/tech/comp/fnv/
+//  * https://stackoverflow.com/a/22429679/247441
+//  *
+//  * @param {string} str the input value
+//  * @param {boolean} [asString=false] set to true to return the hash value as 
+//  *     8-digit hex string instead of an integer
+//  * @param {integer} [seed] optionally pass the hash of the previous chunk
+//  * @returns {integer | string}
+//  */
+// function hashFnv32a(str: string, asString: false, seed?: undefined | number): number
+// function hashFnv32a(str: string, asString: true, seed?: undefined | number): string
+// function hashFnv32a(str: string, asString: boolean, seed?: undefined | number): string | number {
+//     /*jshint bitwise:false */
+//     var i, l,
+//         hval = (seed === undefined) ? 0x811c9dc5 : seed;
+// 
+//     for (i = 0, l = str.length; i < l; i++) {
+//         hval ^= str.charCodeAt(i);
+//         hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
+//     }
+//     if( asString ){
+//         // Convert to 8 digit hex string
+//         return ("0000000" + (hval >>> 0).toString(16)).substr(-8);
+//     }
+//     return hval >>> 0;
+// }
+
+function bytesToBase64(bytes: Uint8Array) {
+  const binString = Array.from(bytes, (byte) =>
+    String.fromCodePoint(byte),
+  ).join("");
+  return btoa(binString);
+}
+//function base64ToBytes(base64: string) {
+//  const binString = atob(base64);
+//  return Uint8Array.from(binString, (m) => m.codePointAt(0) as number);
+//}
+
 function getCitationKey(c: Citation): string {
-  return JSON.stringify(Object.keys(c).sort(EN_COLLATOR.compare).reduce(
-    (obj, key) => {
-      const p = key as keyof Citation;
-      if (c[p]) {
-        if (typeof c[p] === 'string') {
-          obj[p] = c[p].trim() as any;
-        } else {
-          obj[p] = [...c[p]].sort(EN_COLLATOR.compare).map(v => v.trim()) as any;
-        }
-      }
-      return obj;
-    },
-    {} as Citation
-  ), null, 4);
+  return bytesToBase64(
+    new TextEncoder().encode(
+      JSON.stringify(
+        Object.keys(c).
+        sort(EN_COLLATOR.compare).
+        reduce(
+          (obj, key) => {
+            const p = key as keyof Citation;
+            if (c[p]) {
+              if (typeof c[p] === 'string') {
+                obj[p] = c[p].trim() as any;
+              } else {
+                obj[p] = [...c[p]].sort(EN_COLLATOR.compare).map(v => v.trim()) as any;
+              }
+            }
+            return obj;
+          },
+          {} as Citation
+        )
+      )
+    )
+  );
 }
 
 
@@ -696,6 +952,38 @@ function useInfoSources(
 };
 
 
+function getStatusClass(
+  row: CitationWithReferencingItems,
+  getClarified: RegistryContextProps['getPossiblyClarifiedValue'],
+) {
+  let clarified = false;
+  for (const prop of Object.keys(row)) {
+    const [, maybeClarified] = getClarified(
+      row._ephemeralID,
+      prop as keyof Omit<Citation, 'alternateTitles'>,
+    );
+    if (maybeClarified) {
+      clarified = true;
+      break;
+    }
+  }
+  const deduped = row._verdict[0] === 'DEDUPED';
+  const preferred = row._verdict[0] === 'PREFERRED';
+  return (
+    deduped
+      ? classNames.dedupedRow
+      : preferred && clarified
+        ? classNames.preferredAndClarifiedRow
+        : preferred
+          ? classNames.preferredRow
+          : clarified
+            ? classNames.clarifiedRow
+            : ''
+  );
+};
+
+
+
 const DEFAULT_GROUP_BY = ['title'];
 
 const EMPTY_OBJECT = Object.freeze({} as const);
@@ -745,11 +1033,105 @@ React.FC<{
 }
 
 
-const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [
-  SelectColumn, {
+const EditableField: React.FC<{
+  row: CitationWithReferencingItems,
+  column: { key: string },
+}> =
+function ({ row, column: { key } }) {
+  const {
+    getPossiblyClarifiedValue,
+    clarifyValue,
+    resetClarification,
+  } = useContext(RegistryContext);
+  const [val, clarified] = getPossiblyClarifiedValue(
+    row._ephemeralID,
+    key as keyof Omit<Citation, 'alternateTitles'>,
+  );
+  const [edited, setEdited] = useState<string>(val ?? '');
+  const [editing, setEditing] = useState(false);
+
+  useEffect(() => {
+    setEdited(val ?? '');
+  }, [val]);
+
+  const handleUpdateEdited = useCallback((evt: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (editing) {
+      setEdited(evt.currentTarget.value);
+    }
+  }, [editing, setEdited]);
+
+  const handleSaveEdited = useCallback(() => {
+    if (editing && edited !== val) {
+      clarifyValue(
+        row._ephemeralID,
+        key as keyof Omit<Citation, 'alternateTitles'>,
+        edited);
+      setEditing(false);
+    }
+  }, [row._ephemeralID, val, key, editing, edited, setEditing]);
+
+  const handleResetClarification = useCallback(() => {
+    resetClarification(
+      row._ephemeralID,
+      key as keyof Omit<Citation, 'alternateTitles'>,
+    );
+  }, [row._ephemeralID, key]);
+
+  const deduped = row._verdict[0] === 'DEDUPED';
+
+  return (
+    <>
+      {deduped
+        ? <span className={classNames.value}><RenderCell val={val} /></span>
+        : <>
+            {editing
+              ? <>
+                  <textarea
+                    value={edited}
+                    onChange={handleUpdateEdited}
+                    className={`${classNames.value} ${classNames.clarifyTextarea}`}
+                  />
+                  <button onClick={handleSaveEdited}>✅</button>
+                </>
+              : <span className={classNames.value}>
+                  <RenderCell val={val} />
+                </span>}
+            {clarified && !editing
+              ? <button onClick={handleResetClarification} title="Undo clarification">
+                  ↩️
+                </button>
+              : null}
+            <button
+                title={editing
+                  ? "Cancel editing"
+                  : clarified
+                    ? "Clarified"
+                    : "Clarify"}
+                onClick={() => setEditing(e => !e)}
+                className={clarified && !editing ? classNames.activeEditButton : ''}>
+              {editing ? "❎" : "✏️"}
+            </button>
+          </>}
+    </>
+  );
+}
+
+
+const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [{
+  ...SelectColumn,
+  cellClass: (row) => {
+    const { getPossiblyClarifiedValue } = useContext(RegistryContext);
+    const getRowClass = useCallback((row: CitationWithReferencingItems) => {
+      return getStatusClass(row, getPossiblyClarifiedValue);
+    }, [getPossiblyClarifiedValue]);
+    return getRowClass(row);
+  },
+}, {
   key: 'title',
   name: "Title",
   width: '30%',
+  cellClass: classNames.editableCell,
+  renderCell: ({ row, column }) => <EditableField row={row} column={column} />,
 }, {
   key: '_citingItems',
   name: "Citing items",
@@ -777,14 +1159,14 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [
         ).join('\n— ')
       : '';
     const deduplicationSuffix = additionalCitingItemsTitle
-      ? `\nAfter deduplication, also by:\n— ${additionalCitingItemsTitle}`
+      ? `\nAfter manual deduplication, also by:\n— ${additionalCitingItemsTitle}`
       : row._verdict[0] === 'DEDUPED'
-        ? '\n(before deduplication; click “show preferred” for what these items will be citing after)'
+        ? '\nAfter manual deduplication: click “deduped info” for what these items will be citing'
         : '';
 
-    return <span title={`Cited by:\n— ${citingItemsTitle}${deduplicationSuffix}`}>
+    return <span title={`Cited by (after auto-deduplication):\n— ${citingItemsTitle}${deduplicationSuffix}`}>
       {Object.keys(row._citingItems).join(', ')}
-      {additionalCitingItems.length > 0 ? ` + ${additionalCitingItems}` : ''}
+      {additionalCitingItems.length > 0 ? ` + ${additionalCitingItems.join(', ')}` : ''}
     </span>
   },
 }, {
@@ -803,16 +1185,16 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [
         return <>
           {row._verdict[0] === 'PREFERRED'
             ? <span className={classNames.verdictSummary}>
-                ✅
+                + preferred
               </span>
             : <span className={classNames.verdictSummary}>
-                🟠
+                – deduped
               </span>}
           &nbsp;
           <button
               className={classNames.verdictButton}
               onClick={() => highlightRows(row._verdict[1]!)}>
-            show {row._verdict[0] === 'DEDUPED' ? 'preferred' : 'deduped'}
+            {row._verdict[0] === 'DEDUPED' ? 'into' : 'over'}
           </button>
         </>
       case 'UNKNOWN':
@@ -822,58 +1204,74 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [
 }, {
   key: 'author',
   name: "Author",
-  renderCell: ({ row }) => <RenderCell val={row.author} />,
   width: '20%',
+  cellClass: classNames.editableCell,
+  renderCell: ({ row, column }) => <EditableField row={row} column={column} />,
 }, {
   key: 'publisher',
   name: "Publisher",
-  renderCell: ({ row }) => <RenderCell val={row.publisher} />,
   width: '20%',
+  cellClass: classNames.editableCell,
+  renderCell: ({ row, column }) => <EditableField row={row} column={column} />,
 }, {
   key: 'publicationDate',
   name: "Publication date",
-  renderCell: ({ row }) => <RenderCell val={row.publicationDate} />,
+  width: 100,
+  cellClass: classNames.editableCell,
+  renderCell: ({ row, column }) => <EditableField row={row} column={column} />,
 }, {
   key: 'revisionDate',
   name: "Revision date",
-  renderCell: ({ row }) => <RenderCell val={row.revisionDate} />,
+  cellClass: classNames.editableCell,
+  width: 100,
+  renderCell: ({ row, column }) => <EditableField row={row} column={column} />,
 }, {
   key: 'seriesIssueID',
   name: "Series issue ID",
-  width: 80,
-  renderCell: ({ row }) => <RenderCell val={row.seriesIssueID} />,
+  width: 100,
+  cellClass: classNames.editableCell,
+  renderCell: ({ row, column }) => <EditableField row={row} column={column} />,
 }, {
   key: 'seriesName',
   name: "Series name",
-  renderCell: ({ row }) => <RenderCell val={row.seriesName} />,
+  cellClass: classNames.editableCell,
+  renderCell: ({ row, column }) => <EditableField row={row} column={column} />,
   width: '20%',
 }, {
   key: 'seriesPage',
-  width: 80,
+  width: 100,
   name: "Series page",
-  renderCell: ({ row }) => <RenderCell val={row.seriesPage} />,
+  cellClass: classNames.editableCell,
+  renderCell: ({ row, column }) => <EditableField row={row} column={column} />,
 }, {
   key: 'doi',
   name: "DOI",
-  width: 100,
-  renderCell: ({ row }) => <RenderCell val={row.doi} />,
+  width: 120,
+  cellClass: classNames.editableCell,
+  renderCell: ({ row, column }) => <EditableField row={row} column={column} />,
 }, {
   key: 'uri',
   name: "URI",
-  width: 100,
-  renderCell: ({ row }) => <RenderCell val={row.uri} />,
+  width: 120,
+  cellClass: classNames.editableCell,
+  renderCell: ({ row, column }) => <EditableField row={row} column={column} />,
 }, {
   key: 'edition',
   name: "Edition",
-  renderCell: ({ row }) => <RenderCell val={row.edition} />,
+  width: 120,
+  cellClass: classNames.editableCell,
+  renderCell: ({ row, column }) => <EditableField row={row} column={column} />,
 }, {
   key: 'editionDate',
   name: "Edition date",
-  renderCell: ({ row }) => <RenderCell val={row.editionDate} />,
+  width: 120,
+  cellClass: classNames.editableCell,
+  renderCell: ({ row, column }) => <EditableField row={row} column={column} />,
 }, {
   key: 'otherDetails',
   name: "Other details",
-  renderCell: ({ row }) => <RenderCell val={row.otherDetails} />,
+  cellClass: classNames.editableCell,
+  renderCell: ({ row, column }) => <EditableField row={row} column={column} />,
   width: '20%',
 }, {
   key: 'alternateTitles',
