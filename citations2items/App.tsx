@@ -49,9 +49,12 @@ const EMPTY_REGISTRY: Registry = Object.freeze({ items: {}, version: '' } as con
 
 type Verdict = ['DEDUPED', CitationKey[]] | ['PREFERRED', CitationKey[]] | ['UNKNOWN', null];
 
-interface CitationWithReferencingItems extends Citation, Record<string, unknown> {
+type UUID = string;
+
+interface CitationWithReferencingItems extends Citation {
   _verdict: Verdict;
-  _ephemeralID: string;
+  //_ephemeralID: string;
+  _uuid: UUID;
   _citingItems: Record<GRID, CitationPositionInCitingItemsList>;
 }
 
@@ -62,21 +65,21 @@ const EN_COLLATOR = Intl.Collator('en');
 
 
 interface RegistryContextProps {
-  getItem: (grID: number) => RegisterItem<CommonGRItemData> | undefined
+  getItem: (registryUUID: string) => RegisterItem<CommonGRItemData> | undefined
   clarifyValue:
     <K extends keyof Omit<Citation, 'alternateTitles'>>(
-      citationKey: CitationKey,
+      uuid: UUID,
       prop: K,
       val: Citation[K],
     ) => void,
   resetClarification:
     <K extends keyof Omit<Citation, 'alternateTitles'>>(
-      citationKey: CitationKey,
+      uuid: UUID,
       prop: K,
     ) => void,
   getPossiblyClarifiedValue:
     <K extends keyof Omit<Citation, 'alternateTitles'>>(
-      citationKey: CitationKey,
+      uuid: UUID,
       prop: K,
     ) =>
       [val: Citation[K] | undefined, edited: boolean | undefined],
@@ -90,9 +93,9 @@ const RegistryContext = createContext<RegistryContextProps>({
 
 
 interface Annotations {
-  deduped: Record<CitationKey, undefined | CitationKey[]>
-  preferred: Record<CitationKey, undefined | CitationKey[]>
-  clarified: Record<CitationKey, Partial<Citation>>
+  deduped: Record<UUID, undefined | UUID[]>
+  preferred: Record<UUID, undefined | UUID[]>
+  clarified: Record<UUID, Partial<Citation>>
 }
 const INITIAL_ANNOTATIONS: Annotations = Object.freeze({
   deduped: {},
@@ -111,10 +114,10 @@ function () {
   //  useDB<Registry>('clarified-items', EMPTY_REGISTRY);
 
   const getItem = useCallback(
-    function getItem(grID: number): RegisterItem<CommonGRItemData> | undefined {
+    function getItem(registryUUID: string): RegisterItem<CommonGRItemData> | undefined {
       return Object.values(registry.items).
       flatMap(items => Object.values(items)).
-      find(i => i.data.identifier === grID);
+      find(i => i.id === registryUUID);
     },
     [registry],
   );
@@ -144,12 +147,12 @@ function () {
 
   const getPossiblyClarifiedValue = useCallback(
     function getPossiblyClarifiedValue<K extends keyof Citation>(
-      citationKey: CitationKey,
+      uuid: UUID,
       prop: K,
     ): [val: Citation[K] | undefined, edited: boolean | undefined] {
-      const cit = infoSources.find(c => c._ephemeralID === citationKey);
+      const cit = infoSources.find(c => c._uuid === uuid);
       if (cit) {
-        const clarified = annotations.clarified[citationKey];
+        const clarified = annotations.clarified[uuid];
         if (clarified?.[prop]) {
           return [
             clarified[prop],
@@ -166,13 +169,13 @@ function () {
   );
 
   const clarifyValue: RegistryContextProps['clarifyValue'] = useCallback(
-    function clarifyValue(citationKey, prop, val) {
+    function clarifyValue(uuid, prop, val) {
       updateAnnotations?.({
         ...annotations,
         clarified: {
           ...annotations.clarified,
-          [citationKey]: {
-            ...(annotations.clarified[citationKey] ?? {}),
+          [uuid]: {
+            ...(annotations.clarified[uuid] ?? {}),
             [prop]: val,
           },
         },
@@ -182,8 +185,8 @@ function () {
   );
 
   const resetClarification: RegistryContextProps['resetClarification'] = useCallback(
-    function resetClarification(citationKey, prop) {
-      const citAnn = { ...(annotations.clarified[citationKey] ?? {}) };
+    function resetClarification(uuid, prop) {
+      const citAnn = { ...(annotations.clarified[uuid] ?? {}) };
       if (citAnn[prop]) {
         delete citAnn[prop];
       }
@@ -191,7 +194,7 @@ function () {
         ...annotations,
         clarified: {
           ...annotations.clarified,
-          [citationKey]: citAnn,
+          [uuid]: citAnn,
         },
       });
     },
@@ -227,22 +230,35 @@ function () {
   }, [storeRegistry, updateAnnotations]);
 
   const handleExportProposal = useCallback(() => {
-    const sources: Record<string, Omit<CitationWithReferencingItems, '_ephemeralID'>> = {};
+    type C = Omit<CitationWithReferencingItems, '_uuid'> & { _clarified: boolean };
+    const sources: Record<string, C> = {};
+
+    //type UUID = string;
+    //let keys: Record<CitationKey, UUID> = {};
+    //function getUUID(_ephemeralID: CitationKey): UUID {
+    //  if (!keys[_ephemeralID]) {
+    //    keys[_ephemeralID] = crypto.randomUUID();
+    //  }
+    //  return keys[_ephemeralID];
+    //}
+
     for (const item of infoSources) {
-      const i = { ...item };
-      delete (i as any)._ephemeralID;
+      //const uuid = getUUID(item._ephemeralID)
+      const i: C = { ...item, _clarified: false };
+      delete (i as any)._uuid;
       const citationProperties = Object.keys(i).
         filter((k) => k !== 'alternateTitles' && !k.startsWith('_'))
       for (const prop of citationProperties) {
         const [val, maybeClarified] = getPossiblyClarifiedValue(
-          item._ephemeralID,
+          item._uuid,
           prop as keyof Omit<Citation, 'alternateTitles'>,
         );
         if (maybeClarified) {
-          i[prop] = val;
+          (i as any)[prop] = val;
+          i._clarified = true;
         }
       }
-      sources[item._ephemeralID] = i;
+      sources[item._uuid] = i;
     }
     const dataSerialized = JSON.stringify(sources, null, 4);
     const encoder = new TextEncoder();
@@ -281,6 +297,7 @@ function () {
           //onUndoClarify={useCallback(function (item, prop) {
           //}, [handleUpdateAnnotations, annotations])}
           onDedupe={useCallback(function (deduped, preferred) {
+            console.debug({ deduped, preferred });
             handleUpdateAnnotations({
               ...annotations,
               deduped: {
@@ -387,8 +404,8 @@ function ({ registry, infoSources, onReset, searchQ, onSearchQChange, onDownload
 const InformationSources:
 React.FC<{
   infoSources: CitationWithReferencingItems[]
-  onDedupe: (dedupe: CitationKey, prefer: CitationKey) => void
-  onUndoDedupe: (item1: CitationKey, item2: CitationKey) => void
+  onDedupe: (dedupe: UUID, prefer: UUID) => void
+  onUndoDedupe: (item1: UUID, item2: UUID) => void
   //onClarify: <K extends keyof Citation>(item: CitationKey, prop: K, val: Citation[K]) => void
   //onUndoClarify: <K extends keyof Citation>(item: CitationKey, prop: K) => void
   searchQ: string
@@ -440,12 +457,12 @@ function ({ infoSources, searchQ, onDedupe, onUndoDedupe, className }) {
         const compareArgs: [string, string] =
           col.direction === 'ASC'
             ? [
-                getValString(s1[col.columnKey]),
-                getValString(s2[col.columnKey]),
+                getValString(s1[col.columnKey as keyof CitationWithReferencingItems]),
+                getValString(s2[col.columnKey as keyof CitationWithReferencingItems]),
               ]
             : [
-                getValString(s2[col.columnKey]),
-                getValString(s1[col.columnKey]),
+                getValString(s2[col.columnKey as keyof CitationWithReferencingItems]),
+                getValString(s1[col.columnKey as keyof CitationWithReferencingItems]),
               ];
         return EN_COLLATOR.compare(...compareArgs);
       });
@@ -466,7 +483,7 @@ function ({ infoSources, searchQ, onDedupe, onUndoDedupe, className }) {
             rows={rows}
             //onCellClick={(args, evt) => {
             //  //const r = Object.entries(args.row).
-            //  //filter(([k]) => k !== '_citingItems' && k !== '_ephemeralID').
+            //  //filter(([k]) => k !== '_citingItems' && k !== '_uuid').
             //  //map(([k, v]) => ({ [k]: v })).
             //  //reduce((prev, curr) => ({ ...prev, ...curr }), {});
             //  //if (evt.metaKey) {
@@ -482,7 +499,7 @@ function ({ infoSources, searchQ, onDedupe, onUndoDedupe, className }) {
           items={
             useMemo(() =>
               state.selectedRows.
-              map(rID => rows.find(r => r._ephemeralID === rID)).
+              map(rID => rows.find(r => r._uuid === rID)).
               filter(r => r !== undefined)
             , [rows, state.selectedRows]
              )
@@ -506,7 +523,7 @@ const Differ: React.FC<{
 }> = function ({ items: _items, onSwapItems, onDeduplicate, onResetDecision, className }) {
   const items: Citation[] = useMemo(() => _items.map(i => {
     const item = { ...i };
-    delete (item as any)._ephemeralID;
+    delete (item as any)._uuid;
     delete (item as any)._citingItems;
     delete (item as any)._verdict;
     return item;
@@ -531,7 +548,7 @@ const Differ: React.FC<{
             (_items[0]!._verdict[0] !== _items[1]!._verdict[0]),
           leftPreferredForThisItem:
             _items[1]!._verdict[0] === 'DEDUPED'
-            && _items[1]!._verdict[1].includes(_items[0]!._ephemeralID),
+            && _items[1]!._verdict[1].includes(_items[0]!._uuid),
           leftPreferredForAnyItem:
             _items[0]!._verdict[0] === 'PREFERRED',
           leftDeduped:
@@ -541,7 +558,7 @@ const Differ: React.FC<{
 
           rightPreferredForThisItem:
             _items[0]!._verdict[0] === 'DEDUPED'
-            && _items[0]!._verdict[1].includes(_items[1]!._ephemeralID),
+            && _items[0]!._verdict[1].includes(_items[1]!._uuid),
           rightPreferredForAnyItem:
             _items[1]!._verdict[0] === 'PREFERRED',
           rightDeduped:
@@ -613,7 +630,7 @@ const Differ: React.FC<{
             aria-selected={el.leftPreferredForThisItem}
             disabled={!el.canChooseLeft}
             title={preferLeftItemTitle}
-            onClick={() => onDeduplicate(_items[1]!._ephemeralID, _items[0]!._ephemeralID)}>
+            onClick={() => onDeduplicate(_items[1]!._uuid, _items[0]!._uuid)}>
           ⬅️ Prefer left, dedupe right ❌
         </button>
         <button onClick={onSwapItems}>
@@ -621,14 +638,14 @@ const Differ: React.FC<{
         </button>
         <button
             disabled={!el.leftPreferredForThisItem && !el.rightPreferredForThisItem}
-            onClick={() => onResetDecision(_items[1]!._ephemeralID, _items[0]!._ephemeralID)}>
+            onClick={() => onResetDecision(_items[1]!._uuid, _items[0]!._uuid)}>
           Reset decision
         </button>
         <button
             aria-selected={el.rightPreferredForThisItem}
             disabled={!el.canChooseRight}
             title={preferRightItemTitle}
-            onClick={() => onDeduplicate(_items[0]!._ephemeralID, _items[1]!._ephemeralID)}>
+            onClick={() => onDeduplicate(_items[0]!._uuid, _items[1]!._uuid)}>
           ❌ Dedupe left, prefer right ➡️
         </button>
       </>
@@ -889,40 +906,44 @@ function useDB<T extends any = unknown>
 //     return hval >>> 0;
 // }
 
-function bytesToBase64(bytes: Uint8Array) {
-  const binString = Array.from(bytes, (byte) =>
-    String.fromCodePoint(byte),
-  ).join("");
-  return btoa(binString);
-}
+//function bytesToBase64(bytes: Uint8Array) {
+//  const binString = Array.from(bytes, (byte) =>
+//    String.fromCodePoint(byte),
+//  ).join("");
+//  return btoa(binString);
+//}
 //function base64ToBytes(base64: string) {
 //  const binString = atob(base64);
 //  return Uint8Array.from(binString, (m) => m.codePointAt(0) as number);
 //}
 
 function getCitationKey(c: Citation): string {
-  return bytesToBase64(
-    new TextEncoder().encode(
-      JSON.stringify(
-        Object.keys(c).
-        sort(EN_COLLATOR.compare).
-        reduce(
-          (obj, key) => {
-            const p = key as keyof Citation;
-            if (c[p]) {
-              if (typeof c[p] === 'string') {
-                obj[p] = c[p].trim() as any;
-              } else {
-                obj[p] = [...c[p]].sort(EN_COLLATOR.compare).map(v => v.trim()) as any;
-              }
-            }
-            return obj;
-          },
-          {} as Citation
-        )
-      )
+  return JSON.stringify(
+    Object.keys(c).
+    sort(EN_COLLATOR.compare).
+    reduce(
+      (obj, key) => {
+        const p = key as keyof Citation;
+        if (c[p]) {
+          if (typeof c[p] === 'string') {
+            obj[p] = c[p].trim() as any;
+          } else {
+            obj[p] = [...c[p]].sort(EN_COLLATOR.compare).map(v => v.trim()) as any;
+          }
+        }
+        return obj;
+      },
+      {} as Citation
     )
   );
+}
+
+const uuids: Record<CitationKey, UUID> = {};
+function getUUID(key: CitationKey): UUID {
+  if (!uuids[key]) {
+    uuids[key] = crypto.randomUUID();
+  }
+  return uuids[key];
 }
 
 
@@ -930,8 +951,8 @@ function useInfoSources(
   registry: Registry,
   annotations: Annotations,
 ): CitationWithReferencingItems[] {
-  return useMemo(() => (
-    Object.values(
+  return useMemo(() => {
+    return Object.values(
       Object.entries(registry.items).
       flatMap(([_classID, itemMap]) => Object.entries(itemMap).
         flatMap(([_itemUUID, item]) => item.data.informationSources.
@@ -941,18 +962,19 @@ function useInfoSources(
           })).
           map((citation, idx) => {
             const key = getCitationKey(citation);
+            const uuid = getUUID(key);
             return {
-              [key]: {
+              [uuid]: {
                 ...citation,
                 _verdict: (
-                  annotations.deduped[key]
-                    ? ['DEDUPED', annotations.deduped[key]]
-                    : annotations.preferred[key]
-                      ? ['PREFERRED', annotations.preferred[key]]
+                  annotations.deduped[uuid]
+                    ? ['DEDUPED', annotations.deduped[uuid]]
+                    : annotations.preferred[uuid]
+                      ? ['PREFERRED', annotations.preferred[uuid]]
                       : ['UNKNOWN', null]
                 ) as Verdict,
-                _ephemeralID: key,
-                _citingItems: { [`${item.data.identifier}`]: idx },
+                _uuid: uuid,
+                _citingItems: { [`${item.id}`]: idx },
               },
             }
           })
@@ -960,20 +982,20 @@ function useInfoSources(
       ).
       reduce((prev, curr) => {
         //console.debug("Accumulating", { prev, curr });
-        for (const [citationKey, ci] of Object.entries(curr)) {
-          if (prev[citationKey]) {
+        for (const [uuid, ci] of Object.entries(curr)) {
+          if (prev[uuid]) {
             // Same citation as before, but new item
-            for (const [grID, idx] of Object.entries(ci._citingItems)) {
-              prev[citationKey]._citingItems[grID] = idx;
+            for (const [itemUUID, idx] of Object.entries(ci._citingItems)) {
+              prev[uuid]._citingItems[itemUUID] = idx;
             }
           } else {
-            prev[citationKey] = ci;
+            prev[uuid] = ci;
           }
         }
         return prev;
       }, {} as InfoSourceItems)
-    )
-  ), [registry, annotations]);
+    );
+  }, [registry, annotations]);
 };
 
 
@@ -984,7 +1006,7 @@ function isClarified(
   let clarified = false;
   for (const prop of Object.keys(row)) {
     const [, maybeClarified] = getClarified(
-      row._ephemeralID,
+      row._uuid,
       prop as keyof Omit<Citation, 'alternateTitles'>,
     );
     if (maybeClarified) {
@@ -1032,7 +1054,7 @@ const INITIAL_GRID_STATE: GridState<CitationWithReferencingItems> = {
 
 const ROW_KEY_GETTER:
 TreeDataGridProps<CitationWithReferencingItems>['rowKeyGetter'] =
-r => r._ephemeralID;
+r => r._uuid;
 
 
 const DEFAULT_COLUMN_OPTIONS = {
@@ -1076,7 +1098,7 @@ function ({ row, column: { key } }) {
     resetClarification,
   } = useContext(RegistryContext);
   const [val, clarified] = getPossiblyClarifiedValue(
-    row._ephemeralID,
+    row._uuid,
     key as keyof Omit<Citation, 'alternateTitles'>,
   );
   const [edited, setEdited] = useState<string>(val ?? '');
@@ -1095,19 +1117,19 @@ function ({ row, column: { key } }) {
   const handleSaveEdited = useCallback(() => {
     if (editing && edited !== val) {
       clarifyValue(
-        row._ephemeralID,
+        row._uuid,
         key as keyof Omit<Citation, 'alternateTitles'>,
         edited);
       setEditing(false);
     }
-  }, [row._ephemeralID, val, key, editing, edited, setEditing]);
+  }, [row._uuid, val, key, editing, edited, setEditing]);
 
   const handleResetClarification = useCallback(() => {
     resetClarification(
-      row._ephemeralID,
+      row._uuid,
       key as keyof Omit<Citation, 'alternateTitles'>,
     );
-  }, [row._ephemeralID, key]);
+  }, [row._uuid, key]);
 
   const deduped = row._verdict[0] === 'DEDUPED';
 
@@ -1175,20 +1197,31 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [{
     (GridContext as any);
 
     const { getItem } = useContext(RegistryContext);
-    const citingItemsTitle = Object.entries(row._citingItems).map(([grID, citIdx]) =>
-      `#${grID} (${getItem(parseInt(grID, 10))?.data.name ?? 'item data not found'})`
+    const citingItemIDs = Object.entries(row._citingItems).map(([uuid, ]) => {
+      const item = getItem(uuid);
+      return item?.data.identifier;
+    });
+    const citingItemsTitle = Object.entries(row._citingItems).map(([uuid, ]) => {
+      const item = getItem(uuid);
+      const grID = item?.data.identifier;
+      return `#${grID} (${item?.data.name ?? 'item data not found'})`
       //`#${grID} (${getItem(parseInt(grID, 10))?.data.name ?? 'item data not found'}) as citation no. ${citIdx + 1}`
-    ).join('\n— ');
+    }).join('\n— ');
 
     // after deduplication:
     const additionalCitingItems = row._verdict[0] === 'PREFERRED'
       ? row._verdict[1]!.
-          flatMap(id => Object.keys(getRow(r => r._ephemeralID === id)?._citingItems ?? {}))
+          flatMap(id => Object.keys(getRow(r => r._uuid === id)?._citingItems ?? {}))
+      : [];
+    const additionalCitingItemIDs = row._verdict[0] === 'PREFERRED'
+      ? additionalCitingItems.map(i => getItem(i)?.data.identifier)
       : [];
     const additionalCitingItemsTitle = additionalCitingItems
-      ? additionalCitingItems.map((grID) =>
-          `#${grID} (${getItem(parseInt(grID, 10))?.data.name ?? 'item data not found'})`
-        ).join('\n— ')
+      ? additionalCitingItems.map((uuid) => {
+          const item = getItem(uuid);
+          const grID = item?.data.identifier;
+          `#${grID} (${item?.data.name ?? 'item data not found'})`
+        }).join('\n— ')
       : '';
     const deduplicationSuffix = additionalCitingItemsTitle
       ? `\nAfter manual deduplication, also by:\n— ${additionalCitingItemsTitle}`
@@ -1197,8 +1230,8 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [{
         : '';
 
     return <span title={`Cited by (after auto-deduplication):\n— ${citingItemsTitle}${deduplicationSuffix}`}>
-      {Object.keys(row._citingItems).join(', ')}
-      {additionalCitingItems.length > 0 ? ` + ${additionalCitingItems.join(', ')}` : ''}
+      {citingItemIDs.join(', ')}
+      {additionalCitingItems.length > 0 ? ` + ${additionalCitingItemIDs.join(', ')}` : ''}
     </span>
   },
 }, {
@@ -1310,8 +1343,8 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [{
   name: "Alternate titles",
   renderCell: ({ row }) => <RenderCell val={row.alternateTitles} />,
 }, {
-  key: '_ephemeralID',
-  name: "Ephemeral ID",
+  key: '_uuid',
+  name: "UUID",
   sortable: false,
   width: 50,
 }] as const;

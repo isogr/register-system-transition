@@ -56,7 +56,7 @@ interface GridProps<T>
   rowGrouper?: undefined | TreeDataGridProps<T>['rowGrouper'],
 }
 
-export function Grid<T extends Record<string, unknown>>({
+export function Grid<T>({
   rows,
   columns,
   groupBy,
@@ -70,11 +70,11 @@ export function Grid<T extends Record<string, unknown>>({
 }: GridProps<T>) {
   const ref = useRef<DataGridHandle>(null);
 
-  const keyGetter = props.rowKeyGetter ?? ((r: T) => r.id);
+  const keyGetter = props.rowKeyGetter ?? ((r: T) => (r as any).id);
 
   const defaultGrouper: TreeDataGridProps<T>['rowGrouper'] = useCallback((rows, cKey) => {
     const out = Object.groupBy(rows, (row) => {
-      const v = row[cKey];
+      const v = row[cKey as keyof T];
       return typeof v === 'string' ? v : `${v}`;
     }) as Record<string, T[]>;
     return out;
