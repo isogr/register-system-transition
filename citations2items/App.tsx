@@ -35,7 +35,7 @@ import 'json-diff-viewer-component';
 
 
 type ItemID = string;
-type GRID = string;
+//type GRID = string;
 type CitationPositionInCitingItemsList = number;
 type ClassID = string;
 type CitationKey = string;
@@ -55,7 +55,7 @@ interface CitationWithReferencingItems extends Citation {
   _verdict: Verdict;
   //_ephemeralID: string;
   _uuid: UUID;
-  _citingItems: Record<GRID, CitationPositionInCitingItemsList>;
+  _citingItems: Record<UUID, CitationPositionInCitingItemsList>;
 }
 
 type InfoSourceItems = Record<CitationKey, CitationWithReferencingItems>;
