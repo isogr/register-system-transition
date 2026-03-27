@@ -1281,19 +1281,19 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [{
 }, {
   key: 'publicationDate',
   name: "Publication date",
-  width: 100,
+  width: 140,
   cellClass: classNames.editableCell,
   renderCell: ({ row, column }) => <EditableField row={row} column={column} />,
 }, {
   key: 'revisionDate',
   name: "Revision date",
   cellClass: classNames.editableCell,
-  width: 100,
+  width: 140,
   renderCell: ({ row, column }) => <EditableField row={row} column={column} />,
 }, {
   key: 'seriesIssueID',
   name: "Series issue ID",
-  width: 100,
+  width: 120,
   cellClass: classNames.editableCell,
   renderCell: ({ row, column }) => <EditableField row={row} column={column} />,
 }, {
@@ -1304,32 +1304,32 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [{
   width: '20%',
 }, {
   key: 'seriesPage',
-  width: 100,
+  width: 140,
   name: "Series page",
   cellClass: classNames.editableCell,
   renderCell: ({ row, column }) => <EditableField row={row} column={column} />,
 }, {
   key: 'doi',
   name: "DOI",
-  width: 120,
+  width: 160,
   cellClass: classNames.editableCell,
   renderCell: ({ row, column }) => <EditableField row={row} column={column} />,
 }, {
   key: 'uri',
   name: "URI",
-  width: 120,
+  width: 180,
   cellClass: classNames.editableCell,
   renderCell: ({ row, column }) => <EditableField row={row} column={column} />,
 }, {
   key: 'edition',
   name: "Edition",
-  width: 120,
+  width: 140,
   cellClass: classNames.editableCell,
   renderCell: ({ row, column }) => <EditableField row={row} column={column} />,
 }, {
   key: 'editionDate',
   name: "Edition date",
-  width: 120,
+  width: 140,
   cellClass: classNames.editableCell,
   renderCell: ({ row, column }) => <EditableField row={row} column={column} />,
 }, {
