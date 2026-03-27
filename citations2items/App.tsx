@@ -848,7 +848,7 @@ function useDB<T extends any = unknown>
       }
       load();
       return function cleanUp() {
-        console.debug("Unmounting", id);
+        //console.debug("Unmounting", id);
       }
     }
     return;
@@ -857,7 +857,7 @@ function useDB<T extends any = unknown>
     if (initialized) {
       async function store(data: any, id: string) {
         const compressed = await compressString(JSON.stringify(data));
-        console.debug("Store", id, data);
+        //console.debug("Store", id, data);
         localStorage.setItem(id, compressed);
       }
       let timeout = setTimeout(() => store(items, id), 1000);
