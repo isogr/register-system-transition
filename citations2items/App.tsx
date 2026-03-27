@@ -1220,7 +1220,7 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [{
       ? additionalCitingItems.map((uuid) => {
           const item = getItem(uuid);
           const grID = item?.data.identifier;
-          `#${grID} (${item?.data.name ?? 'item data not found'})`
+          return `#${grID} (${item?.data.name ?? 'item data not found'})`;
         }).join('\n— ')
       : '';
     const deduplicationSuffix = additionalCitingItemsTitle
