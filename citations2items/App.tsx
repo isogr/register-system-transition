@@ -687,32 +687,32 @@ const Differ: React.FC<{
 }
 
 
-const NewInformationSourceItems:
-React.FC<Record<never, never>> =
-function () {
-  const [annotations, updateAnnotations] =
-    useDB('new-item-annotations', EMPTY_OBJECT);
-  const [items, storeItems] =
-    useDB<readonly CitationWithReferencingItems[]>('new-items', []);
-  const [state, storeState] =
-    useDB<GridState<CitationWithReferencingItems>>
-    ('new-item-view-state', INITIAL_GRID_STATE);
-
-  return (
-    <Grid<CitationWithReferencingItems>
-      rowKeyGetter={ROW_KEY_GETTER}
-      columns={INFOSOURCE_COLUMNS}
-      defaultColumnOptions={DEFAULT_COLUMN_OPTIONS}
-      groupBy={DEFAULT_GROUP_BY}
-      rows={items}
-      onChange={storeItems}
-      state={state}
-      onStateChange={storeState}
-      annotations={annotations}
-      onAnnotate={updateAnnotations}
-    />
-  );
-};
+// const NewInformationSourceItems:
+// React.FC<Record<never, never>> =
+// function () {
+//   const [annotations, updateAnnotations] =
+//     useDB('new-item-annotations', EMPTY_OBJECT);
+//   const [items, storeItems] =
+//     useDB<readonly CitationWithReferencingItems[]>('new-items', []);
+//   const [state, storeState] =
+//     useDB<GridState<CitationWithReferencingItems>>
+//     ('new-item-view-state', INITIAL_GRID_STATE);
+// 
+//   return (
+//     <Grid<CitationWithReferencingItems>
+//       rowKeyGetter={ROW_KEY_GETTER}
+//       columns={INFOSOURCE_COLUMNS}
+//       defaultColumnOptions={DEFAULT_COLUMN_OPTIONS}
+//       groupBy={DEFAULT_GROUP_BY}
+//       rows={items}
+//       onChange={storeItems}
+//       state={state}
+//       onStateChange={storeState}
+//       annotations={annotations}
+//       onAnnotate={updateAnnotations}
+//     />
+//   );
+// };
 
 
 const LoadPrompt: React.FC<{
