@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
+
 import {
   fileSave,
   fileOpen,
@@ -14,9 +15,18 @@ import {
   type Citation,
   type RegisterItem,
 } from '@riboseinc/paneron-registry-kit/types';
+
+import type {
+  ProposalSet,
+  ImportableCR,
+} from '@riboseinc/paneron-registry-kit/proposals/types';
+
 import {
   type CommonGRItemData,
 } from '@riboseinc/paneron-extension-geodetic-registry/classes/common';
+import {
+  type InformationSourceItemData,
+} from '@riboseinc/paneron-extension-geodetic-registry/classes/information-source';
 
 import { parse as parseYAML } from 'yaml';
 
@@ -58,10 +68,54 @@ interface CitationWithReferencingItems extends Citation {
   _citingItems: Record<UUID, CitationPositionInCitingItemsList>;
 }
 
+type PossiblyClarified =
+  Omit<CitationWithReferencingItems, '_uuid'> & { _clarified: boolean };
+
 type InfoSourceItems = Record<CitationKey, CitationWithReferencingItems>;
 
 
 const EN_COLLATOR = Intl.Collator('en');
+
+
+// NOTE: Copied from GR extension.
+export function getInformationSourceStub(): Readonly<Citation> {
+  return {
+    title: "Untitled publication",
+
+    author: null,
+    publisher: null,
+    publicationDate: null,
+    revisionDate: null,
+
+    seriesIssueID: null,
+    seriesName: null,
+    seriesPage: null,
+
+    edition: null,
+    editionDate: null,
+
+    otherDetails: '',
+
+    isbn: null,
+    issn: null,
+
+    alternateTitles: [],
+
+    uri: '',
+    doi: '',
+  } as Readonly<Citation>;
+}
+
+const CITATION_PROPERTIES = Object.keys(getInformationSourceStub());
+
+
+//const uuids: Record<CitationKey, UUID> = {};
+//function getUUID(key: CitationKey): UUID {
+//  if (!uuids[key]) {
+//    uuids[key] = crypto.randomUUID();
+//  }
+//  return uuids[key];
+//}
 
 
 interface RegistryContextProps {
@@ -127,14 +181,14 @@ function () {
 
   const handleUpdateAnnotations = useCallback((newA: Annotations) => {
     const newAnnotations = { ...newA };
-    for (const [key, ids] of Object.entries(newAnnotations.deduped)) {
+    for (const [uuid, ids] of Object.entries(newAnnotations.deduped)) {
       if (ids && ids.length < 1) {
-        newAnnotations.deduped[key] = undefined;
+        newAnnotations.deduped[uuid] = undefined;
       }
     }
-    for (const [key, ids] of Object.entries(newAnnotations.preferred)) {
+    for (const [uuid, ids] of Object.entries(newAnnotations.preferred)) {
       if (ids && ids.length < 1) {
-        newAnnotations.preferred[key] = undefined;
+        newAnnotations.preferred[uuid] = undefined;
       }
     }
     updateAnnotations?.(newAnnotations);
@@ -143,7 +197,9 @@ function () {
   const [searchQ, onSearchQChange] =
     useDB<string>('search-q', '');
 
-  const infoSources = useInfoSources(registry, annotations);
+  const [uuids, updateUUIDs] = useDB<Record<CitationKey, UUID>>('uuid-map', {});
+
+  const infoSources = useInfoSources(registry, annotations, uuids, updateUUIDs);
 
   const getPossiblyClarifiedValue = useCallback(
     function getPossiblyClarifiedValue<K extends keyof Citation>(
@@ -153,7 +209,7 @@ function () {
       const cit = infoSources.find(c => c._uuid === uuid);
       if (cit) {
         const clarified = annotations.clarified[uuid];
-        if (clarified?.[prop]) {
+        if (clarified?.[prop] !== undefined) {
           return [
             clarified[prop],
             JSON.stringify(clarified[prop]) !== JSON.stringify(cit[prop]),
@@ -210,28 +266,32 @@ function () {
     const data = {
       registry,
       annotations,
+      uuids,
     };
     const dataSerialized = JSON.stringify(data, null, 4);
     const encoder = new TextEncoder();
     const dataBytes = new Blob([encoder.encode(dataSerialized)]);
     fileSave(dataBytes, { fileName: 'isogr-migration-wip.json' });
-  }, [registry, annotations]);
+  }, [registry, annotations, uuids]);
 
   const handleLoadWIP = useCallback(() => {
     (async () => {
+      if (!storeRegistry || !updateAnnotations || !updateUUIDs) {
+        return;
+      }
       const rawData = await fileOpen();
       const decoder = new TextDecoder();
       const dataDecoded = decoder.decode(await rawData.bytes());
       const dataDeserialized = JSON.parse(dataDecoded);
-      const { registry, annotations } = dataDeserialized;
-      storeRegistry?.(registry);
-      updateAnnotations?.(annotations);
+      const { registry, annotations, uuids } = dataDeserialized;
+      storeRegistry(registry);
+      updateAnnotations(annotations);
+      updateUUIDs(uuids);
     })();
-  }, [storeRegistry, updateAnnotations]);
+  }, [storeRegistry, updateAnnotations, updateUUIDs]);
 
   const handleExportProposal = useCallback(() => {
-    type C = Omit<CitationWithReferencingItems, '_uuid'> & { _clarified: boolean };
-    const sources: Record<string, C> = {};
+    const sources: Record<string, PossiblyClarified> = {};
 
     //type UUID = string;
     //let keys: Record<CitationKey, UUID> = {};
@@ -242,13 +302,12 @@ function () {
     //  return keys[_ephemeralID];
     //}
 
+    // Apply any edits/clarifications
     for (const item of infoSources) {
       //const uuid = getUUID(item._ephemeralID)
-      const i: C = { ...item, _clarified: false };
+      const i: PossiblyClarified = { ...item, _clarified: false };
       delete (i as any)._uuid;
-      const citationProperties = Object.keys(i).
-        filter((k) => k !== 'alternateTitles' && !k.startsWith('_'))
-      for (const prop of citationProperties) {
+      for (const prop of CITATION_PROPERTIES) {
         const [val, maybeClarified] = getPossiblyClarifiedValue(
           item._uuid,
           prop as keyof Omit<Citation, 'alternateTitles'>,
@@ -260,11 +319,15 @@ function () {
       }
       sources[item._uuid] = i;
     }
-    const dataSerialized = JSON.stringify(sources, null, 4);
+    const dataSerialized = JSON.stringify(makeProposal(
+      registry.version,
+      sources,
+      registry.items,
+    ), null, 4);
     const encoder = new TextEncoder();
     const dataBytes = new Blob([encoder.encode(dataSerialized)]);
-    fileSave(dataBytes, { fileName: 'isogr-migration-export.json' });
-  }, [infoSources, getPossiblyClarifiedValue]);
+    fileSave(dataBytes, { fileName: 'isogr-migration-export-proposal.json' });
+  }, [registry.version, infoSources, getPossiblyClarifiedValue]);
 
   return (
     <>
@@ -393,7 +456,7 @@ function ({ registry, infoSources, onReset, searchQ, onSearchQChange, onDownload
               download work in progress
             </button>
             <button onClick={onExportProposal}>
-              export result
+              export proposal
             </button>
             <button onClick={onReset}>Restart from scratch</button>
           </div>
@@ -729,7 +792,7 @@ function ({ onLoad, onLoadWIP, className }) {
     //const handles = result.map(b => b.handle).filter(b => b !== undefined);
     const items: Registry['items'] = {};
     const decoder = new TextDecoder();
-    let latestVersion: Temporal.Instant | null = null;
+    let latestVersion: [string, Temporal.Instant] | null = null;
     for (const res of results) {
       if (res.webkitRelativePath.includes('/proposals/') &&
           res.webkitRelativePath.endsWith('main.yaml')) {
@@ -744,10 +807,11 @@ function ({ onLoad, onLoadWIP, className }) {
             ? Temporal.Instant.from(proposalData.timeDisposed)
             : Temporal.Instant.from(`${proposalData.timeDisposed}T00:00:00.000Z`);
           if (!latestVersion) {
-            latestVersion = date;
-          } else if (Temporal.Instant.compare(date, latestVersion) > 0) {
-            console.debug(`${date.toString()} is later than ${latestVersion.toString()}`);
-            latestVersion = date;
+            latestVersion = [proposalData.id, date];
+          } else if (Temporal.Instant.compare(date, latestVersion[1]) > 0) {
+            console.debug(`${date.toString()} is later than ${latestVersion[1].toString()}`);
+            latestVersion[0] = proposalData.id;
+            latestVersion[1] = date;
           } else {
             console.debug(`${date.toString()} is earlier than ${latestVersion.toString()}`);
           }
@@ -761,7 +825,7 @@ function ({ onLoad, onLoadWIP, className }) {
 
         //console.debug(res.webkitRelativePath);
 
-        const [_1, _2, classID, itemID] =
+        const [_1, _2, classID, itemFilename] =
           res.webkitRelativePath.split('/') as [string, string, string, string];
 
         //console.debug({ classID, itemID });
@@ -776,8 +840,12 @@ function ({ onLoad, onLoadWIP, className }) {
           console.error("Malformed registry item", result);
           throw new Error("Malformed registry item");
         }
+        if (!itemFilename.endsWith('.yaml')) {
+          console.error("Unexpected registry item filename", itemFilename);
+          throw new Error("Unexpected registry item filename");
+        }
         items[classID] ??= {};
-        items[classID][itemID] = result;
+        items[classID][itemFilename.replace('.yaml', '')] = result;
       }
       //for await (const [path, file] of getFilesRecursively((res as any))) {
       //  console.debug(path);
@@ -785,7 +853,11 @@ function ({ onLoad, onLoadWIP, className }) {
       //}
     }
     console.debug({ items });
-    onLoad({ items, version: latestVersion?.toString() ?? '' });
+    if (!latestVersion) {
+      throw new Error("Unable to determine register version");
+    } else {
+      onLoad({ items, version: latestVersion[0] });
+    }
   }, []);
   return (
     <div className={className}>
@@ -938,20 +1010,32 @@ function getCitationKey(c: Citation): string {
   );
 }
 
-const uuids: Record<CitationKey, UUID> = {};
-function getUUID(key: CitationKey): UUID {
-  if (!uuids[key]) {
-    uuids[key] = crypto.randomUUID();
-  }
-  return uuids[key];
-}
-
 
 function useInfoSources(
   registry: Registry,
   annotations: Annotations,
+  uuids: Record<CitationKey, UUID>,
+  updateUUIDs: undefined | ((newU: Record<CitationKey, UUID>) => void),
 ): CitationWithReferencingItems[] {
+  const getUUID = useMemo(() => (
+    updateUUIDs
+      ? function getUUID(key: CitationKey): UUID {
+          if (!uuids[key]) {
+            const uuid = crypto.randomUUID();
+            updateUUIDs({
+              ...uuids,
+              [key]: uuid,
+            });
+            // this is bad
+            uuids[key] = uuid;
+          }
+          return uuids[key];
+        }
+      : null
+  ), [updateUUIDs, uuids]);
+
   return useMemo(() => {
+    if (!getUUID) { return [] };
     return Object.values(
       Object.entries(registry.items).
       flatMap(([_classID, itemMap]) => Object.entries(itemMap).
@@ -995,7 +1079,7 @@ function useInfoSources(
         return prev;
       }, {} as InfoSourceItems)
     );
-  }, [registry, annotations]);
+  }, [registry, annotations, getUUID]);
 };
 
 
@@ -1387,3 +1471,146 @@ const INFOSOURCE_COLUMNS: Column<CitationWithReferencingItems>[] = [{
 //  }
 //}
 
+
+
+function makeProposal(
+  registerVersion: string,
+  infoSources: Record<string, PossiblyClarified>,
+  registry: Registry['items'],
+): ImportableCR {
+
+  const now = new Date();
+
+  const nonDedupedSourceEntries = Object.entries(infoSources).
+  filter(([uuid, source]) => source._verdict[0] !== 'DEDUPED');
+
+  const informationSourceProposalItemAdditions: ProposalSet =
+    nonDedupedSourceEntries.
+    map(([uuid, data]) => ({
+      [`/information-source/${uuid}.yaml`]: {
+        type: 'addition' as 'addition',
+      },
+    })).
+    reduce((p, c) => ({ ...p, ...c }), {});
+
+  const informationSourceItemPayloads: ImportableCR['itemPayloads'] =
+    nonDedupedSourceEntries.
+    map(([uuid, origData]) => {
+      const citation: Citation =
+      Object.entries(origData).
+      filter(([key]) => !key.startsWith('_')).
+      map(([key, data]) => ({ [key]: data })).
+      reduce((p, c) => ({ ...p, ...c }), {} as Citation);
+      const data: InformationSourceItemData = {
+        identifier: 0,
+        name: citation.title,
+        informationSources: [],
+        informationSourceRefs: [],
+        aliases: [],
+        remarks: '',
+        citation,
+      };
+      return {
+        [`/information-source/${uuid}.yaml`]: {
+          id: uuid,
+          status: 'valid' as 'valid',
+          dateAccepted: now,
+          data,
+        },
+      }
+    }).
+    reduce((p, c) => ({ ...p, ...c }), {});
+
+  // Which item cites which info sources
+  const citingItems: Record<UUID, UUID[]> = {};
+  for (const [uuid, data] of nonDedupedSourceEntries) {
+    // Omit deduped sources
+    if (data._verdict[0] !== 'DEDUPED') {
+      for (const citingItem of Object.keys(data._citingItems)) {
+        citingItems[citingItem] ??= [];
+        citingItems[citingItem].push(uuid);
+      }
+    }
+    if (data._verdict[0] === 'PREFERRED' && data._verdict[1].length > 0) {
+      const dedupedInfoSources = data._verdict[1];
+      for (const dedupedSourceID of dedupedInfoSources) {
+        const dedupedSource = infoSources[dedupedSourceID];
+        if (!dedupedSource) {
+          console.error("Preferred source’s deduped source can’t be found", uuid, dedupedSourceID);
+          throw new Error("Preferred source’s deduped source can’t be found");
+        }
+        const additionalCitingItems = dedupedSource._citingItems;
+        for (const additionalCitingItem of Object.keys(additionalCitingItems)) {
+          citingItems[additionalCitingItem] ??= [];
+          citingItems[additionalCitingItem].push(uuid);
+        }
+      }
+    }
+  }
+
+  //function isClarified(uuid: string): boolean {
+  //}
+
+  const citingItemClarifications: ProposalSet =
+    Object.entries(registry).
+    flatMap(([classID, items]) =>
+      Object.entries(items).
+      filter(([, item]) => item.data.informationSources.length > 0).
+      map(([uuid, ]) => ({
+        [`/${classID}/${uuid}.yaml`]: {
+          type: 'clarification' as 'clarification',
+        },
+      }))
+    ).
+    reduce((p, c) => ({ ...p, ...c }), {});
+
+  const citingItemPayloads: ImportableCR['itemPayloads'] =
+    Object.entries(registry).
+    flatMap(([classID, items]) =>
+      Object.entries(items).
+      filter(([, item]) => item.data.informationSources.length > 0).
+      map(([uuid, origItem]) => {
+        return {
+          [`/${classID}/${uuid}.yaml`]: {
+            ...origItem,
+            data: {
+              ...origItem.data,
+              informationSourceRefs: citingItems[uuid] ?? [],
+            },
+          },
+        }
+      })
+    ).
+    reduce((p, c) => ({ ...p, ...c }), {});
+
+  // Cross-check
+  for (const [path, item] of Object.entries(citingItemPayloads)) {
+    if (!item) {
+      throw new Error("Unexpected null among citing item payloads");
+    }
+    if (item.data.informationSourceRefs.length !== item.data.informationSources.length) {
+      console.debug("Mismatching information source reference count", path, item.data);
+      throw new Error("Mismatching information source reference count (vs. old information sources)");
+    }
+  }
+
+  return {
+    proposalDraft: {
+      state: 'draft',
+      timeStarted: now,
+      timeEdited: now,
+      id: crypto.randomUUID(),
+      justification: "Migrate information sources to dedicated item class",
+      submittingStakeholderGitServerUsername: 'strogonoff',
+      registerVersion,
+      items: {
+        ...informationSourceProposalItemAdditions,
+        ...citingItemClarifications,
+      }
+    },
+    itemPayloads: {
+      ...informationSourceItemPayloads,
+      ...citingItemPayloads,
+    },
+  };
+}

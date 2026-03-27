@@ -16,7 +16,7 @@
     "yaml": "^2.8.3"
   },
   "devDependencies": {
-    "@riboseinc/paneron-extension-geodetic-registry": "^1.0.69",
+    "@riboseinc/paneron-extension-geodetic-registry": "^1.0.70",
     "@riboseinc/paneron-registry-kit": "^2.2.61",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

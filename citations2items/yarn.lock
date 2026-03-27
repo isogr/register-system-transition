@@ -187,10 +187,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@riboseinc/paneron-extension-geodetic-registry@npm:^1.0.69":
-  version: 1.0.69
-  resolution: "@riboseinc/paneron-extension-geodetic-registry@npm:1.0.69"
-  checksum: 10c0/25962b3d4935734d84add50549684b53d26616e2dafb73e664c44d1330d7455033589833f1e620096621f1a0290ad9a7ffcba1e151796971cb7f5a92c208cf76
+"@riboseinc/paneron-extension-geodetic-registry@npm:^1.0.70":
+  version: 1.0.70
+  resolution: "@riboseinc/paneron-extension-geodetic-registry@npm:1.0.70"
+  checksum: 10c0/23288d658b27294fc608d9c48ad97466685ec825d21f8d4eea84fcc9c7d89582ab8bed411914576cc1cdf630656d56ecf5c35fd488d734d72c48b0feb66c131f
   languageName: node
   linkType: hard
 
@@ -237,7 +237,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "citations2items@workspace:."
   dependencies:
-    "@riboseinc/paneron-extension-geodetic-registry": "npm:^1.0.69"
+    "@riboseinc/paneron-extension-geodetic-registry": "npm:^1.0.70"
     "@riboseinc/paneron-registry-kit": "npm:^2.2.61"
     "@types/react": "npm:^19.2.14"
     "@types/react-dom": "npm:^19.2.3"

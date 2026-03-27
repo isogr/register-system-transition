@@ -28,7 +28,7 @@ const RAW_RUNTIME_STATE =
       [null, {\
         "packageLocation": "./",\
         "packageDependencies": [\
-          ["@riboseinc/paneron-extension-geodetic-registry", "npm:1.0.69"],\
+          ["@riboseinc/paneron-extension-geodetic-registry", "npm:1.0.70"],\
           ["@riboseinc/paneron-registry-kit", "npm:2.2.61"],\
           ["@types/react", "npm:19.2.14"],\
           ["@types/react-dom", "virtual:236eb634d1a1024e879d48130f5325836e703aed314aab149d919a84e8c5d4537ac62a52e3b85240906ef163b205a740c1010a2626d2016649803ab5c2bd5d8e#npm:19.2.3"],\
@@ -282,10 +282,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@riboseinc/paneron-extension-geodetic-registry", [\
-      ["npm:1.0.69", {\
-        "packageLocation": "./.yarn/cache/@riboseinc-paneron-extension-geodetic-registry-npm-1.0.69-1d4f6f20ec-25962b3d49.zip/node_modules/@riboseinc/paneron-extension-geodetic-registry/",\
+      ["npm:1.0.70", {\
+        "packageLocation": "./.yarn/cache/@riboseinc-paneron-extension-geodetic-registry-npm-1.0.70-379cb381af-23288d658b.zip/node_modules/@riboseinc/paneron-extension-geodetic-registry/",\
         "packageDependencies": [\
-          ["@riboseinc/paneron-extension-geodetic-registry", "npm:1.0.69"]\
+          ["@riboseinc/paneron-extension-geodetic-registry", "npm:1.0.70"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -351,7 +351,7 @@ const RAW_RUNTIME_STATE =
       ["workspace:.", {\
         "packageLocation": "./",\
         "packageDependencies": [\
-          ["@riboseinc/paneron-extension-geodetic-registry", "npm:1.0.69"],\
+          ["@riboseinc/paneron-extension-geodetic-registry", "npm:1.0.70"],\
           ["@riboseinc/paneron-registry-kit", "npm:2.2.61"],\
           ["@types/react", "npm:19.2.14"],\
           ["@types/react-dom", "virtual:236eb634d1a1024e879d48130f5325836e703aed314aab149d919a84e8c5d4537ac62a52e3b85240906ef163b205a740c1010a2626d2016649803ab5c2bd5d8e#npm:19.2.3"],\
